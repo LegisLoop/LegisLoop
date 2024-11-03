@@ -18,7 +18,7 @@ public class LegisloopApplication {
 
 	@Bean
 	CommandLineRunner init(UserRepository userRepository) {
-		return args -> Stream.of("John", "Julie", "Jennifer", "Helen", "Rachel").forEach(name -> {
+		return args -> Stream.of("Jono", "Anthony", "Steph", "Sean", "Damien").forEach(name -> {
             AppUser appUser = new AppUser(name, name.toLowerCase() + "@domain.com");
             userRepository.save(appUser);
         });
