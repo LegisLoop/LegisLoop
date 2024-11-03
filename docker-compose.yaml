@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  frontend:
+    build:
+      context: ./legisloop-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    networks:
+      - legisloop-network
+
+  backend:
+    build:
+      context: ./legisloop
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - legisloop-network
+    depends_on:
+      - frontend
+
+networks:
+  legisloop-network:
+    driver: bridge
