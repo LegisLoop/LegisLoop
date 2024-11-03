@@ -30,15 +30,35 @@ The project can also be run using most code editors.
 ## Frontent Setup 
 ### Install Dependencies
 ```bash
-cd legisloopapp
+cd legisloop-frontend
 npm install
 ```
-### Configure Server Endpoint (TODO)
-Make sure that the development and production API URLs are correct. `environment.ts` should be `http://localhost:8080`
-by default. 
 ### Build and Run
 Terminal: 
 ```bash
-cd legisloopapp
-ng serve
+cd legisloop-frontend
+npm start
+```
+
+The app should be available at http://localhost:3000/.
+
+## Running with Docker 
+
+Make sure to have docker desktop installed. Then run the following commands. 
+
+Terminal: 
+```bash
+cd LegisLoop
+docker-compose up
+```
+
+If you have made changes to the code, you will need to run this instead: 
+```bash
+docker-compose up --build 
+```
+The app should be available at http://localhost:3000/.
+
+To stop the app do ctrl+c in the terminal or run this command: 
+```bash
+docker-compose down
 ```
