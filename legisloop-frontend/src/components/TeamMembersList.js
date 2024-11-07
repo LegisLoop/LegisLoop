@@ -22,7 +22,7 @@ function TeamMembersList() {
         <div>
             <ul>
                 {members.map((member) => (
-                    <li key={member.id}>
+                    <li key={member.id} className="underline">
                         {member.name}
                     </li>
                 ))}
