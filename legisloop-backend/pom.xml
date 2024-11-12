@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.backend</groupId>
-	<artifactId>legisloop</artifactId>
+	<artifactId>legisloop-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>legisloop</name>
+	<name>legisloop-backend</name>
 	<description>Legisloop Backend Server </description>
 	<url/>
 	<licenses>
