@@ -7,6 +7,11 @@ Intellij and Eclipse are best for Java applications.
 
 ### Frontend (Angular)
 - **Node.js** (LTS version): [Download and install Node.js](https://nodejs.org/)
+  - If using nvm, launch command prompt as Admin
+    ```bash
+    nvm install lts
+    nvm use lts
+    ```
 - **Angular CLI**: Install globally using npm:
   ```bash
   npm install -g @angular/cli
