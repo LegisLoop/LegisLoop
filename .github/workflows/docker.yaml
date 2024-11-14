@@ -1,0 +1,40 @@
+name: build and publish dockerfile
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Backend Image 
+        uses: docker/build-push-action@v4
+        with: 
+            push: true
+            context: ./legisloop-backend
+            tags: |
+                ghcr.io/aleef02/LegisLoop/legisloop-backend:${{ github.sha }}
+                ghcr.io/aleef02/LegisLoop/legisloop-backend:latest
+
+      - name: Build and Frontend Image 
+        uses: docker/build-push-action@v4
+        with: 
+            push: true
+            context: ./legisloop-frontend
+            tags: |
+                ghcr.io/aleef02/LegisLoop/legisloop-frontend:${{ github.sha }}
+                ghcr.io/aleef02/LegisLoop/legisloop-frontend:latest
+
+        
+     
+

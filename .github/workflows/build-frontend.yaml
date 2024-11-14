@@ -1,0 +1,17 @@
+name: Test Frontend Build
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v4
+        - name: 
+          working-directory: legisloop-frontend
+          run: |
+            npm ci
+            npm run build
