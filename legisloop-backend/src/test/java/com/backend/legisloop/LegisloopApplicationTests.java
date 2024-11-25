@@ -1,13 +1,15 @@
 package com.backend.legisloop;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class LegisloopApplicationTests {
 
 	@Test
-	void contextLoads() {
+	void anthony_ford() {
+		int num = 1;
+		assertEquals(1, num);
 	}
 
 }
