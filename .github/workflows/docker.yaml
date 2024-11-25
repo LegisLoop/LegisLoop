@@ -1,4 +1,4 @@
-name: build and publish dockerfile
+name: Build and Publish Dockerfile
 
 on:
   push:
