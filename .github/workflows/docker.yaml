@@ -31,8 +31,8 @@ jobs:
             push: true
             context: ./legisloop-backend
             tags: |
-                ghcr.io/aleef02/legisloop/legisloop-backend:${{ github.sha }}
-                ghcr.io/aleef02/legisloop/legisloop-backend:latest
+                ghcr.io/legisloop/legisloop-backend:${{ github.sha }}
+                ghcr.io/legisloop/legisloop-backend:latest
 
       - name: Build and Frontend Image 
         uses: docker/build-push-action@v4
@@ -40,5 +40,5 @@ jobs:
             push: true
             context: ./legisloop-frontend
             tags: |
-                ghcr.io/aleef02/legisloop/legisloop-frontend:${{ github.sha }}
-                ghcr.io/aleef02/legisloop/legisloop-frontend:latest
+                ghcr.io/legisloop/legisloop-frontend:${{ github.sha }}
+                ghcr.io/legisloop/legisloop-frontend:latest
