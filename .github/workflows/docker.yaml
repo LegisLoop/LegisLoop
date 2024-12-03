@@ -7,6 +7,10 @@ on:
       - skeleton
   workflow_dispatch: # Allows for manual triggering
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   docker:
     runs-on: ubuntu-latest
