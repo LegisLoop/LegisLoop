@@ -6,7 +6,7 @@ function TeamMembersList() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:8080/users');
+                const response = await fetch('http://localhost:8080/api/v1/users');
                 const data = await response.json();
                 console.log('Balls', data);
                 setMembers(data);
