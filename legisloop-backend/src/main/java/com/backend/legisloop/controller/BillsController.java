@@ -20,7 +20,7 @@ import java.util.List;
 public class BillsController {
     private final BillService billService;
 
-    @GetMapping("/test")
+    @GetMapping("/getMasterList")
     public ResponseEntity<List<Legislation>> getMasterListTest(@RequestParam String state) throws UnirestException {
         return new ResponseEntity<>(billService.getMasterList(state), HttpStatus.OK);
     }
