@@ -1,10 +1,10 @@
 package com.backend.legisloop.service;
 
 import com.backend.legisloop.model.Legislation;
+import com.backend.legisloop.model.Bill;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -45,8 +45,8 @@ public class BillService {
                 JsonObject masterlistObject = jsonObject.getAsJsonObject("masterlist");
                 masterlistObject.remove("session");
 
-                Type mapType = new TypeToken<Map<String, Legislation>>() {}.getType();
-                Map<String, Legislation> billsMap = gson.fromJson(masterlistObject, mapType);
+                Type mapType = new TypeToken<Map<String, Bill>>() {}.getType();
+                Map<String, Bill> billsMap = gson.fromJson(masterlistObject, mapType);
                 return new ArrayList<>(billsMap.values());
             } catch (Exception e) {
                 log.error(e.getMessage());

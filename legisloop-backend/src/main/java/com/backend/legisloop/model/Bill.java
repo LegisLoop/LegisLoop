@@ -4,15 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.net.URI;
+import java.util.List;
 
 @AllArgsConstructor
 @Data
-public class ls_LegislationDocument {
+public class Bill extends Legislation{
 
-    private int docId;
     private int billId;
+    private int sessionId;
     private URI legiscanLink;
-    private URI externalLink;
-    private String mime;
-    private String docContent;
+    private List<Representative> endorsements;
+    private List<LegislationDocument> documents;
 }
