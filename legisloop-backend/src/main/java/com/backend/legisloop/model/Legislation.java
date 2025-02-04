@@ -17,4 +17,7 @@ public abstract class Legislation {
     private String summary;
     private List<ArticleResponse> newsArticles;
     private List<Representative> sponsors;
+    private String change_hash;
+    private GoverningBody governingBody;
+
 }
