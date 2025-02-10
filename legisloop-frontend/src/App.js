@@ -1,11 +1,10 @@
 import TeamMembersList from './components/TeamMembersList';
-
+import NavBar from "./components/NavBar/NavBar";
 
 function App() {
   return (
     <div className="App">
-      <h1>Legisloop Team Members</h1>
-      <TeamMembersList />
+        <NavBar/>
     </div>
   );
 }
