@@ -19,5 +19,7 @@ public class LegislationDocument {
     private String mime;
     private int mimeId;
     private String docContent;
+    private String type;
+    private int typeId;
 
 }

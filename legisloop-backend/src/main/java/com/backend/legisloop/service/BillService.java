@@ -99,6 +99,8 @@ public class BillService {
                             .docId(text.getAsJsonObject().get("doc_id").getAsInt())
                             .mime(text.getAsJsonObject().get("mime").getAsString())
                             .mimeId(text.getAsJsonObject().get("mime_id").getAsInt())
+                            .type(text.getAsJsonObject().get("type").getAsString())
+                            .typeId(text.getAsJsonObject().get("type_id").getAsInt())
                             .build();
 
                     List<LegislationDocument> documents = bill.getDocuments();
@@ -126,5 +128,29 @@ public class BillService {
                     "Failed to fetch bills, server responded with status: " + response.getStatus());
         }
         return bill;
+    }
+    private LegislationDocument getDocContent(LegislationDocument legislationDocument) throws UnirestException {
+        HttpResponse<JsonNode> response = Unirest.get(url + "/")
+                .queryString("key", API_KEY)
+                .queryString("op", "getBillText")
+                .queryString("id", legislationDocument.getDocId())
+                .asJson();
+
+        if (response.getStatus() == 200) {
+            JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+            JsonObject text = jsonObject.getAsJsonObject("text");
+
+            legislationDocument.setMime(text.getAsJsonObject("mime").getAsString());
+            legislationDocument.setMimeId(text.getAsJsonObject("mime_id").getAsInt());
+            legislationDocument.setTypeId(text.getAsJsonObject("type_id").getAsInt());
+            legislationDocument.setType(text.getAsJsonObject("type").getAsString());
+            legislationDocument.setDocContent(text.getAsJsonObject("doc").getAsString());
+
+            return legislationDocument;
+
+
+        }
+        log.error("Failed to fetch bill text");
+        return legislationDocument;
     }
 }
