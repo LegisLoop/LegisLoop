@@ -56,7 +56,7 @@ public class BillService {
                 Map<String, Bill> billsMap = gson.fromJson(masterlistObject, mapType);
 
                 int sessionId = sessionObject.get("session_id").getAsInt();
-                billsMap.values().forEach(bill -> bill.setSessionId(sessionId));
+                billsMap.values().forEach(bill -> bill.setSession_id(sessionId));
 
                 return new ArrayList<>(billsMap.values());
             } catch (Exception e) {
