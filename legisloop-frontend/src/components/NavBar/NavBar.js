@@ -1,3 +1,11 @@
+/***************************************************************
+ * LegisLoop
+ * All rights reserved (c) 2025 - GNU General Public License v3.0
+ ****************************************************************
+ * NavBar component declaration.
+ ****************************************************************
+ * Last Updated: February 10, 2025.
+ ***************************************************************/
 import styles from './NavBar.module.css';
 
 function NavBar() {
@@ -30,9 +38,7 @@ function NavBar() {
                     </li>
                 </ul>
             </div>
-
         </nav>
-    );
-}
+    );}
 
 export default NavBar;

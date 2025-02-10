@@ -1,3 +1,12 @@
+/***************************************************************
+* LegisLoop
+* All rights reserved (c) 2025 - GNU General Public License v3.0
+****************************************************************
+* Global styling.
+****************************************************************
+* Last Updated: February 10, 2025.
+***************************************************************/
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Quicksand:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;

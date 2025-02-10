@@ -1,3 +1,11 @@
+/***************************************************************
+* LegisLoop
+* All rights reserved (c) 2025 - GNU General Public License v3.0
+****************************************************************
+* NavBar component styling.
+****************************************************************
+* Last Updated: February 10, 2025.
+***************************************************************/
 .navbar {
     display: flex;
     align-items: center;
@@ -42,8 +50,4 @@
 .navbar .nav-links a:hover {
     transform: scale(1.07);
     color: white;
-}
-
-.navbar .nav-links a:active {
-    font-weight: bold;
 }
