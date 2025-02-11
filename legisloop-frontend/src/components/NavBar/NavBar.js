@@ -6,39 +6,49 @@
  ****************************************************************
  * Last Updated: February 10, 2025.
  ***************************************************************/
-import styles from './NavBar.module.css';
-
 function NavBar() {
     return (
-        <nav className={styles.navbar}>
-            <div className={styles['navbar-left']}>
-                <ul className={styles['nav-links']}>
+        <nav className="flex items-center justify-between bg-[#344966] text-[#fff6ec] h-16 fixed top-0 left-0 right-0 z-10">
+            <div className="flex items-center">
+                <ul className="flex space-x-6">
                     <li>
-                        <a href="/">HOME</a>
+                        <a href="/" className="flex items-center justify-center h-full px-4 hover:scale-105 transition-all">
+                            HOME
+                        </a>
                     </li>
                 </ul>
             </div>
-            <div className={styles['navbar-center']}>
-                <ul className={styles['nav-links']}>
+            <div className="flex items-center">
+                <ul className="flex space-x-6">
                     <li>
-                        <a href="/">LEGISLATION</a>
+                        <a href="/" className="flex items-center justify-center h-full px-4 hover:scale-105 transition-all">
+                            LEGISLATION
+                        </a>
                     </li>
                     <li>
-                        <a href="/">SEE GOVERNMENT SPENDING</a>
+                        <a href="/" className="flex items-center justify-center h-full px-4 hover:scale-105 transition-all">
+                            SEE GOVERNMENT SPENDING
+                        </a>
                     </li>
                     <li>
-                        <a href="/">FIND YOUR REPRESENTATIVES</a>
+                        <a href="/" className="flex items-center justify-center h-full px-4 hover:scale-105 transition-all">
+                            FIND YOUR REPRESENTATIVES
+                        </a>
                     </li>
                 </ul>
             </div>
-            <div className={styles['navbar-right']}>
-                <ul className={styles['nav-links']}>
+            <div className="flex items-center">
+                <ul className="flex space-x-6">
                     <li>
-                        <a href="/">CONNECT</a>
+                        <a href="/" className="flex items-center justify-center h-full px-4 hover:scale-105 transition-all">
+                            CONNECT
+                        </a>
                     </li>
                 </ul>
             </div>
         </nav>
-    );}
+    );
+}
 
 export default NavBar;
+
