@@ -49,6 +49,8 @@ public class BillService {
             try {
                 Gson gson = new Gson();
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+                checkLegiscanResponseStatus(jsonObject);
+
                 JsonObject masterlistObject = jsonObject.getAsJsonObject("masterlist");
                 JsonObject sessionObject = masterlistObject.getAsJsonObject("session");
                 masterlistObject.remove("session");
@@ -87,6 +89,8 @@ public class BillService {
         if (response.getStatus() == 200) {
             try {
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+                checkLegiscanResponseStatus(jsonObject);
+
                 JsonArray textsArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("texts");
                 JsonArray sponsorsArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("sponsors");
 
@@ -162,6 +166,8 @@ public class BillService {
 
         if (response.getStatus() == 200) {
             JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+            checkLegiscanResponseStatus(jsonObject);
+
             JsonObject text = jsonObject.getAsJsonObject("text");
 
             legislationDocument.setMime(text.getAsJsonObject("mime").getAsString());
@@ -176,5 +182,12 @@ public class BillService {
         }
         log.error("Failed to fetch bill text");
         return legislationDocument;
+    }
+    private void checkLegiscanResponseStatus(JsonObject response) {
+        if (response.has("status") && "ERROR".equals(response.get("status").getAsString())) {
+            String errorMessage = response.getAsJsonObject("alert").get("message").getAsString();
+            log.error("API Error: {}", errorMessage);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "API Error: " + errorMessage);
+        }
     }
 }
