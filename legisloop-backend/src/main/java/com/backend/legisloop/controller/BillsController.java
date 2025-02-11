@@ -23,14 +23,17 @@ public class BillsController {
     private final BillService billService;
 
     @GetMapping("/getMasterList")
-    public ResponseEntity<List<Legislation>> getMasterListTest(@RequestParam String state) throws UnirestException {
+    public ResponseEntity<List<Bill>> getMasterListByState(@RequestParam String state) throws UnirestException {
         return new ResponseEntity<>(billService.getMasterList(state), HttpStatus.OK);
     }
 
     @GetMapping("/getBill")
-    public ResponseEntity<Legislation> getBill(@RequestParam int bill_id) throws UnirestException, URISyntaxException {
-        Bill bill = new Bill();
-        bill.setBill_id(bill_id);
-        return new ResponseEntity<>(billService.getBill(bill), HttpStatus.OK);
+    public ResponseEntity<Legislation> getBill(@RequestParam int bill_id, @RequestParam String state) throws UnirestException, URISyntaxException {
+        List<Bill> masterList = billService.getMasterList(state);
+        Bill billToFind = masterList.stream()
+                .filter(bill -> bill.getBill_id() == bill_id)
+                .findFirst()
+                .orElse(null);
+        return new ResponseEntity<>(billService.getBill(billToFind), HttpStatus.OK);
     }
 }

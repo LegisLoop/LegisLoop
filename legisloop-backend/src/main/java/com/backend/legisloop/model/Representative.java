@@ -1,12 +1,14 @@
 package com.backend.legisloop.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 public class Representative {
 
     private int people_id;
