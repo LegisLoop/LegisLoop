@@ -1,7 +1,6 @@
 package com.backend.legisloop.service;
 
 import com.backend.legisloop.model.Legislation;
-import com.backend.legisloop.model.Bill;
 import com.backend.legisloop.model.LegislationDocument;
 import com.backend.legisloop.model.Representative;
 import com.google.gson.Gson;
@@ -22,7 +21,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +35,7 @@ public class BillService {
     @Value("${legiscan.base.url}")
     private String url;
 
-    public List<Bill> getMasterList(String state) throws UnirestException {
+    public List<Legislation> getMasterList(String state) throws UnirestException {
 
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
@@ -55,11 +53,11 @@ public class BillService {
                 JsonObject sessionObject = masterlistObject.getAsJsonObject("session");
                 masterlistObject.remove("session");
 
-                Type mapType = new TypeToken<Map<String, Bill>>() {}.getType();
-                Map<String, Bill> billsMap = gson.fromJson(masterlistObject, mapType);
+                Type mapType = new TypeToken<Map<String, Legislation>>() {}.getType();
+                Map<String, Legislation> billsMap = gson.fromJson(masterlistObject, mapType);
 
                 int sessionId = sessionObject.get("session_id").getAsInt();
-                billsMap.values().forEach(bill -> bill.setSession_id(sessionId));
+                billsMap.values().forEach(legislation -> legislation.setSession_id(sessionId));
 
                 return new ArrayList<>(billsMap.values());
             } catch (Exception e) {
@@ -73,17 +71,17 @@ public class BillService {
     }
 
     /**
-     * Get a complete {@link Bill} from a 'stub' (presumably from {@link #getMasterList(String)}).
-     * @param bill The {@link Bill} with, at minimum, a filled {@link Bill#bill_id}
-     * @return A completed {@link Bill} with texts, sans {@link LegislationDocument#docContent}
+     * Get a complete {@link Legislation} from a 'stub' (presumably from {@link #getMasterList(String)}).
+     * @param legislation The {@link Legislation} with, at minimum, a filled {@link Legislation#bill_id}
+     * @return A completed {@link Legislation} with texts, sans {@link LegislationDocument#docContent}
      * @throws UnirestException
      * @throws URISyntaxException
      */
-    public Bill getBill(Bill bill) throws UnirestException, URISyntaxException { // NOTE: it is assumed that the state is known from first calling master list function
+    public Legislation getBill(Legislation legislation) throws UnirestException, URISyntaxException { // NOTE: it is assumed that the state is known from first calling master list function
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
                 .queryString("op", "getBill")
-                .queryString("id", bill.getBill_id())
+                .queryString("id", legislation.getBill_id())
                 .asJson();
 
         if (response.getStatus() == 200) {
@@ -96,7 +94,7 @@ public class BillService {
 
                 textsArray.forEach(text -> {
                     LegislationDocument possibleNewLegislationDocument = LegislationDocument.builder()
-                            .billId(bill.getBill_id())
+                            .billId(legislation.getBill_id())
                             .textHash(text.getAsJsonObject().get("text_hash").getAsString())
                             .legiscanLink(URI.create(text.getAsJsonObject().get("url").getAsString()))
                             .externalLink(URI.create(text.getAsJsonObject().get("state_link").getAsString()))
@@ -107,22 +105,22 @@ public class BillService {
                             .typeId(text.getAsJsonObject().get("type_id").getAsInt())
                             .build();
 
-                    List<LegislationDocument> documents = bill.getDocuments();
+                    List<LegislationDocument> documents = legislation.getDocuments();
                     boolean replacedDoc = false;
                     for (LegislationDocument document : documents) {
                         if (document.getDocId() == possibleNewLegislationDocument.getDocId()) {
                             if (Objects.equals(document.getTextHash(), possibleNewLegislationDocument.getTextHash())) break;
-                            bill.documents.remove(document);
-                            bill.documents.add(possibleNewLegislationDocument); // TODO: Should refetech the doc content for this doc
+                            legislation.documents.remove(document);
+                            legislation.documents.add(possibleNewLegislationDocument); // TODO: Should refetech the doc content for this doc
                             replacedDoc = true;
                             break;
                         }
                     }
 
-                    if (!replacedDoc) bill.documents.add(possibleNewLegislationDocument);
+                    if (!replacedDoc) legislation.documents.add(possibleNewLegislationDocument);
 
                 });
-                List<Representative> billSponsors = bill.getSponsors();
+                List<Representative> billSponsors = legislation.getSponsors();
                 sponsorsArray.forEach(sponsor -> {
                     int peopleId = sponsor.getAsJsonObject().get("people_id").getAsInt();
                     boolean exists = billSponsors.stream().anyMatch(rep -> rep.getPeople_id() == peopleId);
@@ -146,7 +144,7 @@ public class BillService {
                         billSponsors.add(representativeToAdd);
                     }
                 });
-                bill.setStateLink(new URI(jsonObject.getAsJsonObject("bill").get("state_link").getAsString()));
+                legislation.setStateLink(new URI(jsonObject.getAsJsonObject("bill").get("state_link").getAsString()));
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw e;
@@ -155,7 +153,7 @@ public class BillService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Failed to fetch bills, server responded with status: " + response.getStatus());
         }
-        return bill;
+        return legislation;
     }
     private LegislationDocument getDocContent(LegislationDocument legislationDocument) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")

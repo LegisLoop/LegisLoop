@@ -1,11 +1,10 @@
 package com.backend.legisloop.controller;
 
-import com.backend.legisloop.model.Bill;
+import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.service.RepresentativeService;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +31,7 @@ public class RepresentativeController {
     }
 
     @GetMapping("/getSponsoredBills")
-    public ResponseEntity<List<Bill>> getSponsoredBills(int personId) throws UnirestException {
+    public ResponseEntity<List<Legislation>> getSponsoredBills(int personId) throws UnirestException {
         return new ResponseEntity<>(representativeService.getRepresentativeBills(personId), HttpStatus.OK);
     }
 }

@@ -1,9 +1,7 @@
 package com.backend.legisloop.controller;
 
-import com.backend.legisloop.model.Bill;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.service.BillService;
-import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,17 +21,17 @@ public class BillsController {
     private final BillService billService;
 
     @GetMapping("/getMasterList")
-    public ResponseEntity<List<Bill>> getMasterListByState(@RequestParam String state) throws UnirestException {
+    public ResponseEntity<List<Legislation>> getMasterListByState(@RequestParam String state) throws UnirestException {
         return new ResponseEntity<>(billService.getMasterList(state), HttpStatus.OK);
     }
 
     @GetMapping("/getBill")
     public ResponseEntity<Legislation> getBill(@RequestParam int bill_id, @RequestParam String state) throws UnirestException, URISyntaxException {
-        List<Bill> masterList = billService.getMasterList(state);
-        Bill billToFind = masterList.stream()
-                .filter(bill -> bill.getBill_id() == bill_id)
+        List<Legislation> masterList = billService.getMasterList(state);
+        Legislation legislationToFind = masterList.stream()
+                .filter(legislation -> legislation.getBill_id() == bill_id)
                 .findFirst()
                 .orElse(null);
-        return new ResponseEntity<>(billService.getBill(billToFind), HttpStatus.OK);
+        return new ResponseEntity<>(billService.getBill(legislationToFind), HttpStatus.OK);
     }
 }

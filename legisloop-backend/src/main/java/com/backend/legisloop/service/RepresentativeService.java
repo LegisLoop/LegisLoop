@@ -1,6 +1,6 @@
 package com.backend.legisloop.service;
 
-import com.backend.legisloop.model.Bill;
+import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.Representative;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -12,7 +12,6 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanInfoFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,7 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @Slf4j
@@ -84,7 +82,7 @@ public class RepresentativeService {
         }
     }
 
-    public List<Bill> getRepresentativeBills(int personId) throws UnirestException {
+    public List<Legislation> getRepresentativeBills(int personId) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
                 .queryString("op", "getSponsoredList")
@@ -97,7 +95,7 @@ public class RepresentativeService {
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 JsonArray listList = jsonObject.getAsJsonObject("sponsoredbills").getAsJsonArray("bills");
 
-                Type listType = new TypeToken<List<Bill>>() {}.getType();
+                Type listType = new TypeToken<List<Legislation>>() {}.getType();
                 return gson.fromJson(listList, listType);
             }
             catch (Exception e) {

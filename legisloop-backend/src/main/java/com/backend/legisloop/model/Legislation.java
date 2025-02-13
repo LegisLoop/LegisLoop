@@ -5,13 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public abstract class Legislation {
+public class Legislation {
 
     private String title;
     private String description;
@@ -20,5 +21,10 @@ public abstract class Legislation {
     private List<Representative> sponsors = new ArrayList<>();
     private String change_hash;
     private GoverningBody governingBody;
-
+    private int bill_id;
+    private int session_id;
+    private URI url; // legiscan link
+    private URI stateLink;
+    private List<Representative> endorsements;
+    public List<LegislationDocument> documents = new ArrayList<>();
 }
