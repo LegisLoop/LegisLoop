@@ -16,7 +16,7 @@ import java.util.List;
 public class Bill extends Legislation{
 
     private int bill_id;
-    private int sessionId;
+    private int session_id;
     private URI url; // legiscan link
     private URI stateLink;
     private List<Representative> endorsements;

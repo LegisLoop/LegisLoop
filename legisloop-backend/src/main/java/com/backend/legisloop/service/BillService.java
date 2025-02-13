@@ -3,6 +3,7 @@ package com.backend.legisloop.service;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.Bill;
 import com.backend.legisloop.model.LegislationDocument;
+import com.backend.legisloop.model.Representative;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -36,7 +37,7 @@ public class BillService {
     @Value("${legiscan.base.url}")
     private String url;
 
-    public List<Legislation> getMasterList(String state) throws UnirestException {
+    public List<Bill> getMasterList(String state) throws UnirestException {
 
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
@@ -48,6 +49,8 @@ public class BillService {
             try {
                 Gson gson = new Gson();
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+                checkLegiscanResponseStatus(jsonObject);
+
                 JsonObject masterlistObject = jsonObject.getAsJsonObject("masterlist");
                 JsonObject sessionObject = masterlistObject.getAsJsonObject("session");
                 masterlistObject.remove("session");
@@ -56,7 +59,7 @@ public class BillService {
                 Map<String, Bill> billsMap = gson.fromJson(masterlistObject, mapType);
 
                 int sessionId = sessionObject.get("session_id").getAsInt();
-                billsMap.values().forEach(bill -> bill.setSessionId(sessionId));
+                billsMap.values().forEach(bill -> bill.setSession_id(sessionId));
 
                 return new ArrayList<>(billsMap.values());
             } catch (Exception e) {
@@ -86,9 +89,10 @@ public class BillService {
         if (response.getStatus() == 200) {
             try {
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
-                // TODO  Add get and add sponsors
-                //  JsonArray sessionsArray = jsonObject.getAsJsonArray("sponsors");
+                checkLegiscanResponseStatus(jsonObject);
+
                 JsonArray textsArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("texts");
+                JsonArray sponsorsArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("sponsors");
 
                 textsArray.forEach(text -> {
                     LegislationDocument possibleNewLegislationDocument = LegislationDocument.builder()
@@ -118,6 +122,30 @@ public class BillService {
                     if (!replacedDoc) bill.documents.add(possibleNewLegislationDocument);
 
                 });
+                List<Representative> billSponsors = bill.getSponsors();
+                sponsorsArray.forEach(sponsor -> {
+                    int peopleId = sponsor.getAsJsonObject().get("people_id").getAsInt();
+                    boolean exists = billSponsors.stream().anyMatch(rep -> rep.getPeople_id() == peopleId);
+                    if (!exists) {
+                        Representative representativeToAdd = Representative.builder()
+                                .people_id(sponsor.getAsJsonObject().get("people_id").getAsInt())
+                                .person_hash(sponsor.getAsJsonObject().get("person_hash").getAsString())
+                                .party_id(sponsor.getAsJsonObject().get("party_id").getAsInt())
+                                .state_id(sponsor.getAsJsonObject().get("state_id").getAsInt())
+                                .party(sponsor.getAsJsonObject().get("party").getAsString())
+                                .role_id(sponsor.getAsJsonObject().get("role_id").getAsInt())
+                                .role(sponsor.getAsJsonObject().get("role").getAsString())
+                                .name(sponsor.getAsJsonObject().get("name").getAsString())
+                                .first_name(sponsor.getAsJsonObject().get("first_name").getAsString())
+                                .last_name(sponsor.getAsJsonObject().get("last_name").getAsString())
+                                .district(sponsor.getAsJsonObject().get("district").getAsString())
+                                .ftm_eid(sponsor.getAsJsonObject().get("ftm_eid").getAsInt())
+                                .votesmart_id(sponsor.getAsJsonObject().get("votesmart_id").getAsInt())
+                                .knowwho_pid(sponsor.getAsJsonObject().get("knowwho_pid").getAsInt())
+                                .build();
+                        billSponsors.add(representativeToAdd);
+                    }
+                });
                 bill.setStateLink(new URI(jsonObject.getAsJsonObject("bill").get("state_link").getAsString()));
             } catch (Exception e) {
                 log.error(e.getMessage());
@@ -138,6 +166,8 @@ public class BillService {
 
         if (response.getStatus() == 200) {
             JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+            checkLegiscanResponseStatus(jsonObject);
+
             JsonObject text = jsonObject.getAsJsonObject("text");
 
             legislationDocument.setMime(text.getAsJsonObject("mime").getAsString());
@@ -152,5 +182,12 @@ public class BillService {
         }
         log.error("Failed to fetch bill text");
         return legislationDocument;
+    }
+    private void checkLegiscanResponseStatus(JsonObject response) {
+        if (response.has("status") && "ERROR".equals(response.get("status").getAsString())) {
+            String errorMessage = response.getAsJsonObject("alert").get("message").getAsString();
+            log.error("API Error: {}", errorMessage);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "API Error: " + errorMessage);
+        }
     }
 }
