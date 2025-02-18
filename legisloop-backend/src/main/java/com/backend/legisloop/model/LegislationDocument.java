@@ -21,5 +21,4 @@ public class LegislationDocument {
     private String docContent;
     private String type;
     private int typeId;
-
 }
