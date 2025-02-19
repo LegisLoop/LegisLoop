@@ -4,20 +4,26 @@
  ****************************************************************
  * App declaration.
  ****************************************************************
- * Last Updated: February 10, 2025.
+ * Last Updated: February 18, 2025.
  ***************************************************************/
-import NavBar from "./components/NavBar/NavBar";
-import Footer from "./components/Footer/Footer";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
+import LegislationPage from "./pages/LegislationPage";
+import SpendingPage from "./pages/SpendingPage";
+import RepresentativePage from "./pages/RepresentativePage";
+import ConnectPage from "./pages/ConnectPage";
 
 function App() {
   return (
-    <div className="App">
-        <NavBar/>
-        <div style={{ marginTop: '4rem' }}>  {/* This pushes content below the navbar */}
-            {/* Add your main content here */}
-        </div>
-        <Footer/>
-    </div>
+      <Router>
+          <Routes>
+              <Route path="/" element={<LandingPage/>} />
+              <Route path="/legislation" element={<LegislationPage/>} />
+              <Route path="/spending" element={<SpendingPage/>} />
+              <Route path="/representatives" element={<RepresentativePage/>} />
+              <Route path="/connect" element={<ConnectPage/>} />
+          </Routes>
+      </Router>
   );
 }
 

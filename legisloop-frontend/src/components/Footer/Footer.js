@@ -1,9 +1,16 @@
-
+/***************************************************************
+ * LegisLoop
+ * All rights reserved (c) 2025 - GNU General Public License v3.0
+ ****************************************************************
+ * Footer Declaration.
+ ****************************************************************
+ * Last Updated: February 19, 2025.
+ ***************************************************************/
 function Footer() {
 
     return (
         <footer
-            className="relative z-10 bg-[#A69B97] pb-10 pt-20 lg:pb-20 lg:pt-10 dark:bg-dark flex flex-col mt-auto"
+            className="relative z-10 bg-[#A69B97] pb-5 pt-20 lg:pb-8 lg:pt-10 dark:bg-dark flex flex-col mt-auto bottom-0 "
         >
             <div className="container mx-auto">
                 <div className="-mx-4 flex flex-wrap">
