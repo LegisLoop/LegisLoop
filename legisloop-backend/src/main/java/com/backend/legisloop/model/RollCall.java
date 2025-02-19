@@ -16,7 +16,7 @@ public class RollCall {
 	private int roll_call_id;
     private int bill_id;
     private Date date;
-    private String description;
+    private String desc;
     private int yea;
     private int nay;
     private int nv;
@@ -24,5 +24,7 @@ public class RollCall {
     private int total;
     private boolean passed;
     private List<Vote> votes;
+    private URI url; // legiscan link
+    private URI state_link;
 
 }
