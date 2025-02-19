@@ -3,18 +3,18 @@ package com.backend.legisloop.controller;
 import com.backend.legisloop.model.RollCall;
 import com.backend.legisloop.repository.UserRepository;
 import com.backend.legisloop.service.RollCallService;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,12 +54,12 @@ class RollCallControllerTest {
     @Test
     void testGetRollCallByID_Failure() throws Exception {
         // Mock exception
-        when(rollCallService.getRollCallByID(anyInt())).thenThrow(new UnirestException("API Error"));
+        when(rollCallService.getRollCallByID(anyInt())).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "API Error: "));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/getRollCall")
                         .param("roll_call_id", "123"))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 
     @Test
@@ -80,11 +80,11 @@ class RollCallControllerTest {
     @Test
     void testGetRollCallsForLegislation_Failure() throws Exception {
         // Mock exception
-        when(rollCallService.getRollCallsForLegislation(anyInt())).thenThrow(new URISyntaxException("Invalid URI", "error"));
+        when(rollCallService.getRollCallsForLegislation(anyInt())).thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "API Error: "));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/getRollCallsForLegislation")
                         .param("bill_id", "456"))
                 .andDo(print())
-                .andExpect(MockMvcResultMatchers.status().isInternalServerError());
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 }

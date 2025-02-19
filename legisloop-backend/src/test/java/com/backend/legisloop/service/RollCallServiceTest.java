@@ -6,6 +6,8 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.GetRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URISyntaxException;
@@ -38,14 +41,24 @@ class RollCallServiceTest {
 
     @Test
     void testGetRollCallByID_Success() throws UnirestException {
+    	
+    	// Mock API key
+    	ReflectionTestUtils.setField(rollCallService, "API_KEY", "test-api-key");
+    	
         // Mock API response
         HttpResponse<JsonNode> mockResponse = mock(HttpResponse.class);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.getBody()).thenReturn(new JsonNode("{ \"roll_call\": { \"roll_call_id\": 123, \"votes\": [] } }"));
+        
+        GetRequest mockRequest = mock(GetRequest.class);
 
         // Mock Unirest call
         try (var unirestMockedStatic = Mockito.mockStatic(com.mashape.unirest.http.Unirest.class)) {
-            unirestMockedStatic.when(() -> Unirest.get(anyString())).thenReturn(mockResponse);
+            unirestMockedStatic.when(() -> Unirest.get(anyString())).thenReturn(mockRequest);
+            unirestMockedStatic.when(() -> mockRequest.queryString(eq("key"), anyString())).thenReturn(mockRequest);
+            unirestMockedStatic.when(() -> mockRequest.queryString(eq("op"), anyString())).thenReturn(mockRequest);
+            unirestMockedStatic.when(() -> mockRequest.queryString(eq("id"), anyInt())).thenReturn(mockRequest);
+            unirestMockedStatic.when(() -> mockRequest.asJson()).thenReturn(mockResponse);
 
             // Call the service method
             RollCall rollCall = rollCallService.getRollCallByID(123);
@@ -58,12 +71,22 @@ class RollCallServiceTest {
 
     @Test
     void testGetRollCallByID_Failure() throws UnirestException {
+    	
+    	// Mock API key
+    	ReflectionTestUtils.setField(rollCallService, "API_KEY", "test-api-key");
+    	
         // Mock API response with bad request
         HttpResponse<JsonNode> mockResponse = mock(HttpResponse.class);
         when(mockResponse.getStatus()).thenReturn(400);
+        
+        GetRequest mockRequest = mock(GetRequest.class);
 
         try (var unirestMockedStatic = Mockito.mockStatic(com.mashape.unirest.http.Unirest.class)) {
-            unirestMockedStatic.when(() -> Unirest.get(anyString())).thenReturn(mockResponse);
+            unirestMockedStatic.when(() -> Unirest.get(anyString())).thenReturn(mockRequest);
+            unirestMockedStatic.when(() -> mockRequest.queryString(eq("key"), anyString())).thenReturn(mockRequest);
+            unirestMockedStatic.when(() -> mockRequest.queryString(eq("op"), anyString())).thenReturn(mockRequest);
+            unirestMockedStatic.when(() -> mockRequest.queryString(eq("id"), anyInt())).thenReturn(mockRequest);
+            unirestMockedStatic.when(() -> mockRequest.asJson()).thenReturn(mockResponse);
 
             // Expect exception
             assertThrows(ResponseStatusException.class, () -> rollCallService.getRollCallByID(123));

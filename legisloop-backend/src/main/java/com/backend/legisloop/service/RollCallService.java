@@ -79,7 +79,8 @@ public class RollCallService {
     }
     
     public List<RollCall> getRollCallsForLegislation(int bill_id) throws UnirestException, URISyntaxException {
-    	Legislation temp = Legislation.builder().bill_id(bill_id).build();
+    	Legislation temp = new Legislation();
+    	temp.setBill_id(bill_id);
     	return getRollCallsForLegislation(temp);
     }
     
