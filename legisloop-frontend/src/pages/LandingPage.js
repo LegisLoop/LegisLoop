@@ -11,7 +11,7 @@ import Footer from "../components/Footer/Footer";
 import SideBar from "../components/SideBar/SideBar";
 import LegislationPreviewCard from "../components/BillComponents/LegislationPreviewCard";
 import EventCard from "../components/BillComponents/EventCard";
-import {CalendarEventIcon, CompassIcon} from "../components/Icons/Icons";
+import { CalendarEventIcon } from "../components/Icons/Icons";
 import Tooltip from "../components/ToolTips/ToolTip";
 
 function LandingPage() {

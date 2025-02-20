@@ -23,7 +23,7 @@ import {
     SparklesIcon,
     ScaleIcon,
     ShieldIcon,
-    IdentificationIcon, LockIcon, HomeIcon, BuildingBridgeIcon, InformationCircleIcon
+    IdentificationIcon, LockIcon, HomeIcon, BuildingBridgeIcon
 } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
 
