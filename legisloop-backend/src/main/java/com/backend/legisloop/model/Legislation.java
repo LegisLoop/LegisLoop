@@ -25,6 +25,7 @@ public class Legislation {
     private int session_id;
     private URI url; // legiscan link
     private URI stateLink;
+    private List<RollCall> votes;
     private List<Representative> endorsements;
     public List<LegislationDocument> documents = new ArrayList<>();
 }
