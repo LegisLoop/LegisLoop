@@ -1,12 +1,29 @@
-import TeamMembersList from './components/TeamMembersList';
-
+/***************************************************************
+ * LegisLoop
+ * All rights reserved (c) 2025 - GNU General Public License v3.0
+ ****************************************************************
+ * App declaration.
+ ****************************************************************
+ * Last Updated: February 18, 2025.
+ ***************************************************************/
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
+import LegislationPage from "./pages/LegislationPage";
+import SpendingPage from "./pages/SpendingPage";
+import RepresentativePage from "./pages/RepresentativePage";
+import ConnectPage from "./pages/ConnectPage";
 
 function App() {
   return (
-    <div className="App">
-      <h1>Legisloop Team Members</h1>
-      <TeamMembersList />
-    </div>
+      <Router>
+          <Routes>
+              <Route path="/" element={<LandingPage/>} />
+              <Route path="/legislation" element={<LegislationPage/>} />
+              <Route path="/spending" element={<SpendingPage/>} />
+              <Route path="/representatives" element={<RepresentativePage/>} />
+              <Route path="/connect" element={<ConnectPage/>} />
+          </Routes>
+      </Router>
   );
 }
 
