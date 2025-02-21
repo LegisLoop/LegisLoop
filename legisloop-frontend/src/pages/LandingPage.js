@@ -9,8 +9,8 @@
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import SideBar from "../components/SideBar/SideBar";
-import LegislationPreviewCard from "../components/BillComponents/LegislationPreviewCard";
-import EventCard from "../components/BillComponents/EventCard";
+import LegislationPreviewCard from "../components/Cards/LegislationPreviewCard";
+import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
 import Tooltip from "../components/ToolTips/ToolTip";
 
