@@ -33,7 +33,7 @@ mvn spring-boot:run
 ```
 The project can also be run using most code editors. The api will be available at http://localhost:8080/
 
-Visiting Http://localhost:8080/swatter-ui/index.html will redirect 
+Visiting Http://localhost:8080/swatter-ui/index.html will redirect
 
 # Frontent Setup 
 ### Install Dependencies
