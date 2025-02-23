@@ -1,5 +1,9 @@
 package com.backend.legisloop.model;
 
+import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.entities.RepresentativeEntity;
+import com.backend.legisloop.entities.RollCallEntity;
+import com.backend.legisloop.entities.VoteEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +21,14 @@ public class Vote {
     private int bill_id;
     private int person_id;
     private VotePosition vote_position;
+
+    public VoteEntity toEntity() {
+        return VoteEntity.builder()
+                .bill(LegislationEntity.builder().billId(this.bill_id).build())
+                .rollCall(RollCallEntity.builder().rollCallId(this.roll_call_id).build())
+                .representative(RepresentativeEntity.builder().peopleId(this.person_id).build())
+                .vote_position(this.vote_position)
+                .build();
+    }
 
 }

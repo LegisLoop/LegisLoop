@@ -4,7 +4,7 @@ import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.RollCall;
 import com.backend.legisloop.model.Vote;
 import com.backend.legisloop.serial.BooleanSerializer;
-import com.backend.legisloop.Utils;
+import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.enums.VotePosition;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

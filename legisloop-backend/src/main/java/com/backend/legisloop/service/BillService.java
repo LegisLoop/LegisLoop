@@ -1,6 +1,6 @@
 package com.backend.legisloop.service;
 
-import com.backend.legisloop.Utils;
+import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.LegislationDocument;
 import com.backend.legisloop.model.Representative;
