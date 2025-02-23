@@ -33,7 +33,19 @@ mvn spring-boot:run
 ```
 The project can also be run using most code editors. The api will be available at http://localhost:8080/
 
-Visiting Http://localhost:8080/swatter-ui/index.html will redirect
+Visiting Http://localhost:8080/swatter-ui/index.html will redirect to the swagger page for the API.
+
+### Database Setup
+To spin up only the database, run the following in the root project directory: 
+```bash
+docker-compose -f docker-compose-db.yaml up -d
+```
+The database needs to be running before the backend starts otherwise it will throw an error. If there is an authentication error and the database is running, make sure that there isn't another process already running on port 5432. 
+
+To start a shell session inside the db container, run the following: 
+```bash
+docker exec -it postgres_container psql -U postgres -d legisloop
+```
 
 # Frontent Setup 
 ### Install Dependencies
