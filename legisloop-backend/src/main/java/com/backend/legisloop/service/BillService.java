@@ -1,5 +1,11 @@
 package com.backend.legisloop.service;
 
+import com.backend.legisloop.entities.LegislationDocumentEntity;
+import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.entities.RepresentativeEntity;
+import com.backend.legisloop.repository.LegislationDocumentRepository;
+import com.backend.legisloop.repository.LegislationRepository;
+import com.backend.legisloop.repository.RepresentativeRepository;
 import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.LegislationDocument;
@@ -14,6 +20,8 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,14 +31,16 @@ import org.springframework.web.server.ResponseStatusException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class BillService {
+
+    private final LegislationRepository legislationRepository;
+    private final RepresentativeRepository representativeRepository;
+    private final LegislationDocumentRepository legislationDocumentRepository;
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
@@ -196,4 +206,67 @@ public class BillService {
         log.error("Failed to fetch bill text");
         return legislationDocument;
     }
+
+    @PostConstruct
+    public void insertDummyData() {
+        // Insert Representatives
+        RepresentativeEntity rep1 = RepresentativeEntity.builder()
+                .peopleId(1)
+                .name("John Doe")
+                .party("Democrat")
+                .stateId(1)
+                .role("Senator")
+                .roleId(1)
+                .build();
+
+        RepresentativeEntity rep2 = RepresentativeEntity.builder()
+                .peopleId(2)
+                .name("Jane Smith")
+                .party("Republican")
+                .stateId(2)
+                .role("Representative")
+                .roleId(1)
+                .build();
+
+        representativeRepository.saveAll(Arrays.asList(rep1, rep2));
+
+        // Insert Legislation
+        LegislationEntity legislation = LegislationEntity.builder()
+                .billId(101)
+                .title("Clean Energy Act")
+                .description("A bill to promote renewable energy")
+                .summary("This bill provides incentives for clean energy projects.")
+                .change_hash("xyz123")
+                .url("https://example.com/legislation/101")
+                .stateLink("https://state.example.com/legislation/101")
+                .sponsors(List.of(rep1, rep2))
+                .endorsements(List.of(rep1))
+                .build();
+
+        legislationRepository.save(legislation);
+
+        // Insert Legislation Documents
+        LegislationDocumentEntity document = LegislationDocumentEntity.builder()
+                .docId(1)
+                .bill(legislation)
+                .textHash("doc_hash_123")
+                .legiscanLink(URI.create("https://example.com/document/1"))
+                .externalLink(URI.create("https://external.example.com/document/1"))
+                .mime("application/pdf")
+                .mimeId(1)
+                .docContent("Sample document content")
+                .type("Bill Text")
+                .typeId(101)
+                .build();
+
+        legislationDocumentRepository.save(document);
+    }
+
+    public List<Legislation> getAllLegislation() {
+        return legislationRepository.findAll().stream().map(LegislationEntity::toModel).toList();
+    }
+    public Legislation getLegislationById(int bill_id) {
+        return legislationRepository.getReferenceById(bill_id).toModel();
+    }
+
 }

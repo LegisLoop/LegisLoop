@@ -19,7 +19,7 @@ import java.util.List;
 public class RollCallEntity {
 
     @Id
-    private int roll_vall_id;
+    private int roll_call_id;
 
     @Column(name = "bill_id")
     private int bill_id;
@@ -59,7 +59,7 @@ public class RollCallEntity {
 
     public RollCall toModel() {
         return RollCall.builder()
-                .roll_call_id(this.roll_vall_id)
+                .roll_call_id(this.roll_call_id)
                 .bill_id(this.bill_id)
                 .date(this.date)
                 .yea(this.yea)

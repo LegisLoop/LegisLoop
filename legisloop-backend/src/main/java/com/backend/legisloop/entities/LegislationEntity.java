@@ -33,10 +33,10 @@ public class LegislationEntity {
     private String change_hash;
 
     @Column(name = "url")
-    private URI url; // LegiScan link
+    private String url; // LegiScan link
 
     @Column(name = "stateLink")
-    private URI stateLink;
+    private String stateLink;
 
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LegislationDocumentEntity> documents = new ArrayList<>();
@@ -63,8 +63,8 @@ public class LegislationEntity {
                 .title(this.title)
                 .description(this.description)
                 .summary(this.summary)
-                .url(this.url)
-                .stateLink(this.stateLink)
+                .url(URI.create(this.url))
+                .stateLink(URI.create(this.stateLink))
                 .documents(this.documents.stream().map(LegislationDocumentEntity::toModel).toList())
                 .sponsors(this.sponsors.stream().map(RepresentativeEntity::toModel).toList())
                 .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())

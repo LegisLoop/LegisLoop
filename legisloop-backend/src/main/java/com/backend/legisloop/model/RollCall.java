@@ -31,7 +31,7 @@ public class RollCall {
 
     public RollCallEntity toEntity() {
         return RollCallEntity.builder()
-                .roll_vall_id(this.roll_call_id)
+                .roll_call_id(this.roll_call_id)
                 .bill_id(this.bill_id)
                 .date(this.date)
                 .desc(this.desc)

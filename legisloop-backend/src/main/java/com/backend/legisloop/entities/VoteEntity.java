@@ -37,7 +37,7 @@ public class VoteEntity {
     public Vote toModel() {
         return Vote.builder()
                 .bill_id(this.bill.getBillId())
-                .roll_call_id(this.rollCall.getRollCallId())
+                .roll_call_id(this.rollCall.getRoll_call_id())
                 .vote_position(this.vote_position)
                 .build();
     }
