@@ -1,15 +1,10 @@
 package com.backend.legisloop.service;
 
 
-import com.backend.legisloop.entities.LegislationDocumentEntity;
-import com.backend.legisloop.entities.LegislationEntity;
-import com.backend.legisloop.entities.RepresentativeEntity;
-import com.backend.legisloop.entities.RollCallEntity;
+import com.backend.legisloop.entities.*;
+import com.backend.legisloop.enums.VotePosition;
 import com.backend.legisloop.model.LegiscanDataset;
-import com.backend.legisloop.repository.LegislationDocumentRepository;
-import com.backend.legisloop.repository.LegislationRepository;
-import com.backend.legisloop.repository.RepresentativeRepository;
-import com.backend.legisloop.repository.RollCallRepository;
+import com.backend.legisloop.repository.*;
 import com.backend.legisloop.util.Utils;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
@@ -40,6 +35,7 @@ public class InitializationService {
     private final RepresentativeRepository representativeRepository;
     private final LegislationDocumentRepository legislationDocumentRepository;
     private final RollCallRepository rollCallRepository;
+    private final VoteRepository voteRepository;
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
@@ -94,31 +90,32 @@ public class InitializationService {
                 .build();
 
         representativeRepository.saveAll(Arrays.asList(rep1, rep2));
-        
+
+        // Insert Roll Calls
         RollCallEntity rollCall1 = RollCallEntity.builder()
-        		.bill_id(101)
-        		.absent(1)
-        		.nv(2)
-        		.yea(3)
-        		.nay(4)
-        		.passed(false)
-        		.total(7)
-        		.desc("Baller vote")
-        		.roll_call_id(999)
-        		.build();
-        
+                .bill_id(101)
+                .absent(1)
+                .nv(2)
+                .yea(3)
+                .nay(4)
+                .passed(false)
+                .total(10)
+                .desc("Baller vote")
+                .roll_call_id(999)
+                .build();
+
         RollCallEntity rollCall2 = RollCallEntity.builder()
-        		.bill_id(101)
-        		.absent(5)
-        		.nv(6)
-        		.yea(7)
-        		.nay(8)
-        		.passed(false)
-        		.total(15)
-        		.desc("Mega baller vote")
-        		.roll_call_id(1000)
-        		.build();
-        
+                .bill_id(101)
+                .absent(5)
+                .nv(6)
+                .yea(7)
+                .nay(8)
+                .passed(false)
+                .total(20)
+                .desc("Mega baller vote")
+                .roll_call_id(1000)
+                .build();
+
         rollCallRepository.saveAll(Arrays.asList(rollCall1, rollCall2));
 
         // Insert Legislation
@@ -152,5 +149,36 @@ public class InitializationService {
                 .build();
 
         legislationDocumentRepository.save(document);
+
+        // Insert votes
+        VoteEntity vote1 = VoteEntity.builder()
+                .bill(legislation)
+                .rollCall(rollCall1)
+                .representative(rep1)
+                .vote_position(VotePosition.YEA)
+                .build();
+
+        VoteEntity vote2 = VoteEntity.builder()
+                .bill(legislation)
+                .rollCall(rollCall1)
+                .representative(rep2)
+                .vote_position(VotePosition.NAY)
+                .build();
+
+        VoteEntity vote3 = VoteEntity.builder()
+                .bill(legislation)
+                .rollCall(rollCall2)
+                .representative(rep1)
+                .vote_position(VotePosition.NV)
+                .build();
+
+        VoteEntity vote4 = VoteEntity.builder()
+                .bill(legislation)
+                .rollCall(rollCall2)
+                .representative(rep2)
+                .vote_position(VotePosition.ABSENT)
+                .build();
+
+        voteRepository.saveAll(Arrays.asList(vote1, vote2, vote3, vote4));
     }
 }
