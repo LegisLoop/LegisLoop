@@ -43,10 +43,6 @@ import java.util.*;
 public class BillService {
 
     private final LegislationRepository legislationRepository;
-    private final RepresentativeRepository representativeRepository;
-    private final LegislationDocumentRepository legislationDocumentRepository;
-    private final RollCallRepository rollCallRepository;
-    private final VoteRepository voteRepository;
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
@@ -186,6 +182,7 @@ public class BillService {
         }
         return legislation;
     }
+    
     private LegislationDocument getDocContent(LegislationDocument legislationDocument) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
@@ -211,88 +208,6 @@ public class BillService {
         }
         log.error("Failed to fetch bill text");
         return legislationDocument;
-    }
-
-    @PostConstruct
-    public void insertDummyData() {
-        // Insert Representatives
-        RepresentativeEntity rep1 = RepresentativeEntity.builder()
-                .peopleId(1)
-                .name("John Doe")
-                .party("Democrat")
-                .stateId(1)
-                .role("Senator")
-                .roleId(1)
-                .build();
-
-        RepresentativeEntity rep2 = RepresentativeEntity.builder()
-                .peopleId(2)
-                .name("Jane Smith")
-                .party("Republican")
-                .stateId(2)
-                .role("Representative")
-                .roleId(1)
-                .build();
-
-        representativeRepository.saveAll(Arrays.asList(rep1, rep2));
-        
-        RollCallEntity rollCall1 = RollCallEntity.builder()
-        		.bill_id(101)
-        		.absent(1)
-        		.nv(2)
-        		.yea(3)
-        		.nay(4)
-        		.passed(false)
-        		.total(7)
-        		.desc("Baller vote")
-        		.roll_call_id(999)
-        		.build();
-        
-        RollCallEntity rollCall2 = RollCallEntity.builder()
-        		.bill_id(101)
-        		.absent(5)
-        		.nv(6)
-        		.yea(7)
-        		.nay(8)
-        		.passed(false)
-        		.total(15)
-        		.desc("Mega baller vote")
-        		.roll_call_id(1000)
-        		.build();
-        
-        rollCallRepository.saveAll(Arrays.asList(rollCall1, rollCall2));
-
-        // Insert Legislation
-        LegislationEntity legislation = LegislationEntity.builder()
-                .billId(101)
-                .title("Clean Energy Act")
-                .description("A bill to promote renewable energy")
-                .summary("This bill provides incentives for clean energy projects.")
-                .change_hash("xyz123")
-                .url("https://example.com/legislation/101")
-                .stateLink("https://state.example.com/legislation/101")
-                .sponsors(List.of(rep1, rep2))
-                .endorsements(List.of(rep1))
-                .rollCalls(List.of(rollCall1, rollCall2))
-                .build();
-
-        legislationRepository.save(legislation);
-
-        // Insert Legislation Documents
-        LegislationDocumentEntity document = LegislationDocumentEntity.builder()
-                .docId(1)
-                .bill(legislation)
-                .textHash("doc_hash_123")
-                .legiscanLink(URI.create("https://example.com/document/1"))
-                .externalLink(URI.create("https://external.example.com/document/1"))
-                .mime("application/pdf")
-                .mimeId(1)
-                .docContent("Sample document content")
-                .type("Bill Text")
-                .typeId(101)
-                .build();
-
-        legislationDocumentRepository.save(document);
     }
 
     public List<Legislation> getAllLegislation() {
