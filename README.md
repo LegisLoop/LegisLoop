@@ -20,7 +20,6 @@ The following software should be installed to accommodate the environment.
 ## Backend (Spring Boot)
 - **JDK 21**: Can be done within intellij
 - **Maven**: [Download and install Maven](https://maven.apache.org/install.html)
-- **DATABASE**: To be determined 
 
 # Backend Setup
 ### Build and run 
@@ -40,12 +39,18 @@ To spin up only the database, run the following in the root project directory:
 ```bash
 docker-compose -f docker-compose-db.yaml up -d
 ```
-The database needs to be running before the backend starts otherwise it will throw an error. If there is an authentication error and the database is running, make sure that there isn't another process already running on port 5432. 
+The database needs to be running BEFORE the backend starts otherwise it will throw an error. If there is an authentication error and the database is running, make sure that there isn't another process already running on port 5432. 
 
 To start a shell session inside the db container, run the following: 
 ```bash
 docker exec -it postgres_container psql -U postgres -d legisloop
 ```
+
+To spin down the container, run the following: 
+```bash
+docker-compose down -v
+```
+The -v is important to remove the volume and ensure that there is no persistent data left over for a future run. Currently a way to check for existing data is not implemented, so spring boot will throw an error when it tries to automatically create the tables.
 
 # Frontent Setup 
 ### Install Dependencies
