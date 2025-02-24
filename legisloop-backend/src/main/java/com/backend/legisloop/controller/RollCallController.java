@@ -1,6 +1,7 @@
 package com.backend.legisloop.controller;
 
 import com.backend.legisloop.model.RollCall;
+import com.backend.legisloop.repository.RollCallRepository;
 import com.backend.legisloop.service.RollCallService;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RollCallController {
 	
     private final RollCallService rollCallService;
+    private final RollCallRepository rollCallRepository;
 
     @GetMapping("/getRollCall")
     public ResponseEntity<RollCall> getRollCallByID(@RequestParam int roll_call_id) throws UnirestException {
@@ -35,5 +37,9 @@ public class RollCallController {
     	log.info("{}", rollCalls);
     	return new ResponseEntity<>(rollCalls, HttpStatus.OK);
     }
-    
+
+    @GetMapping("/testRollCallDb")
+    public ResponseEntity<RollCall> testRollCallDb(@RequestParam int roll_call_id) throws UnirestException {
+        return new ResponseEntity<>(rollCallRepository.getReferenceById(roll_call_id).toModel(), HttpStatus.OK);
+    }
 }
