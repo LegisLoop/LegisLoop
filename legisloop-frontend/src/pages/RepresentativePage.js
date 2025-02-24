@@ -11,13 +11,11 @@ import NavBar from '../components/NavBar/NavBar';
 import Footer from '../components/Footer/Footer';
 import Timeline from '../components/Timeline/Timeline';
 import ProfileCard from "../components/Cards/ProfileCard";
-import StateSelectorBar from "../components/StateSelector/StateSelectorBar";
 
 function RepresentativePage() {
     return (
         <div>
             <NavBar />
-            <StateSelectorBar/>
             <main className="flex flex-col  py-10">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
