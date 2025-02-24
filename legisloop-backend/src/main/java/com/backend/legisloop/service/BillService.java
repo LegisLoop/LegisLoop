@@ -1,15 +1,7 @@
 package com.backend.legisloop.service;
 
-import com.backend.legisloop.entities.LegislationDocumentEntity;
 import com.backend.legisloop.entities.LegislationEntity;
-import com.backend.legisloop.entities.RepresentativeEntity;
-import com.backend.legisloop.entities.RollCallEntity;
-import com.backend.legisloop.entities.VoteEntity;
-import com.backend.legisloop.repository.LegislationDocumentRepository;
 import com.backend.legisloop.repository.LegislationRepository;
-import com.backend.legisloop.repository.RepresentativeRepository;
-import com.backend.legisloop.repository.RollCallRepository;
-import com.backend.legisloop.repository.VoteRepository;
 import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.LegislationDocument;
@@ -24,7 +16,6 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;

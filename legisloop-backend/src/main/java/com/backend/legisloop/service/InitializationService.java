@@ -10,7 +10,7 @@ import com.backend.legisloop.repository.LegislationDocumentRepository;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.repository.RepresentativeRepository;
 import com.backend.legisloop.repository.RollCallRepository;
-import com.backend.legisloop.repository.VoteRepository;
+import com.backend.legisloop.util.Utils;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
@@ -57,7 +57,7 @@ public class InitializationService {
             try {
                 Gson gson = new Gson();
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
-                checkLegiscanResponseStatus(jsonObject);
+                Utils.checkLegiscanResponseStatus(jsonObject);
 
                 JsonArray datasetList = jsonObject.get("datasetlist").getAsJsonArray();
                 Type listType = new TypeToken<List<LegiscanDataset>>() {}.getType();
@@ -69,14 +69,6 @@ public class InitializationService {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Failed to fetch bills, server responded with status: " + response.getStatus());
-        }
-    }
-
-    private void checkLegiscanResponseStatus(JsonObject response) {
-        if (response.has("status") && "ERROR".equals(response.get("status").getAsString())) {
-            String errorMessage = response.getAsJsonObject("alert").get("message").getAsString();
-            log.error("API Error: {}", errorMessage);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "API Error: " + errorMessage);
         }
     }
 
