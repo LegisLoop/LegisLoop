@@ -31,7 +31,7 @@ public class RepresentativeEntity {
     @Column(name = "party")
     private String party;
 
-    @Column(name = "roldId")
+    @Column(name = "roleId")
     private int roleId;
 
     @Column(name = "role")

@@ -44,7 +44,7 @@ public class LegislationEntity {
     @ManyToMany
     @JoinTable(
             name = "legislation_sponsors",
-            joinColumns = @JoinColumn(name = "bill_ii"),
+            joinColumns = @JoinColumn(name = "bill_id"),
             inverseJoinColumns = @JoinColumn(name = "people_id")
     )
     private List<RepresentativeEntity> sponsors = new ArrayList<>();
