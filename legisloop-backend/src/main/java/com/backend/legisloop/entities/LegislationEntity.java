@@ -1,6 +1,7 @@
 package com.backend.legisloop.entities;
 
 import com.backend.legisloop.model.Legislation;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -57,6 +58,14 @@ public class LegislationEntity {
     )
     private List<RepresentativeEntity> endorsements = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "legislation_roll_calls",
+            joinColumns = @JoinColumn(name = "bill_id"),
+            inverseJoinColumns = @JoinColumn(name = "roll_call_id")
+    )
+    private List<RollCallEntity> rollCalls = new ArrayList<>();
+
     public Legislation toModel() {
         return Legislation.builder()
                 .bill_id(this.billId)
@@ -68,6 +77,7 @@ public class LegislationEntity {
                 .documents(this.documents.stream().map(LegislationDocumentEntity::toModel).toList())
                 .sponsors(this.sponsors.stream().map(RepresentativeEntity::toModel).toList())
                 .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())
+                .roll_calls(this.rollCalls.stream().map(RollCallEntity::toModel).toList())
                 .build();
     }
 

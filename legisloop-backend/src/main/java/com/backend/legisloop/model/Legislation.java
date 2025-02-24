@@ -28,7 +28,7 @@ public class Legislation {
     private int session_id;
     private URI url; // legiscan link
     private URI stateLink;
-    private List<RollCall> votes;
+    private List<RollCall> roll_calls;
     private List<Representative> endorsements;
     public List<LegislationDocument> documents = new ArrayList<>();
 
@@ -44,6 +44,7 @@ public class Legislation {
                 .documents(this.documents != null ? this.documents.stream().map(LegislationDocument::toEntity).toList() : new ArrayList<>())
                 .sponsors(this.sponsors != null ? this.sponsors.stream().map(Representative::toEntity).toList() : new ArrayList<>())
                 .endorsements(this.endorsements != null ? this.endorsements.stream().map(Representative::toEntity).toList() : new ArrayList<>())
+                .rollCalls(this.roll_calls != null ? this.roll_calls.stream().map(RollCall::toEntity).toList() : new ArrayList<>())
                 .build();
     }
 
