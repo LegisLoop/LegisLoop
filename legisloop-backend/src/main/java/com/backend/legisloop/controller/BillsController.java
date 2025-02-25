@@ -35,10 +35,12 @@ public class BillsController {
                 .orElse(null);
         return new ResponseEntity<>(billService.getBill(legislationToFind), HttpStatus.OK);
     }
+    //TODO delete eventually
     @GetMapping("/testDb")
     public ResponseEntity<List<Legislation>> getAllLegislation() {
         return new ResponseEntity<>(billService.getAllLegislation(), HttpStatus.OK);
     }
+    //TODO delete eventually
     @GetMapping("/testDbId")
     public ResponseEntity<Legislation> getAllLegislation(@RequestParam int bill_id) {
         return new ResponseEntity<>(billService.getLegislationById(bill_id), HttpStatus.OK);

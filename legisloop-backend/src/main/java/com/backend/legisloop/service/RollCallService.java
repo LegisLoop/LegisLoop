@@ -106,7 +106,6 @@ public class RollCallService {
     	if (rollCallVotes != null) {
 	    	rollCallVotes.forEach(rollCallVote -> {
 	    		Vote vote = Vote.builder()
-	    				.bill_id(rollCall.getBill_id())
 	    				.roll_call_id(rollCall.getRoll_call_id())
 	    				.person_id(rollCallVote.getAsJsonObject().get("people_id").getAsInt())
 	    				.vote_position(VotePosition.fromVoteID(rollCallVote.getAsJsonObject().get("vote_id").getAsInt()))

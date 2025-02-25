@@ -91,8 +91,9 @@ public class InitializationService {
 
         representativeRepository.saveAll(Arrays.asList(rep1, rep2));
 
-        // Insert Roll Calls
+        // Insert and Save Roll Calls First
         RollCallEntity rollCall1 = RollCallEntity.builder()
+                .roll_call_id(98)
                 .bill_id(101)
                 .absent(1)
                 .nv(2)
@@ -101,10 +102,10 @@ public class InitializationService {
                 .passed(false)
                 .total(10)
                 .desc("Baller vote")
-                .roll_call_id(999)
                 .build();
 
         RollCallEntity rollCall2 = RollCallEntity.builder()
+                .roll_call_id(99)
                 .bill_id(101)
                 .absent(5)
                 .nv(6)
@@ -113,14 +114,17 @@ public class InitializationService {
                 .passed(false)
                 .total(20)
                 .desc("Mega baller vote")
-                .roll_call_id(1000)
                 .build();
 
         rollCallRepository.saveAll(Arrays.asList(rollCall1, rollCall2));
 
+        // Fetch roll calls again to ensure IDs are set
+        rollCall1 = rollCallRepository.findById(rollCall1.getRoll_call_id()).orElseThrow();
+        rollCall2 = rollCallRepository.findById(rollCall2.getRoll_call_id()).orElseThrow();
+
         // Insert Legislation
         LegislationEntity legislation = LegislationEntity.builder()
-                .billId(101)
+                .billId(100)
                 .title("Clean Energy Act")
                 .description("A bill to promote renewable energy")
                 .summary("This bill provides incentives for clean energy projects.")
@@ -150,35 +154,39 @@ public class InitializationService {
 
         legislationDocumentRepository.save(document);
 
-        // Insert votes
+        // Insert Votes After Roll Calls Exist
         VoteEntity vote1 = VoteEntity.builder()
-                .bill(legislation)
                 .rollCall(rollCall1)
                 .representative(rep1)
                 .vote_position(VotePosition.YEA)
                 .build();
 
         VoteEntity vote2 = VoteEntity.builder()
-                .bill(legislation)
                 .rollCall(rollCall1)
                 .representative(rep2)
                 .vote_position(VotePosition.NAY)
                 .build();
 
         VoteEntity vote3 = VoteEntity.builder()
-                .bill(legislation)
                 .rollCall(rollCall2)
                 .representative(rep1)
                 .vote_position(VotePosition.NV)
                 .build();
 
         VoteEntity vote4 = VoteEntity.builder()
-                .bill(legislation)
                 .rollCall(rollCall2)
                 .representative(rep2)
                 .vote_position(VotePosition.ABSENT)
                 .build();
 
+        // Associate Votes with Roll Calls
+        rollCall1.setVotes(Arrays.asList(vote1, vote2));
+        rollCall2.setVotes(Arrays.asList(vote3, vote4));
+
+        // Save Votes
         voteRepository.saveAll(Arrays.asList(vote1, vote2, vote3, vote4));
+
+        // Save Roll Calls Again to Update with Votes
+        rollCallRepository.saveAll(Arrays.asList(rollCall1, rollCall2));
     }
 }

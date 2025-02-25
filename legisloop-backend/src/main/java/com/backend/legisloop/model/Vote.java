@@ -18,13 +18,11 @@ import com.backend.legisloop.enums.VotePosition;
 public class Vote {
 
     private int roll_call_id;
-    private int bill_id;
     private int person_id;
     private VotePosition vote_position;
 
     public VoteEntity toEntity() {
         return VoteEntity.builder()
-                .bill(LegislationEntity.builder().billId(this.bill_id).build())
                 .rollCall(RollCallEntity.builder().roll_call_id(this.roll_call_id).build())
                 .representative(RepresentativeEntity.builder().peopleId(this.person_id).build())
                 .vote_position(this.vote_position)

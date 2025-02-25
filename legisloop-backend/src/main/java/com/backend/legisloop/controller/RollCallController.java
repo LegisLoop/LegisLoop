@@ -37,7 +37,7 @@ public class RollCallController {
     	log.info("{}", rollCalls);
     	return new ResponseEntity<>(rollCalls, HttpStatus.OK);
     }
-
+    //TODO delete eventually
     @GetMapping("/testRollCallDb")
     public ResponseEntity<RollCall> testRollCallDb(@RequestParam int roll_call_id) throws UnirestException {
         return new ResponseEntity<>(rollCallRepository.getReferenceById(roll_call_id).toModel(), HttpStatus.OK);

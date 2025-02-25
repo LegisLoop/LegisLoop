@@ -20,10 +20,6 @@ public class VoteEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "bill_id", nullable = false)
-    private LegislationEntity bill;
-
-    @ManyToOne
     @JoinColumn(name = "roll_call_id", nullable = false)
     private RollCallEntity rollCall;
 
@@ -36,7 +32,6 @@ public class VoteEntity {
 
     public Vote toModel() {
         return Vote.builder()
-                .bill_id(this.bill.getBillId())
                 .roll_call_id(this.rollCall.getRoll_call_id())
                 .vote_position(this.vote_position)
                 .build();

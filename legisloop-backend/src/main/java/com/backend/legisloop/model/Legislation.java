@@ -47,5 +47,4 @@ public class Legislation {
                 .rollCalls(this.roll_calls != null ? this.roll_calls.stream().map(RollCall::toEntity).toList() : new ArrayList<>())
                 .build();
     }
-
 }

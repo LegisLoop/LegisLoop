@@ -200,10 +200,11 @@ public class BillService {
         log.error("Failed to fetch bill text");
         return legislationDocument;
     }
-
+    //TODO delete eventually
     public List<Legislation> getAllLegislation() {
         return legislationRepository.findAll().stream().map(LegislationEntity::toModel).toList();
     }
+    //TODO delete eventually
     public Legislation getLegislationById(int bill_id) {
         return legislationRepository.getReferenceById(bill_id).toModel();
     }

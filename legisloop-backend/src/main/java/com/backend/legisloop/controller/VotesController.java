@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class VotesController {
     private final VoteRepository voteRepository;
-
+    //TODO delete eventually
     @GetMapping("/testVoteDb")
     public ResponseEntity<Vote> testVoteDb(@RequestParam Long vote_id) {
         return new ResponseEntity<>(voteRepository.getReferenceById(vote_id).toModel(), HttpStatus.OK);
