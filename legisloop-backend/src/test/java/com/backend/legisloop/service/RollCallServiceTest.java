@@ -98,7 +98,7 @@ class RollCallServiceTest {
         // Mock bill service response
         Legislation mockLegislation = new Legislation();
         mockLegislation.setBill_id(123);
-        mockLegislation.setVotes(Collections.emptyList());
+        mockLegislation.setRoll_calls(Collections.emptyList());
 
         when(billService.getBill(any(Legislation.class))).thenReturn(mockLegislation);
 

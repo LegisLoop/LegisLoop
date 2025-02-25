@@ -1,6 +1,7 @@
 package com.backend.legisloop.controller;
 
 import com.backend.legisloop.model.RollCall;
+import com.backend.legisloop.repository.RollCallRepository;
 import com.backend.legisloop.repository.UserRepository;
 import com.backend.legisloop.service.RollCallService;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,9 @@ class RollCallControllerTest {
     
     @MockBean
     private UserRepository userRepository; // Needed for any repository. Source: The Oracle ChatGPT
+    
+    @MockBean
+    private RollCallRepository rollCallReposity; // Needed for any repository. Source: The Oracle ChatGPT
 
     @Test
     void testGetRollCallByID_Success() throws Exception {

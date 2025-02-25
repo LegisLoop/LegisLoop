@@ -1,4 +1,4 @@
-package com.backend.legisloop;
+package com.backend.legisloop.util;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -9,6 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Utils {
+
+    private Utils() {
+        throw new IllegalStateException("Utility class");
+    }
 
 	public static void checkLegiscanResponseStatus(JsonObject response) {
         if (response.has("status") && "ERROR".equals(response.get("status").getAsString())) {

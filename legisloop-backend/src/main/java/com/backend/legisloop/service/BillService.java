@@ -1,6 +1,8 @@
 package com.backend.legisloop.service;
 
-import com.backend.legisloop.Utils;
+import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.repository.LegislationRepository;
+import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.LegislationDocument;
 import com.backend.legisloop.model.Representative;
@@ -14,6 +16,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,14 +26,14 @@ import org.springframework.web.server.ResponseStatusException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class BillService {
+
+    private final LegislationRepository legislationRepository;
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
@@ -99,7 +102,7 @@ public class BillService {
                 votesArray.forEach(roll_call -> {
                 	rollCalls.add(RollCallService.fillRecord(roll_call.getAsJsonObject()));
                 });
-                legislation.setVotes(rollCalls);
+                legislation.setRoll_calls(rollCalls);
 
                 textsArray.forEach(text -> {
                     LegislationDocument possibleNewLegislationDocument = LegislationDocument.builder()
@@ -170,6 +173,7 @@ public class BillService {
         }
         return legislation;
     }
+    
     private LegislationDocument getDocContent(LegislationDocument legislationDocument) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
@@ -196,4 +200,13 @@ public class BillService {
         log.error("Failed to fetch bill text");
         return legislationDocument;
     }
+    //TODO delete eventually
+    public List<Legislation> getAllLegislation() {
+        return legislationRepository.findAll().stream().map(LegislationEntity::toModel).toList();
+    }
+    //TODO delete eventually
+    public Legislation getLegislationById(int bill_id) {
+        return legislationRepository.getReferenceById(bill_id).toModel();
+    }
+
 }

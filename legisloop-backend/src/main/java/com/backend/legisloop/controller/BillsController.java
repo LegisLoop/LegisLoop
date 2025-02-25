@@ -1,5 +1,6 @@
 package com.backend.legisloop.controller;
 
+import com.backend.legisloop.entities.LegislationEntity;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.service.BillService;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -33,5 +34,15 @@ public class BillsController {
                 .findFirst()
                 .orElse(null);
         return new ResponseEntity<>(billService.getBill(legislationToFind), HttpStatus.OK);
+    }
+    //TODO delete eventually
+    @GetMapping("/testDb")
+    public ResponseEntity<List<Legislation>> getAllLegislation() {
+        return new ResponseEntity<>(billService.getAllLegislation(), HttpStatus.OK);
+    }
+    //TODO delete eventually
+    @GetMapping("/testDbId")
+    public ResponseEntity<Legislation> getAllLegislation(@RequestParam int bill_id) {
+        return new ResponseEntity<>(billService.getLegislationById(bill_id), HttpStatus.OK);
     }
 }

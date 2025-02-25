@@ -4,7 +4,7 @@ import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.RollCall;
 import com.backend.legisloop.model.Vote;
 import com.backend.legisloop.serial.BooleanSerializer;
-import com.backend.legisloop.Utils;
+import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.enums.VotePosition;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -75,7 +75,7 @@ public class RollCallService {
     
     public List<RollCall> getRollCallsForLegislation(Legislation legislation) throws UnirestException, URISyntaxException {
 		Legislation bill = billService.getBill(legislation);
-		return bill.getVotes();
+		return bill.getRoll_calls();
     }
     
     public List<RollCall> getRollCallsForLegislation(int bill_id) throws UnirestException, URISyntaxException {
@@ -106,7 +106,6 @@ public class RollCallService {
     	if (rollCallVotes != null) {
 	    	rollCallVotes.forEach(rollCallVote -> {
 	    		Vote vote = Vote.builder()
-	    				.bill_id(rollCall.getBill_id())
 	    				.roll_call_id(rollCall.getRoll_call_id())
 	    				.person_id(rollCallVote.getAsJsonObject().get("people_id").getAsInt())
 	    				.vote_position(VotePosition.fromVoteID(rollCallVote.getAsJsonObject().get("vote_id").getAsInt()))
