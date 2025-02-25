@@ -2,6 +2,7 @@ package com.backend.legisloop.service;
 
 
 import com.backend.legisloop.entities.*;
+import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.enums.VotePosition;
 import com.backend.legisloop.model.LegiscanDataset;
 import com.backend.legisloop.repository.*;
@@ -21,8 +22,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.plaf.nimbus.State;
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,31 +45,46 @@ public class InitializationService {
     @Value("${legiscan.base.url}")
     private String url;
 
-    public List<LegiscanDataset> getDatasetListByState(String state) throws UnirestException {
-        HttpResponse<JsonNode> response = Unirest.get(url + "/")
-                .queryString("key", API_KEY)
-                .queryString("op", "getDatasetList")
-                .queryString("state", state)
-                .asJson();
+    public List<LegiscanDataset> getDatasetListByYear(int year) {
 
-        if (response.getStatus() == 200) {
+        StateEnum[] states = StateEnum.values();
+        List<LegiscanDataset> datasetList = new ArrayList<>();
+        Gson gson = new Gson();
+
+        for (StateEnum state : states) {
             try {
-                Gson gson = new Gson();
-                JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
-                Utils.checkLegiscanResponseStatus(jsonObject);
+                HttpResponse<JsonNode> response = Unirest.get(url + "/")
+                        .queryString("key", API_KEY)
+                        .queryString("op", "getDatasetList")
+                        .queryString("state", state.name())
+                        .queryString("year", year)
+                        .asJson();
 
-                JsonArray datasetList = jsonObject.get("datasetlist").getAsJsonArray();
-                Type listType = new TypeToken<List<LegiscanDataset>>() {}.getType();
-                return gson.fromJson(datasetList, listType);
-            } catch (Exception e) {
-                log.error(e.getMessage());
-                throw e;
+                if (response.getStatus() == 200) {
+                    try {
+                        JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+                        Utils.checkLegiscanResponseStatus(jsonObject);
+
+                        JsonArray stateDataset = jsonObject.getAsJsonArray("datasetlist");
+                        Type listType = new TypeToken<List<LegiscanDataset>>() {}.getType();
+                        datasetList.addAll(gson.fromJson(stateDataset, listType));
+                    } catch (JsonSyntaxException | IllegalStateException e) {
+                        log.error("Error parsing JSON response: {}", e.getMessage(), e);
+                    }
+                } else {
+                    log.error("Failed to fetch bills for state: {}, year: {}. Server responded with status: {}",
+                            state, year, response.getStatus());
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Failed to fetch bills, server responded with status: " + response.getStatus());
+                }
+            } catch (UnirestException e) {
+                log.error("Error making API request for state: {}, year: {} - {}", state, year, e.getMessage(), e);
             }
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Failed to fetch bills, server responded with status: " + response.getStatus());
         }
+
+        return datasetList;
     }
+
 
     @PostConstruct
     public void insertDummyData() {
