@@ -5,6 +5,7 @@ import com.backend.legisloop.entities.*;
 import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.enums.VotePosition;
 import com.backend.legisloop.model.LegiscanDataset;
+import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.repository.*;
 import com.backend.legisloop.util.Utils;
 import com.google.gson.*;
@@ -83,6 +84,32 @@ public class InitializationService {
         }
 
         return datasetList;
+    }
+
+    public LegiscanDataset getDatasetByAccessKeyAndSession(int sessionId, String accessKey) throws UnirestException {
+        HttpResponse<JsonNode> response = Unirest.get(url + "/")
+                .queryString("key", API_KEY)
+                .queryString("op", "getDataset")
+                .queryString("id", sessionId)
+                .queryString("access_key", accessKey)
+                .asJson();
+
+        if (response.getStatus() == 200) {
+            try {
+                Gson gson = new Gson();
+                JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+                Utils.checkLegiscanResponseStatus(jsonObject);
+
+                JsonObject stateDataset = jsonObject.getAsJsonObject("dataset");
+                return gson.fromJson(stateDataset, LegiscanDataset.class);
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw e;
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Failed to fetch bills, server responded with status: " + response.getStatus());
+        }
     }
 
 

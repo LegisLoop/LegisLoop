@@ -15,4 +15,5 @@ public class LegiscanDataset {
     private int session_id;
     private int state_id;
     private String access_key;
+    private String zip;
 }
