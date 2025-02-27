@@ -12,7 +12,7 @@ function SearchBar() {
             <div
                 className='flex w-full bg-gray-100 px-4 py-2 rounded outline outline-transparent border
                 focus-within:border-custom-cyan focus-within:bg-transparent transition-all'>
-                <input type='text' placeholder='Search your address...'
+                <input type='text' placeholder='Search for legislation...'
                        className='w-full text-sm bg-transparent rounded outline-none pr-2'/>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192.904 192.904" width="20px"
                      className="cursor-pointer fill-custom-cyan">

@@ -8,13 +8,32 @@
  ***************************************************************/
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
-import UnderConstruction from "../components/UnderConstruction/UnderConstruction";
+import PostCard from "../components/Cards/PostCard";
+import ConnectSideBar from "../components/SideBar/ConnectSideBar";
+
 function ConnectPage() {
     return (
         <>
-            <NavBar/>
-            <UnderConstruction/>
-            <Footer/>
+            <NavBar />
+            <div className="flex flex-col md:flex-row">
+                {/* Sticky Sidebar */}
+                <div className="w-15/100 min-w-[250px]">
+                    <ConnectSideBar/>
+                </div>
+
+                {/* Post Section */}
+                <div className="w-full md:w-3/4 lg:w-4/5 p-2 space-y-4">
+                    <PostCard
+                        username="username"
+                        date="mm-dd-yyyy"
+                        title="Title of Post"
+                        body="This is the body of the post. People can express their opinions and things"/>
+                    <PostCard />
+                    <PostCard />
+                    <PostCard />
+                </div>
+            </div>
+            <Footer />
         </>
     );
 }

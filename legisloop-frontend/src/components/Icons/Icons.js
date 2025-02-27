@@ -25,9 +25,10 @@ export const CompassIcon = () => (
     </svg>
 );
 
-export const MapPinIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-         strokeWidth="1.5" stroke="currentColor" className="size-8 text-custom-red">
+export const MapPinIcon = ({className= ""}) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+         strokeWidth="1.5" stroke="currentColor" className={`size-8 ${className}`}>
         <path strokeLinecap="round" strokeLinejoin="round"
               d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
         <path strokeLinecap="round" strokeLinejoin="round"
@@ -50,8 +51,9 @@ export const LibraryIcon = () => (
     </svg>
 );
 
-export const MapIcon = () => (
-    <svg className="size-6 "
+export const MapIcon = ({className= ""}) => (
+    <svg
+        className={`size-6 ${className}`}
          viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none"
          strokeLinecap="round" strokeLinejoin="round">
         <path stroke="none" d="M0 0h24v24H0z"/>
@@ -69,9 +71,10 @@ export const BuildingIcon = () => (
     </svg>
 );
 
-export const FilterIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-         strokeWidth="1.5" stroke="currentColor" className="size-8 text-custom-red">
+export const FilterIcon = ({className = ""}) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+         strokeWidth="1.5" stroke="currentColor" className={`size-8 ${className}`}>
         <path strokeLinecap="round" strokeLinejoin="round"
               d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z"/>
     </svg>
@@ -194,14 +197,21 @@ export const CalendarEventIcon = () => (
     </svg>
 );
 
-// export const InformationCircleIcon = () => (
-//     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"
-//          className="size-2">
-//         <path strokeLinecap="round" strokeLinejoin="round"
-//               d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 5.25h.008v.008H12v-.008Z"/>
-//     </svg>
-//
-// );
+export const AdjustmentsIcon = ({className=""}) => (
+    <svg className={`size-8 ${className}`} width="24" height="24" viewBox="0 0 24 24" strokeWidth="2"
+         stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z"/>
+        <circle cx="6" cy="10" r="2"/>
+        <line x1="6" y1="4" x2="6" y2="8"/>
+        <line x1="6" y1="12" x2="6" y2="20"/>
+        <circle cx="12" cy="16" r="2"/>
+        <line x1="12" y1="4" x2="12" y2="14"/>
+        <line x1="12" y1="18" x2="12" y2="20"/>
+        <circle cx="18" cy="7" r="2"/>
+        <line x1="18" y1="4" x2="18" y2="5"/>
+        <line x1="18" y1="9" x2="18" y2="20"/>
+    </svg>
+);
 
 export const GitHubIcon = () => (
     <svg
@@ -277,6 +287,16 @@ export const DocumentTextIcon = () => (
               d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
     </svg>
 
+);
+
+export const ArrowUpRightCircleIcon = () => (
+    <svg className="size-6 " width="24" height="24" viewBox="0 0 24 24" strokeWidth="2"
+         stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z"/>
+        <circle cx="12" cy="12" r="9"/>
+        <line x1="15" y1="9" x2="9" y2="15"/>
+        <polyline points="15 15 15 9 9 9"/>
+    </svg>
 );
 
 export const LegisLoopLogo = (props) => (
