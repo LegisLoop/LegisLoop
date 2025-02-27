@@ -16,6 +16,7 @@ function RepresentativeSideBar() {
     const [selectedCounty, setSelectedCounty] = useState("");
     const [isLocationOpen, setIsLocationOpen] = useState(true);
     const [isLevelOpen, setIsLevelOpen] = useState(false);
+    const [, setIsLocalOpen] = useState(false);
 
     const states = [
         "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware",
