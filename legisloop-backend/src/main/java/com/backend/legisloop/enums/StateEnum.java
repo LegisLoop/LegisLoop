@@ -87,4 +87,3 @@ public enum StateEnum {
         throw new IllegalArgumentException(stateID + " does not match any known state_id");
     }
 }
-	

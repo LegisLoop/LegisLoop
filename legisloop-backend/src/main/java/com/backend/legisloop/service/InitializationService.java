@@ -140,7 +140,7 @@ public class InitializationService {
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
             LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
-            legislationEntity.setState(StateEnum.fromStateID(legislationJson.getAsJsonObject("state_id").getAsInt()));
+            legislationEntity.setState(StateEnum.fromStateID(legislationJson.get("state_id").getAsInt()));
 
             legislationToAdd.add(legislationEntity);
         });

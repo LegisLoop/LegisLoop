@@ -1,5 +1,9 @@
 package com.backend.legisloop.enums;
 
+import com.backend.legisloop.service.InitializationService;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * An enum to relate vote_id's from LegiScan to their string representation.
  */
