@@ -6,7 +6,10 @@ import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.enums.VotePosition;
 import com.backend.legisloop.model.LegiscanDataset;
 import com.backend.legisloop.model.Legislation;
+import com.backend.legisloop.model.Vote;
 import com.backend.legisloop.repository.*;
+import com.backend.legisloop.serial.BooleanSerializer;
+import com.backend.legisloop.util.DatasetUtils;
 import com.backend.legisloop.util.Utils;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
@@ -24,11 +27,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.swing.plaf.nimbus.State;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -112,26 +117,81 @@ public class InitializationService {
         }
     }
 
+    public boolean initializeDb() throws UnirestException, IOException {
+        List<LegiscanDataset> datasetList = getDatasetListByYear(2025);
+        LegiscanDataset legiscanDataset = datasetList.get(0);
 
-    @PostConstruct
+        LegiscanDataset encodedZip = getDatasetByAccessKeyAndSession(legiscanDataset.getSession_id(), legiscanDataset.getAccess_key());
+
+        Map<String, List<JsonObject>> dataMap = DatasetUtils.unzipJsonFiles(encodedZip.getZip());
+        Gson gson = new Gson();
+        // map and save representatives first
+        List<JsonObject> representativeData = dataMap.get("people");
+        List<RepresentativeEntity> representativesToAdd = new ArrayList<>();
+        representativeData.forEach(representative -> {
+            JsonObject representativeJson = representative.getAsJsonObject("person");
+            representativesToAdd.add(gson.fromJson(representativeJson, RepresentativeEntity.class));
+        });
+        representativeRepository.saveAll(representativesToAdd);
+
+        // map and save legislation
+        List<JsonObject> legislationData = dataMap.get("bill");
+        List<LegislationEntity> legislationToAdd = new ArrayList<>();
+        legislationData.forEach(legislation -> {
+            JsonObject legislationJson = legislation.getAsJsonObject("bill");
+            legislationToAdd.add(gson.fromJson(legislationJson, LegislationEntity.class));
+        });
+        legislationRepository.saveAll(legislationToAdd);
+
+        // map and save roll calls/votes
+        List<JsonObject> rollCallData = dataMap.get("vote");
+        rollCallData.forEach(rollCall -> {
+            JsonObject rollCallJson = rollCall.getAsJsonObject("roll_call");
+            RollCallEntity rollCallToAdd = new GsonBuilder()
+                    .setDateFormat("yyyy-mm-dd")
+                    .registerTypeAdapter(boolean.class, new BooleanSerializer())
+                    .create()
+                    .fromJson(rollCallJson, RollCallEntity.class);
+
+            JsonArray votesArray = rollCall.getAsJsonObject("roll_call").getAsJsonArray("votes");
+            List<VoteEntity> votesToAdd = new ArrayList<>();
+            if (votesArray != null) {
+                votesArray.forEach(rollCallVote -> {
+                    VoteEntity vote = VoteEntity.builder()
+                            .rollCall(rollCallToAdd)
+                            .representative(RepresentativeEntity.builder().people_id(rollCallVote.getAsJsonObject().get("people_id").getAsInt()).build())
+                            .vote_position(VotePosition.fromVoteID(rollCallVote.getAsJsonObject().get("vote_id").getAsInt()))
+                            .build();
+
+                    votesToAdd.add(vote);
+                });
+            }
+
+            rollCallToAdd.setVotes(votesToAdd);
+            rollCallRepository.save(rollCallToAdd);
+        });
+        return true;
+    }
+
+
     public void insertDummyData() {
         // Insert Representatives
         RepresentativeEntity rep1 = RepresentativeEntity.builder()
-                .peopleId(1)
+                .people_id(1)
                 .name("John Doe")
                 .party("Democrat")
-                .stateId(1)
+                .state_id(1)
                 .role("Senator")
-                .roleId(1)
+                .role_id(1)
                 .build();
 
         RepresentativeEntity rep2 = RepresentativeEntity.builder()
-                .peopleId(2)
+                .people_id(2)
                 .name("Jane Smith")
                 .party("Republican")
-                .stateId(2)
+                .state_id(2)
                 .role("Representative")
-                .roleId(1)
+                .role_id(1)
                 .build();
 
         representativeRepository.saveAll(Arrays.asList(rep1, rep2));
@@ -169,7 +229,7 @@ public class InitializationService {
 
         // Insert Legislation
         LegislationEntity legislation = LegislationEntity.builder()
-                .billId(100)
+                .bill_id(100)
                 .title("Clean Energy Act")
                 .description("A bill to promote renewable energy")
                 .summary("This bill provides incentives for clean energy projects.")

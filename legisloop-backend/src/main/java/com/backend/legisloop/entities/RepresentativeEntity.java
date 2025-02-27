@@ -17,22 +17,22 @@ import java.util.List;
 public class RepresentativeEntity {
 
     @Id
-    private int peopleId;
+    private int people_id;
 
-    @Column(name = "personHash")
-    private String personHash;
+    @Column(name = "person_hash")
+    private String person_hash;
 
-    @Column(name = "partyId")
-    private int partyId;
+    @Column(name = "party_id")
+    private int party_id;
 
-    @Column(name = "stateId")
-    private int stateId;
+    @Column(name = "state_id")
+    private int state_id;
 
     @Column(name = "party")
     private String party;
 
-    @Column(name = "roleId")
-    private int roleId;
+    @Column(name = "role_id")
+    private int role_id;
 
     @Column(name = "role")
     private String role;
@@ -40,26 +40,26 @@ public class RepresentativeEntity {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "firstName")
-    private String firstName;
+    @Column(name = "first_name")
+    private String first_name;
 
-    @Column(name = "middleName")
-    private String middleName;
+    @Column(name = "middle_name")
+    private String middle_name;
 
-    @Column(name = "lastName")
-    private String lastName;
+    @Column(name = "last_name")
+    private String last_name;
 
     @Column(name = "district")
     private String district;
 
-    @Column(name = "ftmEid")
-    private int ftmEid;
+    @Column(name = "ftm_eid")
+    private int ftm_eid;
 
-    @Column(name = "votesmartId")
-    private int votesmartId;
+    @Column(name = "votesmart_id")
+    private int votesmart_id;
 
-    @Column(name = "knowwhoPid")
-    private int knowwhoPid;
+    @Column(name = "knowwho_pid")
+    private int knowwho_pid;
 
     @ManyToMany(mappedBy = "sponsors")
     private List<LegislationEntity> sponsoredBills = new ArrayList<>();
@@ -69,21 +69,21 @@ public class RepresentativeEntity {
 
     public Representative toModel() {
         return Representative.builder()
-                .people_id(this.peopleId)
-                .person_hash(this.personHash)
-                .party_id(this.partyId)
-                .state_id(this.stateId)
+                .people_id(this.people_id)
+                .person_hash(this.person_hash)
+                .party_id(this.party_id)
+                .state_id(this.state_id)
                 .party(this.party)
-                .role_id(this.roleId)
+                .role_id(this.role_id)
                 .role(this.role)
                 .name(this.name)
-                .first_name(this.firstName)
-                .middle_name(this.middleName)
-                .last_name(this.lastName)
+                .first_name(this.first_name)
+                .middle_name(this.middle_name)
+                .last_name(this.last_name)
                 .district(this.district)
-                .ftm_eid(this.ftmEid)
-                .votesmart_id(this.votesmartId)
-                .knowwho_pid(this.knowwhoPid)
+                .ftm_eid(this.ftm_eid)
+                .votesmart_id(this.votesmart_id)
+                .knowwho_pid(this.knowwho_pid)
                 .build();
     }
 

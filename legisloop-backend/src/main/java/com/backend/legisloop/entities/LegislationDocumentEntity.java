@@ -48,7 +48,7 @@ public class LegislationDocumentEntity {
     public LegislationDocument toModel() {
         return LegislationDocument.builder()
                 .docId(this.docId)
-                .billId(this.bill.getBillId())
+                .billId(this.bill.getBill_id())
                 .textHash(this.textHash)
                 .legiscanLink(this.legiscanLink)
                 .externalLink(this.externalLink)

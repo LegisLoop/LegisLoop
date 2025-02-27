@@ -1,5 +1,6 @@
 package com.backend.legisloop.entities;
 
+import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.model.Legislation;
 
 import jakarta.persistence.*;
@@ -19,12 +20,12 @@ import java.util.List;
 public class LegislationEntity {
 
     @Id
-    private int billId;
+    private int bill_id;
 
     @Column(name = "title")
     private String title;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "summary")
@@ -66,9 +67,12 @@ public class LegislationEntity {
     )
     private List<RollCallEntity> rollCalls = new ArrayList<>();
 
+    @Column(name = "state")
+    private StateEnum state;
+
     public Legislation toModel() {
         return Legislation.builder()
-                .bill_id(this.billId)
+                .bill_id(this.bill_id)
                 .title(this.title)
                 .description(this.description)
                 .summary(this.summary)
@@ -78,6 +82,7 @@ public class LegislationEntity {
                 .sponsors(this.sponsors.stream().map(RepresentativeEntity::toModel).toList())
                 .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())
                 .roll_calls(this.rollCalls.stream().map(RollCallEntity::toModel).toList())
+                .state(this.state)
                 .build();
     }
 

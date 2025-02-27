@@ -41,7 +41,7 @@ public class DatasetUtils {
                         baos.write(buffer, 0, len);
                     }
                     // Convert the entry's bytes into a UTF-8 string
-                    String jsonString = baos.toString(StandardCharsets.UTF_8.name());
+                    String jsonString = baos.toString(StandardCharsets.UTF_8);
                     // Parse the string into a JsonObject
                     JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
                     
