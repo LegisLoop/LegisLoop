@@ -139,7 +139,10 @@ public class InitializationService {
         List<LegislationEntity> legislationToAdd = new ArrayList<>();
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
-            legislationToAdd.add(gson.fromJson(legislationJson, LegislationEntity.class));
+            LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
+            legislationEntity.setState(StateEnum.fromStateID(legislationJson.getAsJsonObject("state_id").getAsInt()));
+
+            legislationToAdd.add(legislationEntity);
         });
         legislationRepository.saveAll(legislationToAdd);
 
@@ -235,7 +238,7 @@ public class InitializationService {
                 .summary("This bill provides incentives for clean energy projects.")
                 .change_hash("xyz123")
                 .url("https://example.com/legislation/101")
-                .stateLink("https://state.example.com/legislation/101")
+                .state_link("https://state.example.com/legislation/101")
                 .sponsors(List.of(rep1, rep2))
                 .endorsements(List.of(rep1))
                 .rollCalls(List.of(rollCall1, rollCall2))

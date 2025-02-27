@@ -42,7 +42,7 @@ public class Legislation {
                 .summary(this.summary)
                 .change_hash(this.change_hash)
                 .url(this.url.toString())
-                .stateLink(this.stateLink.toString())
+                .state_link(this.stateLink.toString())
                 .documents(this.documents != null ? this.documents.stream().map(LegislationDocument::toEntity).toList() : new ArrayList<>())
                 .sponsors(this.sponsors != null ? this.sponsors.stream().map(Representative::toEntity).toList() : new ArrayList<>())
                 .endorsements(this.endorsements != null ? this.endorsements.stream().map(Representative::toEntity).toList() : new ArrayList<>())

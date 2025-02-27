@@ -37,8 +37,8 @@ public class LegislationEntity {
     @Column(name = "url")
     private String url; // LegiScan link
 
-    @Column(name = "stateLink")
-    private String stateLink;
+    @Column(name = "state_link")
+    private String state_link;
 
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LegislationDocumentEntity> documents = new ArrayList<>();
@@ -77,7 +77,7 @@ public class LegislationEntity {
                 .description(this.description)
                 .summary(this.summary)
                 .url(URI.create(this.url))
-                .stateLink(URI.create(this.stateLink))
+                .stateLink(URI.create(this.state_link))
                 .documents(this.documents.stream().map(LegislationDocumentEntity::toModel).toList())
                 .sponsors(this.sponsors.stream().map(RepresentativeEntity::toModel).toList())
                 .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())
