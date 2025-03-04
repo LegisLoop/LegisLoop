@@ -76,6 +76,36 @@ public class BillService {
         }
     }
 
+    public List<Legislation> getMasterListChange(String state) throws UnirestException {
+
+        HttpResponse<JsonNode> response = Unirest.get(url + "/")
+                .queryString("key", API_KEY)
+                .queryString("op", "getMasterListRaw")
+                .queryString("state", state)
+                .asJson();
+
+        if (response.getStatus() == 200) {
+            try {
+                Gson gson = new Gson();
+                JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+                Utils.checkLegiscanResponseStatus(jsonObject);
+
+                JsonObject masterlistObject = jsonObject.getAsJsonObject("masterlist");
+
+                Type mapType = new TypeToken<Map<String, Legislation>>() {}.getType();
+                Map<String, Legislation> billsMap = gson.fromJson(masterlistObject, mapType);
+
+                return new ArrayList<>(billsMap.values());
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw e;
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Failed to fetch bills, server responded with status: " + response.getStatus());
+        }
+    }
+
     /**
      * Get a complete {@link Legislation} from a 'stub' (presumably from {@link #getMasterList(String)}).
      * @param legislation The {@link Legislation} with, at minimum, a filled {@link Legislation#bill_id}
@@ -95,19 +125,28 @@ public class BillService {
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 Utils.checkLegiscanResponseStatus(jsonObject);
 
-                JsonArray textsArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("texts");
-                JsonArray sponsorsArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("sponsors");
-                JsonArray votesArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("votes");
+                Gson gson = new Gson();
+                JsonObject billObject = jsonObject.getAsJsonObject("bill");
+
+                Legislation incomingLegislation = gson.fromJson(billObject, Legislation.class);
+                final Legislation effectiveLegislation = 
+                	    (incomingLegislation.getChange_hash() != legislation.getChange_hash()) 
+                	        ? incomingLegislation 
+                	        : legislation;
+
+                JsonArray textsArray = billObject.getAsJsonArray("texts");
+                JsonArray sponsorsArray = billObject.getAsJsonArray("sponsors");
+                JsonArray votesArray = billObject.getAsJsonArray("votes");
                 
                 List<RollCall> rollCalls = new ArrayList<RollCall>();
                 votesArray.forEach(roll_call -> {
                 	rollCalls.add(RollCallService.fillRecord(roll_call.getAsJsonObject()));
                 });
-                legislation.setRoll_calls(rollCalls);
+                effectiveLegislation.setRoll_calls(rollCalls);
 
                 textsArray.forEach(text -> {
                     LegislationDocument possibleNewLegislationDocument = LegislationDocument.builder()
-                            .billId(legislation.getBill_id())
+                            .billId(effectiveLegislation.getBill_id())
                             .textHash(text.getAsJsonObject().get("text_hash").getAsString())
                             .legiscanLink(URI.create(text.getAsJsonObject().get("url").getAsString()))
                             .externalLink(URI.create(text.getAsJsonObject().get("state_link").getAsString()))
@@ -118,25 +157,25 @@ public class BillService {
                             .typeId(text.getAsJsonObject().get("type_id").getAsInt())
                             .build();
 
-                    List<LegislationDocument> documents = legislation.getDocuments();
+                    List<LegislationDocument> documents = effectiveLegislation.getDocuments();
                     boolean replacedDoc = false;
                     if (documents != null) {
 	                    for (LegislationDocument document : documents) {
 	                        if (document.getDocId() == possibleNewLegislationDocument.getDocId()) {
 	                            if (Objects.equals(document.getTextHash(), possibleNewLegislationDocument.getTextHash())) break;
-	                            legislation.documents.remove(document);
-	                            legislation.documents.add(possibleNewLegislationDocument); // TODO: Should refetech the doc content for this doc
+	                            effectiveLegislation.documents.remove(document);
+	                            effectiveLegislation.documents.add(possibleNewLegislationDocument); // TODO: Should refetech the doc content for this doc
 	                            replacedDoc = true;
 	                            break;
 	                        }
 	                    }
 	
-	                    if (!replacedDoc) legislation.documents.add(possibleNewLegislationDocument);
+	                    if (!replacedDoc) effectiveLegislation.documents.add(possibleNewLegislationDocument);
                     }
 
                 });
                 
-                List<Representative> billSponsors = legislation.getSponsors();
+                List<Representative> billSponsors = effectiveLegislation.getSponsors();
                 if (billSponsors != null) {
 	                sponsorsArray.forEach(sponsor -> {
 	                    int peopleId = sponsor.getAsJsonObject().get("people_id").getAsInt();
@@ -163,10 +202,12 @@ public class BillService {
 	                });
                 }
                 
-                legislation.setStateLink(new URI(jsonObject.getAsJsonObject("bill").get("state_link").getAsString()));
+                effectiveLegislation.setStateLink(new URI(jsonObject.getAsJsonObject("bill").get("state_link").getAsString()));
 
                 int stateId = Integer.parseInt(jsonObject.getAsJsonObject("bill").get("state_id").getAsString());
-                legislation.setState(StateEnum.fromStateID(stateId));
+                effectiveLegislation.setState(StateEnum.fromStateID(stateId));
+                
+                legislation = effectiveLegislation;
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw e;
