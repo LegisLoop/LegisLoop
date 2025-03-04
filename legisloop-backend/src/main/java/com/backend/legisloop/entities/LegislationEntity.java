@@ -22,7 +22,7 @@ public class LegislationEntity {
     @Id
     private int bill_id;
 
-    @Column(name = "title")
+    @Column(name = "title", columnDefinition = "TEXT")
     private String title;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -31,7 +31,7 @@ public class LegislationEntity {
     @Column(name = "summary")
     private String summary;
 
-    @Column(name = "change_hash")
+    @Column(name = "change_hash", columnDefinition = "TEXT")
     private String change_hash;
 
     @Column(name = "url")
@@ -59,12 +59,7 @@ public class LegislationEntity {
     )
     private List<RepresentativeEntity> endorsements = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "legislation_roll_calls",
-            joinColumns = @JoinColumn(name = "bill_id"),
-            inverseJoinColumns = @JoinColumn(name = "roll_call_id")
-    )
+   @OneToMany(mappedBy = "legislation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RollCallEntity> rollCalls = new ArrayList<>();
 
     @Column(name = "state")

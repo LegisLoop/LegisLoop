@@ -6,6 +6,7 @@ import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.enums.VotePosition;
 import com.backend.legisloop.model.LegiscanDataset;
 import com.backend.legisloop.model.Legislation;
+import com.backend.legisloop.model.RollCall;
 import com.backend.legisloop.model.Vote;
 import com.backend.legisloop.repository.*;
 import com.backend.legisloop.serial.BooleanSerializer;
@@ -24,16 +25,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.swing.plaf.nimbus.State;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -116,17 +116,37 @@ public class InitializationService {
                     "Failed to fetch bills, server responded with status: " + response.getStatus());
         }
     }
-
-    public boolean initializeDb() throws UnirestException, IOException {
+    public String initializeDbFromLegisacn() throws UnirestException, IOException {
+        //TODO: Should fetch for all states
         List<LegiscanDataset> datasetList = getDatasetListByYear(2025);
         LegiscanDataset legiscanDataset = datasetList.get(0);
 
         LegiscanDataset encodedZip = getDatasetByAccessKeyAndSession(legiscanDataset.getSession_id(), legiscanDataset.getAccess_key());
 
         Map<String, List<JsonObject>> dataMap = DatasetUtils.unzipJsonFiles(encodedZip.getZip());
+
+        saveDataFromZip(dataMap);
+
+        return "Initialized from API data";
+    }
+    public String initializeDbFromFilesystem(String filePath) throws IOException {
+        File zipFile = new File(filePath);
+        if (!zipFile.exists() || !zipFile.isFile()) {
+            throw new IllegalArgumentException("ZIP file not found at: " + filePath);
+        }
+
+        Map<String, List<JsonObject>> dataMap = DatasetUtils.unzipJsonFilesFromFile(zipFile);
+
+        saveDataFromZip(dataMap);
+
+        return "Initialized from ZIP file in filesystem";
+    }
+
+    private void saveDataFromZip(Map<String, List<JsonObject>> dataMap) {
         Gson gson = new Gson();
-        // map and save representatives first
-        List<JsonObject> representativeData = dataMap.get("people");
+
+        // Save Representatives
+        List<JsonObject> representativeData = dataMap.getOrDefault("people", Collections.emptyList());
         List<RepresentativeEntity> representativesToAdd = new ArrayList<>();
         representativeData.forEach(representative -> {
             JsonObject representativeJson = representative.getAsJsonObject("person");
@@ -134,35 +154,37 @@ public class InitializationService {
         });
         representativeRepository.saveAll(representativesToAdd);
 
-        // map and save legislation
-        List<JsonObject> legislationData = dataMap.get("bill");
+        // Save Legislation
+        List<JsonObject> legislationData = dataMap.getOrDefault("bill", Collections.emptyList());
         List<LegislationEntity> legislationToAdd = new ArrayList<>();
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
             LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
             legislationEntity.setState(StateEnum.fromStateID(legislationJson.get("state_id").getAsInt()));
-
             legislationToAdd.add(legislationEntity);
         });
         legislationRepository.saveAll(legislationToAdd);
 
-        // map and save roll calls/votes
-        List<JsonObject> rollCallData = dataMap.get("vote");
+        // Save Roll Calls and Votes
+        List<JsonObject> rollCallData = dataMap.getOrDefault("vote", Collections.emptyList());
         rollCallData.forEach(rollCall -> {
             JsonObject rollCallJson = rollCall.getAsJsonObject("roll_call");
             RollCallEntity rollCallToAdd = new GsonBuilder()
-                    .setDateFormat("yyyy-mm-dd")
+                    .setDateFormat("yyyy-MM-dd")
                     .registerTypeAdapter(boolean.class, new BooleanSerializer())
                     .create()
-                    .fromJson(rollCallJson, RollCallEntity.class);
+                    .fromJson(rollCallJson, RollCall.class)
+                    .toEntity();
 
-            JsonArray votesArray = rollCall.getAsJsonObject("roll_call").getAsJsonArray("votes");
+            JsonArray votesArray = rollCallJson.getAsJsonArray("votes");
             List<VoteEntity> votesToAdd = new ArrayList<>();
             if (votesArray != null) {
                 votesArray.forEach(rollCallVote -> {
                     VoteEntity vote = VoteEntity.builder()
                             .rollCall(rollCallToAdd)
-                            .representative(RepresentativeEntity.builder().people_id(rollCallVote.getAsJsonObject().get("people_id").getAsInt()).build())
+                            .representative(RepresentativeEntity.builder()
+                                    .people_id(rollCallVote.getAsJsonObject().get("people_id").getAsInt())
+                                    .build())
                             .vote_position(VotePosition.fromVoteID(rollCallVote.getAsJsonObject().get("vote_id").getAsInt()))
                             .build();
 
@@ -173,7 +195,6 @@ public class InitializationService {
             rollCallToAdd.setVotes(votesToAdd);
             rollCallRepository.save(rollCallToAdd);
         });
-        return true;
     }
 
 
@@ -202,7 +223,6 @@ public class InitializationService {
         // Insert and Save Roll Calls First
         RollCallEntity rollCall1 = RollCallEntity.builder()
                 .roll_call_id(98)
-                .bill_id(101)
                 .absent(1)
                 .nv(2)
                 .yea(3)
@@ -214,7 +234,6 @@ public class InitializationService {
 
         RollCallEntity rollCall2 = RollCallEntity.builder()
                 .roll_call_id(99)
-                .bill_id(101)
                 .absent(5)
                 .nv(6)
                 .yea(7)

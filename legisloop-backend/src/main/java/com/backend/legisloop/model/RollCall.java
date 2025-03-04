@@ -1,5 +1,6 @@
 package com.backend.legisloop.model;
 
+import com.backend.legisloop.entities.LegislationEntity;
 import com.backend.legisloop.entities.RollCallEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,13 +27,11 @@ public class RollCall {
     private int total;
     private boolean passed;
     private List<Vote> votes;
-    private URI url; // legiscan link
-    private URI state_link;
 
     public RollCallEntity toEntity() {
         return RollCallEntity.builder()
                 .roll_call_id(this.roll_call_id)
-                .bill_id(this.bill_id)
+                .legislation(LegislationEntity.builder().bill_id(this.bill_id).build())
                 .date(this.date)
                 .desc(this.desc)
                 .yea(this.yea)
@@ -41,10 +40,7 @@ public class RollCall {
                 .absent(this.absent)
                 .total(this.total)
                 .passed(this.passed)
-                .url(this.url)
-                .state_link(this.state_link != null ? this.state_link : null)
                 .votes(this.votes != null ? this.votes.stream().map(Vote::toEntity).toList() : new ArrayList<>())
                 .build();
     }
-
 }
