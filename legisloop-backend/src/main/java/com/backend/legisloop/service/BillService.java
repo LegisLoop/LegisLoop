@@ -142,9 +142,10 @@ public class BillService {
                 votesArray.forEach(roll_call -> {
                 	rollCalls.add(RollCallService.fillRecord(roll_call.getAsJsonObject()));
                 });
-                effectiveLegislation.setRoll_calls(rollCalls);
+                effectiveLegislation.setRoll_calls(rollCalls); // TODO: Add these to the repository
 
                 textsArray.forEach(text -> {
+                	// TODO: Refactor this shit as GSON or a fill_record (or both!)
                     LegislationDocument possibleNewLegislationDocument = LegislationDocument.builder()
                             .billId(effectiveLegislation.getBill_id())
                             .textHash(text.getAsJsonObject().get("text_hash").getAsString())
@@ -164,13 +165,13 @@ public class BillService {
 	                        if (document.getDocId() == possibleNewLegislationDocument.getDocId()) {
 	                            if (Objects.equals(document.getTextHash(), possibleNewLegislationDocument.getTextHash())) break;
 	                            effectiveLegislation.documents.remove(document);
-	                            effectiveLegislation.documents.add(possibleNewLegislationDocument); // TODO: Should refetech the doc content for this doc
+	                            effectiveLegislation.documents.add(possibleNewLegislationDocument); // TODO: Fetch the actual doc content for this doc before adding it
 	                            replacedDoc = true;
 	                            break;
 	                        }
 	                    }
 	
-	                    if (!replacedDoc) effectiveLegislation.documents.add(possibleNewLegislationDocument);
+	                    if (!replacedDoc) effectiveLegislation.documents.add(possibleNewLegislationDocument); // TODO: Add this document to the repository
                     }
 
                 });
@@ -181,6 +182,8 @@ public class BillService {
 	                    int peopleId = sponsor.getAsJsonObject().get("people_id").getAsInt();
 	                    boolean exists = billSponsors.stream().anyMatch(rep -> rep.getPeople_id() == peopleId);
 	                    if (!exists) {
+	                    	// TODO: Refactor this shit as GSON or a fill_record (or both!)
+	                    	// TODO: I think this is missing middle_name, suffix, etc., giving more necessity to the refactor!
 	                        Representative representativeToAdd = Representative.builder()
 	                                .people_id(sponsor.getAsJsonObject().get("people_id").getAsInt())
 	                                .person_hash(sponsor.getAsJsonObject().get("person_hash").getAsString())
@@ -197,7 +200,7 @@ public class BillService {
 	                                .votesmart_id(sponsor.getAsJsonObject().get("votesmart_id").getAsInt())
 	                                .knowwho_pid(sponsor.getAsJsonObject().get("knowwho_pid").getAsInt())
 	                                .build();
-	                        billSponsors.add(representativeToAdd);
+	                        billSponsors.add(representativeToAdd); // TODO: Update this with RepresentativeService.update(representativeToAdd, fromTheDBrep)
 	                    }
 	                });
                 }
@@ -207,7 +210,7 @@ public class BillService {
                 int stateId = Integer.parseInt(jsonObject.getAsJsonObject("bill").get("state_id").getAsString());
                 effectiveLegislation.setState(StateEnum.fromStateID(stateId));
                 
-                legislation = effectiveLegislation;
+                legislation = effectiveLegislation; // TODO: Make an update function for legislation.
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw e;

@@ -10,11 +10,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.entities.RepresentativeEntity;
 import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.model.Legislation;
+import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.repository.RepresentativeRepository;
 import com.backend.legisloop.service.BillService;
+import com.backend.legisloop.service.RepresentativeService;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 import lombok.RequiredArgsConstructor;
@@ -27,12 +30,16 @@ public class UpdateDatabaseTasks {
 
 
     private final LegislationRepository legislationRepository;
+    private final RepresentativeRepository representativeRepository;
     private final BillService billService;
+    private final RepresentativeService representativeService;
 	
 	@Scheduled(timeUnit = TimeUnit.HOURS,
 			fixedRate = 1,
 			initialDelay = 1)
 	public void updateLegislation() throws UnirestException, URISyntaxException {
+		
+		log.info("Updating legislation...");
 		
 		List<LegislationEntity> toSave = new ArrayList<LegislationEntity>();
 		
@@ -61,6 +68,28 @@ public class UpdateDatabaseTasks {
 		}
 		
 		legislationRepository.saveAll(toSave);
+		log.info("Done updating legislation, {} updates.", toSave.size());
+	}
+	
+	@Scheduled(timeUnit = TimeUnit.DAYS,
+			fixedRate = 7,
+			initialDelay = 7)
+	public void updatePeople() throws UnirestException {
+		
+		log.info("Updating legislators...");
+		
+		int added = 0;
+		List<RepresentativeEntity> allLegislators = representativeRepository.findAll();
+		
+		for (RepresentativeEntity representativeDatabase : allLegislators) {
+			Representative representativeFresh = representativeService.update(representativeDatabase.toModel());
+			if (representativeFresh.getPerson_hash() != representativeDatabase.getPerson_hash()) {
+				added++;
+			}
+		}
+		
+		log.info("Done updating legislators, {} updates.", added);
+		
 	}
 
 }
