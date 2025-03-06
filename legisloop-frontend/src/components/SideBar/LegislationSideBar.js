@@ -2,7 +2,7 @@
  * LegisLoop
  * All rights reserved (c) 2025 - GNU General Public License v3.0
  ****************************************************************
- * SideBar declaration.
+ * LegislationSideBar declaration.
  ****************************************************************
  * Last Updated: February 19, 2025.
  ***************************************************************/
@@ -27,7 +27,7 @@ import {
 } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
 
-function SideBar() {
+function LegislationSideBar() {
     const [activeLevel, setActiveLevel] = useState("Federal");
     const [activePolicy, setActivePolicy] = useState(null);
     const [isLevelOpen, setIsLevelOpen] = useState(true);
@@ -47,7 +47,7 @@ function SideBar() {
                 className="relative flex h-full w-full max-w-[20rem] flex-col bg-white bg-clip-border p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 z-9">
 
                     <div className="flex items-center gap-2 p-4">
-                        <CompassIcon />
+                        <CompassIcon/>
                         <Tooltip text="Use this sidebar to filter and explore legislation by government level and policy area." position="bottom">
                         <h5 className="text-xl font-sans font-semibold leading-snug text-blue-gray-900 cursor-pointer">
                             Legislative Explorer
@@ -63,7 +63,7 @@ function SideBar() {
                             <button type="button" onClick={() => setIsLevelOpen(!isLevelOpen)}
                                     className="flex items-center justify-between w-full p-3 font-sans text-xl antialiased font-semibold leading-snug text-left transition-all duration-300 ease-in-out border-b-0 select-none border-b-blue-gray-100 text-blue-gray-700 hover:bg-gray-200">
                                 <div className="grid mr-4 place-items-center">
-                                    <MapPinIcon/>
+                                    <MapPinIcon className="text-custom-red"/>
                                 </div>
                                 <p className="block mr-auto font-sans text-base antialiased font-bold leading-relaxed text-blue-gray-900">
                                     Government Level
@@ -106,7 +106,7 @@ function SideBar() {
                             <button type="button" onClick={() => setIsPolicyOpen(!isPolicyOpen)}
                                     className="flex items-center justify-between w-full p-3 font-sans text-xl antialiased font-semibold leading-snug text-left transition-all duration-300 ease-in-out border-b-0 select-none border-b-blue-gray-100 text-blue-gray-700 hover:bg-gray-200">
                                 <div className="grid mr-4 place-items-center">
-                                    <FilterIcon/>
+                                    <FilterIcon className="text-custom-red"/>
                                 </div>
                                 <p className="block mr-auto font-sans text-base antialiased font-bold leading-relaxed text-blue-gray-900">
                                     Policy Areas
@@ -158,4 +158,4 @@ function SideBar() {
     );
 }
 
-export default SideBar;
+export default LegislationSideBar;

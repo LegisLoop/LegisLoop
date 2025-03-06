@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.sql.Date;
 import java.util.List;
@@ -20,9 +21,6 @@ public class RollCallEntity {
 
     @Id
     private int roll_call_id;
-
-    @Column(name = "bill_id")
-    private int bill_id;
 
     @Column(name = "date")
     private Date date;
@@ -48,19 +46,17 @@ public class RollCallEntity {
     @Column(name = "passed")
     private boolean passed;
 
-    @Column(name = "url")
-    private URI url;
-
-    @Column(name = "state_link")
-    private URI state_link;
-
     @OneToMany(mappedBy = "rollCall", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VoteEntity> votes = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "bill_id", nullable = false)
+    private LegislationEntity legislation;
 
     public RollCall toModel() {
         return RollCall.builder()
                 .roll_call_id(this.roll_call_id)
-                .bill_id(this.bill_id)
+                .bill_id(this.legislation.getBill_id())
                 .date(this.date)
                 .yea(this.yea)
                 .nay(this.nay)
@@ -68,8 +64,6 @@ public class RollCallEntity {
                 .absent(this.absent)
                 .total(this.total)
                 .passed(this.passed)
-                .url(this.url)
-                .state_link(this.state_link)
                 .votes(this.votes.stream().map(VoteEntity::toModel).toList())
                 .build();
     }

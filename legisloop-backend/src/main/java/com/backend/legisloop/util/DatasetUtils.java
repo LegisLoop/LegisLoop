@@ -3,10 +3,9 @@ package com.backend.legisloop.util;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -20,46 +19,60 @@ public class DatasetUtils {
 
     private static final Gson gson = new Gson();
 
+    /**
+     * Unzips and organizes JSON files from a Base64 encoded ZIP file.
+     *
+     * @param base64Zip The Base64 encoded ZIP content.
+     * @return A map where keys are directory names ("bill", "people", "vote"),
+     *         and values are lists of parsed JSON objects.
+     * @throws IOException If an error occurs during file processing.
+     */
     public static Map<String, List<JsonObject>> unzipJsonFiles(String base64Zip) throws IOException {
-        // Decode the Base64 encoded ZIP content to bytes
         byte[] zipBytes = Base64.getDecoder().decode(base64Zip);
+        return processZipInputStream(new ZipInputStream(new ByteArrayInputStream(zipBytes)));
+    }
+    public static Map<String, List<JsonObject>> unzipJsonFilesFromFile(File file) throws IOException {
+        try (FileInputStream fis = new FileInputStream(file);
+             ZipInputStream zis = new ZipInputStream(fis)) {
+            return processZipInputStream(zis);
+        }
+    }
+
+    /**
+     * Processes a ZIP input stream, extracting and categorizing JSON files.
+     *
+     * @param zis The ZipInputStream to process.
+     * @return A map where keys are directory names ("bill", "people", "vote"),
+     *         and values are lists of parsed JSON objects.
+     * @throws IOException If an error occurs during file processing.
+     */
+    private static Map<String, List<JsonObject>> processZipInputStream(ZipInputStream zis) throws IOException {
         Map<String, List<JsonObject>> directoryJsonMap = new HashMap<>();
+        ZipEntry entry;
 
-        try (ByteArrayInputStream bais = new ByteArrayInputStream(zipBytes);
-             ZipInputStream zis = new ZipInputStream(bais)) {
+        while ((entry = zis.getNextEntry()) != null) {
+            if (!entry.isDirectory() && entry.getName().endsWith(".json")) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    baos.write(buffer, 0, len);
+                }
 
-            ZipEntry entry;
-            // Iterate through all entries in the ZIP file
-            while ((entry = zis.getNextEntry()) != null) {
-                // Only process files (ignore directories) and those ending with .json
-                if (!entry.isDirectory() && entry.getName().endsWith(".json")) {
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    int len;
-                    // Read the contents of the current entry
-                    while ((len = zis.read(buffer)) > 0) {
-                        baos.write(buffer, 0, len);
-                    }
-                    // Convert the entry's bytes into a UTF-8 string
-                    String jsonString = baos.toString(StandardCharsets.UTF_8);
-                    // Parse the string into a JsonObject
-                    JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-                    
-                    // Split the entry path by "/" and extract the directory name.
-                    // Expected structure: STATE/SESSION/directory/FILENAME.json
-                    String[] pathParts = entry.getName().split("/");
-                    if (pathParts.length >= 3) {
-                        String directory = pathParts[2]; // "bill", "people", or "vote"
-                        // Add the JsonObject to the corresponding list in the map
-                        directoryJsonMap
+                String jsonString = baos.toString(StandardCharsets.UTF_8);
+                JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+
+                // Extract directory name from ZIP structure (STATE/SESSION/directory/FILENAME.json)
+                String[] pathParts = entry.getName().split("/");
+                if (pathParts.length >= 3) {
+                    String directory = pathParts[2]; // e.g., "bill", "people", "vote"
+                    directoryJsonMap
                             .computeIfAbsent(directory, k -> new ArrayList<>())
                             .add(jsonObject);
-                    }
                 }
-                zis.closeEntry();
             }
+            zis.closeEntry();
         }
-
         return directoryJsonMap;
     }
 }

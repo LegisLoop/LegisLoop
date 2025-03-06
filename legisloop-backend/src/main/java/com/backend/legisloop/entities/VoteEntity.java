@@ -34,6 +34,7 @@ public class VoteEntity {
         return Vote.builder()
                 .roll_call_id(this.rollCall.getRoll_call_id())
                 .vote_position(this.vote_position)
+                .person_id(representative.getPeople_id())
                 .build();
     }
 
