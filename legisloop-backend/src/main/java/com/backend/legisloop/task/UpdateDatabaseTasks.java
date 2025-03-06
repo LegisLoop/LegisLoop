@@ -45,7 +45,7 @@ public class UpdateDatabaseTasks {
 					
 					LegislationEntity legislationEntity = legislation.get();
 					if (legislationStub.getChange_hash() == legislationEntity.getChange_hash()) {	// Nothing has changed.
-						break;
+						continue;
 					}
 					
 					log.debug("We have bill_id {} with changehash {}, but upstream changhash is {}", 
@@ -59,6 +59,8 @@ public class UpdateDatabaseTasks {
 				}
 			}
 		}
+		
+		legislationRepository.saveAll(toSave);
 	}
 
 }

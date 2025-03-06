@@ -101,4 +101,28 @@ class UpdateDatabaseTest {
 		// Then
 		verify(billService, times(StateEnum.values().length)).getMasterListChange(any());
 	}
+
+	@Test
+	void whenMultipleBillsExist_shouldProcessAllBills() throws Exception {
+		// Given
+		Legislation secondLegislation = new Legislation();
+		secondLegislation.setBill_id(2);
+		secondLegislation.setChange_hash("hash2");
+
+		LegislationEntity secondEntity = new LegislationEntity();
+		secondEntity.setBill_id(2);
+		secondEntity.setChange_hash("oldHash2");
+
+		when(billService.getMasterListChange(any())).thenReturn(Arrays.asList(testLegislation, secondLegislation));
+		when(legislationRepository.findById(1)).thenReturn(Optional.of(testEntity));
+		when(legislationRepository.findById(2)).thenReturn(Optional.of(secondEntity));
+		when(billService.getBill(secondLegislation)).thenReturn(secondLegislation);
+
+		// When
+		updateDatabaseTasks.updateLegislation();
+
+		// Then
+		verify(billService, times(StateEnum.values().length)).getBill(any());
+		verify(legislationRepository, times(1)).saveAll(any());
+	}
 }
