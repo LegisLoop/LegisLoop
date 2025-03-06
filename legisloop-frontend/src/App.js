@@ -12,6 +12,7 @@ import LegislationPage from "./pages/LegislationPage";
 import SpendingPage from "./pages/SpendingPage";
 import RepresentativePage from "./pages/RepresentativePage";
 import ConnectPage from "./pages/ConnectPage";
+import FindYourRepresentativesPage from "./pages/FindYourRepresentativePage";
 
 function App() {
   return (
@@ -20,7 +21,8 @@ function App() {
               <Route path="/" element={<LandingPage/>} />
               <Route path="/legislation" element={<LegislationPage/>} />
               <Route path="/spending" element={<SpendingPage/>} />
-              <Route path="/representatives" element={<RepresentativePage/>} />
+              <Route path="/findrepresentatives" element={<FindYourRepresentativesPage/>} />
+              <Route path="/representative/:name" element={<RepresentativePage/>}/>
               <Route path="/connect" element={<ConnectPage/>} />
           </Routes>
       </Router>

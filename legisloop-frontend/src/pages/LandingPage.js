@@ -8,9 +8,9 @@
  ***************************************************************/
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
-import SideBar from "../components/SideBar/SideBar";
-import LegislationPreviewCard from "../components/BillComponents/LegislationPreviewCard";
-import EventCard from "../components/BillComponents/EventCard";
+import LegislationSideBar from "../components/SideBar/LegislationSideBar";
+import LegislationPreviewCard from "../components/Cards/LegislationPreviewCard";
+import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
 import Tooltip from "../components/ToolTips/ToolTip";
 
@@ -20,7 +20,7 @@ function LandingPage() {
             <NavBar/>
             <div className="flex min-h-screen">
                 <div className="w-15/100 min-w-[250px]">
-                    <SideBar/>
+                    <LegislationSideBar/>
                 </div>
                 <div className="flex-1 w-3/5 p-6 space-y-6">
                     <div className="border-b-2 border-gray-300 pb-4 mb-4">

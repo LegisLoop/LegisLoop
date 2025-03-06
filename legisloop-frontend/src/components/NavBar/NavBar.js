@@ -8,21 +8,25 @@
  ***************************************************************/
 import { Link, useLocation } from "react-router-dom";
 import SearchBar from "../SearchBar/SearchBar";
+import {LegisLoopLogo} from "../Icons/Icons";
 
 function NavBar() {
     const location = useLocation();
 
     const navItems = [
-        { path: "/", label: "LegisLoop" },
+        { path: "/", label: "LegisLoop"},
         { path: "/legislation", label: "Legislation" },
         { path: "/spending", label: "See Government Spending" },
-        { path: "/representatives", label: "Find Your Representatives" },
+        { path: "/findrepresentatives", label: "Find Your Representatives" },
         { path: "/connect", label: "Connect" }
     ];
 
     return (
         <nav className="flex items-center justify-between font-sans bg-custom-blue text-[#fff6ec] h-16 sticky top-0 left-0 right-0 z-10 px-6 shadow-md shadow-blue-gray-900/5">
             <div className="flex items-center justify-center">
+                <Link to="/" className="flex items-center space-x-2">
+                    <LegisLoopLogo className="size-11 mr-6"/>
+                </Link>
                 <ul className="hidden md:flex space-x-6">
                     {navItems.slice(0, 4).map((item) => (
                         <li key={item.path} className="relative">
