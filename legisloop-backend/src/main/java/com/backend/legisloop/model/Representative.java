@@ -30,21 +30,21 @@ public class Representative {
 
     public RepresentativeEntity toEntity() {
         return RepresentativeEntity.builder()
-                .peopleId(this.people_id)
-                .personHash(this.person_hash)
-                .partyId(this.party_id)
-                .stateId(this.state_id)
+                .people_id(this.people_id)
+                .person_hash(this.person_hash)
+                .party_id(this.party_id)
+                .state_id(this.state_id)
                 .party(this.party)
-                .roleId(this.role_id)
+                .role_id(this.role_id)
                 .role(this.role)
                 .name(this.name)
-                .firstName(this.first_name)
-                .middleName(this.middle_name)
-                .lastName(this.last_name)
+                .first_name(this.first_name)
+                .middle_name(this.middle_name)
+                .last_name(this.last_name)
                 .district(this.district)
-                .ftmEid(this.ftm_eid)
-                .votesmartId(this.votesmart_id)
-                .knowwhoPid(this.knowwho_pid)
+                .ftm_eid(this.ftm_eid)
+                .votesmart_id(this.votesmart_id)
+                .knowwho_pid(this.knowwho_pid)
                 .build();
     }
 

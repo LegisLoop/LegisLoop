@@ -1,6 +1,7 @@
 package com.backend.legisloop.service;
 
 import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.model.Legislation;
@@ -163,6 +164,9 @@ public class BillService {
                 }
                 
                 legislation.setStateLink(new URI(jsonObject.getAsJsonObject("bill").get("state_link").getAsString()));
+
+                int stateId = Integer.parseInt(jsonObject.getAsJsonObject("bill").get("state_id").getAsString());
+                legislation.setState(StateEnum.fromStateID(stateId));
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw e;

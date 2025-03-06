@@ -24,7 +24,7 @@ public class Vote {
     public VoteEntity toEntity() {
         return VoteEntity.builder()
                 .rollCall(RollCallEntity.builder().roll_call_id(this.roll_call_id).build())
-                .representative(RepresentativeEntity.builder().peopleId(this.person_id).build())
+                .representative(RepresentativeEntity.builder().people_id(this.person_id).build())
                 .vote_position(this.vote_position)
                 .build();
     }

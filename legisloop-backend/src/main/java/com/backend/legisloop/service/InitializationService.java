@@ -2,9 +2,15 @@ package com.backend.legisloop.service;
 
 
 import com.backend.legisloop.entities.*;
+import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.enums.VotePosition;
 import com.backend.legisloop.model.LegiscanDataset;
+import com.backend.legisloop.model.Legislation;
+import com.backend.legisloop.model.RollCall;
+import com.backend.legisloop.model.Vote;
 import com.backend.legisloop.repository.*;
+import com.backend.legisloop.serial.BooleanSerializer;
+import com.backend.legisloop.util.DatasetUtils;
 import com.backend.legisloop.util.Utils;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
@@ -19,12 +25,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.swing.plaf.nimbus.State;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -42,11 +51,52 @@ public class InitializationService {
     @Value("${legiscan.base.url}")
     private String url;
 
-    public List<LegiscanDataset> getDatasetListByState(String state) throws UnirestException {
+    public List<LegiscanDataset> getDatasetListByYear(int year) {
+
+        StateEnum[] states = StateEnum.values();
+        List<LegiscanDataset> datasetList = new ArrayList<>();
+        Gson gson = new Gson();
+
+        for (StateEnum state : states) {
+            try {
+                HttpResponse<JsonNode> response = Unirest.get(url + "/")
+                        .queryString("key", API_KEY)
+                        .queryString("op", "getDatasetList")
+                        .queryString("state", state.name())
+                        .queryString("year", year)
+                        .asJson();
+
+                if (response.getStatus() == 200) {
+                    try {
+                        JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+                        Utils.checkLegiscanResponseStatus(jsonObject);
+
+                        JsonArray stateDataset = jsonObject.getAsJsonArray("datasetlist");
+                        Type listType = new TypeToken<List<LegiscanDataset>>() {}.getType();
+                        datasetList.addAll(gson.fromJson(stateDataset, listType));
+                    } catch (JsonSyntaxException | IllegalStateException e) {
+                        log.error("Error parsing JSON response: {}", e.getMessage(), e);
+                    }
+                } else {
+                    log.error("Failed to fetch bills for state: {}, year: {}. Server responded with status: {}",
+                            state, year, response.getStatus());
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                            "Failed to fetch bills, server responded with status: " + response.getStatus());
+                }
+            } catch (UnirestException e) {
+                log.error("Error making API request for state: {}, year: {} - {}", state, year, e.getMessage(), e);
+            }
+        }
+
+        return datasetList;
+    }
+
+    public LegiscanDataset getDatasetByAccessKeyAndSession(int sessionId, String accessKey) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
-                .queryString("op", "getDatasetList")
-                .queryString("state", state)
+                .queryString("op", "getDataset")
+                .queryString("id", sessionId)
+                .queryString("access_key", accessKey)
                 .asJson();
 
         if (response.getStatus() == 200) {
@@ -55,9 +105,8 @@ public class InitializationService {
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 Utils.checkLegiscanResponseStatus(jsonObject);
 
-                JsonArray datasetList = jsonObject.get("datasetlist").getAsJsonArray();
-                Type listType = new TypeToken<List<LegiscanDataset>>() {}.getType();
-                return gson.fromJson(datasetList, listType);
+                JsonObject stateDataset = jsonObject.getAsJsonObject("dataset");
+                return gson.fromJson(stateDataset, LegiscanDataset.class);
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw e;
@@ -67,26 +116,106 @@ public class InitializationService {
                     "Failed to fetch bills, server responded with status: " + response.getStatus());
         }
     }
+    public String initializeDbFromLegisacn() throws UnirestException, IOException {
+        //TODO: Should fetch for all states
+        List<LegiscanDataset> datasetList = getDatasetListByYear(2025);
+        LegiscanDataset legiscanDataset = datasetList.get(0);
 
-    @PostConstruct
+        LegiscanDataset encodedZip = getDatasetByAccessKeyAndSession(legiscanDataset.getSession_id(), legiscanDataset.getAccess_key());
+
+        Map<String, List<JsonObject>> dataMap = DatasetUtils.unzipJsonFiles(encodedZip.getZip());
+
+        saveDataFromZip(dataMap);
+
+        return "Initialized from API data";
+    }
+    public String initializeDbFromFilesystem(String filePath) throws IOException {
+        File zipFile = new File(filePath);
+        if (!zipFile.exists() || !zipFile.isFile()) {
+            throw new IllegalArgumentException("ZIP file not found at: " + filePath);
+        }
+
+        Map<String, List<JsonObject>> dataMap = DatasetUtils.unzipJsonFilesFromFile(zipFile);
+
+        saveDataFromZip(dataMap);
+
+        return "Initialized from ZIP file in filesystem";
+    }
+
+    private void saveDataFromZip(Map<String, List<JsonObject>> dataMap) {
+        Gson gson = new Gson();
+
+        // Save Representatives
+        List<JsonObject> representativeData = dataMap.getOrDefault("people", Collections.emptyList());
+        List<RepresentativeEntity> representativesToAdd = new ArrayList<>();
+        representativeData.forEach(representative -> {
+            JsonObject representativeJson = representative.getAsJsonObject("person");
+            representativesToAdd.add(gson.fromJson(representativeJson, RepresentativeEntity.class));
+        });
+        representativeRepository.saveAll(representativesToAdd);
+
+        // Save Legislation
+        List<JsonObject> legislationData = dataMap.getOrDefault("bill", Collections.emptyList());
+        List<LegislationEntity> legislationToAdd = new ArrayList<>();
+        legislationData.forEach(legislation -> {
+            JsonObject legislationJson = legislation.getAsJsonObject("bill");
+            LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
+            legislationEntity.setState(StateEnum.fromStateID(legislationJson.get("state_id").getAsInt()));
+            legislationToAdd.add(legislationEntity);
+        });
+        legislationRepository.saveAll(legislationToAdd);
+
+        // Save Roll Calls and Votes
+        List<JsonObject> rollCallData = dataMap.getOrDefault("vote", Collections.emptyList());
+        rollCallData.forEach(rollCall -> {
+            JsonObject rollCallJson = rollCall.getAsJsonObject("roll_call");
+            RollCallEntity rollCallToAdd = new GsonBuilder()
+                    .setDateFormat("yyyy-MM-dd")
+                    .registerTypeAdapter(boolean.class, new BooleanSerializer())
+                    .create()
+                    .fromJson(rollCallJson, RollCall.class)
+                    .toEntity();
+
+            JsonArray votesArray = rollCallJson.getAsJsonArray("votes");
+            List<VoteEntity> votesToAdd = new ArrayList<>();
+            if (votesArray != null) {
+                votesArray.forEach(rollCallVote -> {
+                    VoteEntity vote = VoteEntity.builder()
+                            .rollCall(rollCallToAdd)
+                            .representative(RepresentativeEntity.builder()
+                                    .people_id(rollCallVote.getAsJsonObject().get("people_id").getAsInt())
+                                    .build())
+                            .vote_position(VotePosition.fromVoteID(rollCallVote.getAsJsonObject().get("vote_id").getAsInt()))
+                            .build();
+
+                    votesToAdd.add(vote);
+                });
+            }
+
+            rollCallToAdd.setVotes(votesToAdd);
+            rollCallRepository.save(rollCallToAdd);
+        });
+    }
+
+
     public void insertDummyData() {
         // Insert Representatives
         RepresentativeEntity rep1 = RepresentativeEntity.builder()
-                .peopleId(1)
+                .people_id(1)
                 .name("John Doe")
                 .party("Democrat")
-                .stateId(1)
+                .state_id(1)
                 .role("Senator")
-                .roleId(1)
+                .role_id(1)
                 .build();
 
         RepresentativeEntity rep2 = RepresentativeEntity.builder()
-                .peopleId(2)
+                .people_id(2)
                 .name("Jane Smith")
                 .party("Republican")
-                .stateId(2)
+                .state_id(2)
                 .role("Representative")
-                .roleId(1)
+                .role_id(1)
                 .build();
 
         representativeRepository.saveAll(Arrays.asList(rep1, rep2));
@@ -94,7 +223,6 @@ public class InitializationService {
         // Insert and Save Roll Calls First
         RollCallEntity rollCall1 = RollCallEntity.builder()
                 .roll_call_id(98)
-                .bill_id(101)
                 .absent(1)
                 .nv(2)
                 .yea(3)
@@ -106,7 +234,6 @@ public class InitializationService {
 
         RollCallEntity rollCall2 = RollCallEntity.builder()
                 .roll_call_id(99)
-                .bill_id(101)
                 .absent(5)
                 .nv(6)
                 .yea(7)
@@ -124,13 +251,13 @@ public class InitializationService {
 
         // Insert Legislation
         LegislationEntity legislation = LegislationEntity.builder()
-                .billId(100)
+                .bill_id(100)
                 .title("Clean Energy Act")
                 .description("A bill to promote renewable energy")
                 .summary("This bill provides incentives for clean energy projects.")
                 .change_hash("xyz123")
                 .url("https://example.com/legislation/101")
-                .stateLink("https://state.example.com/legislation/101")
+                .state_link("https://state.example.com/legislation/101")
                 .sponsors(List.of(rep1, rep2))
                 .endorsements(List.of(rep1))
                 .rollCalls(List.of(rollCall1, rollCall2))
