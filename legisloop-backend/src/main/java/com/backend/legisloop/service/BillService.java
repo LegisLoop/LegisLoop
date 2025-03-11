@@ -1,8 +1,10 @@
 package com.backend.legisloop.service;
 
 import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.entities.RepresentativeEntity;
 import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.repository.LegislationRepository;
+import com.backend.legisloop.repository.RepresentativeRepository;
 import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.LegislationDocument;
@@ -17,9 +19,13 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,6 +41,7 @@ import java.util.*;
 public class BillService {
 
     private final LegislationRepository legislationRepository;
+    private final RepresentativeRepository representativeRepository;
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
@@ -204,13 +211,30 @@ public class BillService {
         log.error("Failed to fetch bill text");
         return legislationDocument;
     }
-    //TODO delete eventually
-    public List<Legislation> getAllLegislation() {
-        return legislationRepository.findAll().stream().map(LegislationEntity::toModel).toList();
-    }
-    //TODO delete eventually
-    public Legislation getLegislationById(int bill_id) {
-        return legislationRepository.getReferenceById(bill_id).toModel();
+
+    public Page<LegislationEntity> getLegislationByState(StateEnum state, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return legislationRepository.findByState(state, pageable);
     }
 
+    public Page<Legislation> getLegislationByStateId(int stateId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        StateEnum state = StateEnum.fromStateID(stateId);
+        Page<LegislationEntity> legislationEntities = legislationRepository.findByState(state, pageable);
+        return legislationEntities.map(LegislationEntity::toModel);
+    }
+
+    public Page<Legislation> getLegislationByRepresentativeIdPaginated(int repId, int page, int size) {
+        RepresentativeEntity representative = representativeRepository.findById(repId)
+                .orElseThrow(() -> new EntityNotFoundException("Representative not found"));
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<LegislationEntity> legislationEntities = legislationRepository.findBySponsors(representative, pageable);
+        return legislationEntities.map(LegislationEntity::toModel);
+    }
+    public Page<Legislation> getLegislationBySessionIdPaginated(int sessionId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<LegislationEntity> legislationEntities = legislationRepository.findBySessionId(sessionId, pageable);
+        return legislationEntities.map(LegislationEntity::toModel);
+    }
 }

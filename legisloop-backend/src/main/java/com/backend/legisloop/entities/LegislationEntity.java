@@ -22,6 +22,9 @@ public class LegislationEntity {
     @Id
     private int bill_id;
 
+    @Column(name = "session_id")
+    private int session_id;
+
     @Column(name = "title", columnDefinition = "TEXT")
     private String title;
 
@@ -68,6 +71,7 @@ public class LegislationEntity {
     public Legislation toModel() {
         return Legislation.builder()
                 .bill_id(this.bill_id)
+                .session_id(this.session_id)
                 .title(this.title)
                 .description(this.description)
                 .summary(this.summary)
@@ -75,7 +79,7 @@ public class LegislationEntity {
                 .stateLink(URI.create(this.state_link))
                 .documents(this.documents.stream().map(LegislationDocumentEntity::toModel).toList())
                 .sponsors(this.sponsors.stream().map(RepresentativeEntity::toModel).toList())
-                .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())
+                // .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())
                 .roll_calls(this.rollCalls.stream().map(RollCallEntity::toModel).toList())
                 .state(this.state)
                 .build();

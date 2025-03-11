@@ -37,6 +37,7 @@ public class Legislation {
     public LegislationEntity toEntity() {
         return LegislationEntity.builder()
                 .bill_id(this.bill_id)
+                .session_id(this.session_id)
                 .title(this.title)
                 .description(this.description)
                 .summary(this.summary)
@@ -45,7 +46,7 @@ public class Legislation {
                 .state_link(this.stateLink.toString())
                 .documents(this.documents != null ? this.documents.stream().map(LegislationDocument::toEntity).toList() : new ArrayList<>())
                 .sponsors(this.sponsors != null ? this.sponsors.stream().map(Representative::toEntity).toList() : new ArrayList<>())
-                .endorsements(this.endorsements != null ? this.endorsements.stream().map(Representative::toEntity).toList() : new ArrayList<>())
+                // .endorsements(this.endorsements != null ? this.endorsements.stream().map(Representative::toEntity).toList() : new ArrayList<>())
                 .rollCalls(this.roll_calls != null ? this.roll_calls.stream().map(RollCall::toEntity).toList() : new ArrayList<>())
                 .state(this.state)
                 .build();

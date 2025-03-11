@@ -259,7 +259,7 @@ public class InitializationService {
                 .url("https://example.com/legislation/101")
                 .state_link("https://state.example.com/legislation/101")
                 .sponsors(List.of(rep1, rep2))
-                .endorsements(List.of(rep1))
+                // .endorsements(List.of(rep1))
                 .rollCalls(List.of(rollCall1, rollCall2))
                 .build();
 

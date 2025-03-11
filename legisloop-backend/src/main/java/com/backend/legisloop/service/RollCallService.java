@@ -1,8 +1,12 @@
 package com.backend.legisloop.service;
 
+import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.entities.RollCallEntity;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.RollCall;
 import com.backend.legisloop.model.Vote;
+import com.backend.legisloop.repository.LegislationRepository;
+import com.backend.legisloop.repository.RollCallRepository;
 import com.backend.legisloop.serial.BooleanSerializer;
 import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.enums.VotePosition;
@@ -15,8 +19,13 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,7 +36,10 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RollCallService {
+
+
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
@@ -36,9 +48,8 @@ public class RollCallService {
     
     private final BillService billService;
 
-    public RollCallService(BillService billService) {
-        this.billService = billService;
-    }
+    private final LegislationRepository legislationRepository;
+    private final RollCallRepository rollCallRepository;
 
     /**
      * Get the Roll Call from the LegiScan API using it's ID
@@ -118,5 +129,14 @@ public class RollCallService {
     	
     	return rollCall;
     }
-    
+
+    public Page<RollCall> getRollCallsByBillIdPaginated(int billId, int page, int size) {
+        LegislationEntity legislation = legislationRepository.findById(billId)
+                .orElseThrow(() -> new EntityNotFoundException("Legislation not found"));
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<RollCallEntity> rollCallEntities = rollCallRepository.findByLegislation(legislation, pageable);
+
+        return rollCallEntities.map(RollCallEntity::toModel);
+    }
 }
