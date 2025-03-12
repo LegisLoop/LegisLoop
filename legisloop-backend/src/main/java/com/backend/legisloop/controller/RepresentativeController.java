@@ -50,4 +50,10 @@ public class RepresentativeController {
     public ResponseEntity<List<Representative>> searchRepresentatives(@RequestParam String keyword) {
         return new ResponseEntity<>(representativeService.searchRepresentatives(keyword), HttpStatus.OK);
     }
+
+    // get representatives by state id
+    @GetMapping("/stateId/{stateId}")
+    public ResponseEntity<List<Representative>> getRepresentativeByStateId(@PathVariable int stateId) {
+        return new ResponseEntity<>(representativeRepository.findByStateId(stateId).stream().map(RepresentativeEntity::toModel).toList(), HttpStatus.OK);
+    }
 }

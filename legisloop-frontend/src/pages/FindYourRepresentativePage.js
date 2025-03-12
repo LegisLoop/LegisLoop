@@ -1,9 +1,26 @@
+import { useState, useEffect } from 'react';
 import NavBar from '../components/NavBar/NavBar';
 import Footer from '../components/Footer/Footer';
 import RepresentativeSideBar from "../components/SideBar/FindYourRepsSideBar";
-import RepresentativeGrid from "../components/Cards/RepresentativesCard";
+import { RepresentativeGrid } from "../components/Cards/RepresentativesCard";
+import axios from 'axios';
 
 function FindYourRepresentativesPage() {
+    const [representatives, setRepresentatives] = useState([]);
+    useEffect(() => {
+        const fetchRepresentatives = async () => {
+            try {
+                const response = await axios.get("http://localhost:8080/api/v1/representative/stateId/30");
+                console.log('response', response.data);
+                setRepresentatives(response.data.slice(0, 20)); // just get the first 10 for now 
+            } catch (error) {
+                console.error("Error fetching representatives:", error);
+            }
+        };
+
+        fetchRepresentatives();
+    }, []);
+
     return (
         <div className="flex flex-col">
             <NavBar />
@@ -17,7 +34,7 @@ function FindYourRepresentativesPage() {
 
                 {/* Representative Grid (takes remaining space) */}
                 <div className="flex-grow">
-                    <RepresentativeGrid />
+                    <RepresentativeGrid representatives={representatives} />
                 </div>
             </div>
 
