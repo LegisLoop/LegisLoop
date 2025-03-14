@@ -34,41 +34,53 @@ public class UpdateDatabaseTasks {
     private final BillService billService;
     private final RepresentativeService representativeService;
 	
-	@Scheduled(timeUnit = TimeUnit.HOURS,
-			fixedRate = 1,
-			initialDelay = 1)
+	@Scheduled(timeUnit = TimeUnit.MINUTES,
+			fixedRate = 60,
+			initialDelay = 300)
 	public void updateLegislation() throws UnirestException, URISyntaxException {
 		
 		log.info("Updating legislation...");
 		
-		List<LegislationEntity> toSave = new ArrayList<LegislationEntity>();
+		int toSave = 0;
 		
 		for (StateEnum state : StateEnum.values()) {
 			List<Legislation> changeHashLegislation = billService.getMasterListChange(state.toString());
+			log.info("{}: {}", state.toString(), changeHashLegislation.toString());
 			
 			for (Legislation legislationStub : changeHashLegislation) {
+				log.info("\t{}", legislationStub.toString());
 				Optional<LegislationEntity> legislation = legislationRepository.findById(legislationStub.getBill_id());
 				if (legislation.isPresent()) {	// We have this bill in our DB already
 					
 					LegislationEntity legislationEntity = legislation.get();
-					if (legislationStub.getChange_hash() == legislationEntity.getChange_hash()) {	// Nothing has changed.
+					if (legislationStub.getChange_hash().equals(legislationEntity.getChange_hash())) {	// Nothing has changed.
 						continue;
 					}
 					
-					log.debug("We have bill_id {} with changehash {}, but upstream changhash is {}", 
+					log.info("We have bill_id {} with changehash {}, but upstream changhash is {}", 
 							legislationEntity.getBill_id(), legislationEntity.getChange_hash(), legislationStub.getChange_hash());
-					toSave.add(billService.getBill(legislationStub).toEntity());
+					LegislationEntity fetchedLegislation = billService.getBill(legislationStub).toEntity();
+					
+					legislationRepository.save(fetchedLegislation);
+					toSave++;
 					
 				} else {	// We don't have a bill in our DB that LegiScan has just reported to us
-					log.debug("We do not have bill_id {} with changehash {}!", 
+					log.info("We do not have bill_id {} with changehash {}!", 
 							legislationStub.getBill_id(), legislationStub.getChange_hash());
-					toSave.add(billService.getBill(legislationStub).toEntity());
+					legislationRepository.saveIfDoesNotExist(legislationStub.toEntity());
+					
+					LegislationEntity fetchedLegislation = billService.getBill(legislationStub).toEntity();
+					log.info("\tGot upstream legislation, bill_id {} with changehash {}", 
+							fetchedLegislation.getBill_id(), fetchedLegislation.getChange_hash());
+					
+					legislationRepository.save(fetchedLegislation);
+					toSave++;
 				}
 			}
 		}
 		
-		legislationRepository.saveAll(toSave);
-		log.info("Done updating legislation, {} updates.", toSave.size());
+		legislationRepository.flush();
+		log.info("Done updating legislation, {} updates.", toSave);
 	}
 	
 	@Scheduled(timeUnit = TimeUnit.DAYS,
@@ -82,8 +94,13 @@ public class UpdateDatabaseTasks {
 		List<RepresentativeEntity> allLegislators = representativeRepository.findAll();
 		
 		for (RepresentativeEntity representativeDatabase : allLegislators) {
-			Representative representativeFresh = representativeService.update(representativeDatabase.toModel());
+			Representative representativeFresh = representativeService.getRepresentativeById(representativeDatabase.getPeople_id());
+			
 			if (representativeFresh.getPerson_hash() != representativeDatabase.getPerson_hash()) {
+				log.debug("We have person_id {} with person_hash {}, but upstream person_hash is {}", 
+						representativeDatabase.getPerson_hash(), representativeDatabase.getPerson_hash(), representativeFresh.getPerson_hash());
+				
+				representativeRepository.save(representativeFresh.toEntity());
 				added++;
 			}
 		}

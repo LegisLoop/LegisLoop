@@ -2,6 +2,9 @@ package com.backend.legisloop;
 
 import com.backend.legisloop.model.AppUser;
 import com.backend.legisloop.repository.UserRepository;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +15,7 @@ import java.util.stream.Stream;
 
 @SpringBootApplication
 @EnableScheduling
+@Slf4j
 public class LegisloopApplication {
 
 	public static void main(String[] args) {

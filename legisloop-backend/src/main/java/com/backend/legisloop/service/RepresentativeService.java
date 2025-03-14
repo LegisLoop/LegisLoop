@@ -53,12 +53,10 @@ public class RepresentativeService {
 
         if (response.getStatus() == 200) {
             try {
-                Gson gson = new Gson();
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 JsonArray peopleArray = jsonObject.getAsJsonObject("sessionpeople").getAsJsonArray("people");
 
-                Type listType = new TypeToken<List<Representative>>() {}.getType();
-                return gson.fromJson(peopleArray, listType);
+                return fillRecords(peopleArray);
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw e;
@@ -86,11 +84,10 @@ public class RepresentativeService {
 
         if (response.getStatus() == 200) {
             try {
-                Gson gson = new Gson();
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 JsonObject person = jsonObject.getAsJsonObject("person");
 
-                return gson.fromJson(person, Representative.class);
+                return fillRecord(person);
             }
             catch (Exception e) {
                 log.error(e.getMessage());
@@ -138,27 +135,6 @@ public class RepresentativeService {
     }
     
     /**
-     * From the provided {@link Representative}, fetch the one upstream and update the database if
-     * it's new.
-     * @param rep {@link Representative} to check
-     * @return The most up to date {@link Representative}.
-     * @throws UnirestException
-     * @apiNote LegiScan called.
-     */
-    public Representative update(Representative rep) throws UnirestException {
-    	Representative representativeFresh = getRepresentativeById(rep.getPeople_id());
-    	if (representativeFresh.getPerson_hash() == rep.getPerson_hash()) {	// Nothing has changed.
-			return rep;
-		}
-		
-		log.debug("We have person_id {} with person_hash {}, but upstream person_hash is {}", 
-				rep.getPerson_hash(), rep.getPerson_hash(), representativeFresh.getPerson_hash());
-		representativeRepository.save(representativeFresh.toEntity());
-		
-		return representativeFresh;
-    }
-    
-    /**
      * Save the {@link Representative} to the DB, if it has changed.
      * @param newer The newer {@link Representative} to check
      * @param older The original {@link Representative} to check, presumably from our database.
@@ -167,9 +143,40 @@ public class RepresentativeService {
      */
     public Representative update(Representative newer, Representative older) throws UnirestException {
     	if (newer.getPerson_hash() != older.getPerson_hash()) {	// Something has changed.
-    		representativeRepository.save(newer.toEntity());
+    		representativeRepository.saveAndFlush(newer.toEntity());
 		}
 		
 		return newer;
+    }
+    
+    /**
+     * Take an object of a person and return the Representative using Gson
+     * @param personObject The JSON Object from the LegiScan API
+     * @return The representative
+     */
+    public static Representative fillRecord(JsonObject personObject) {
+        try {
+        	Gson gson = new Gson();
+        	return gson.fromJson(personObject, Representative.class);
+    	} catch (Exception e) {
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+    
+    /**
+     * Take an array of people and return the Representatives using Gson
+     * @param peopleArray The array from the LegiScan API
+     * @return The representatives
+     */
+    public static List<Representative> fillRecords(JsonArray peopleArray) {
+    	try {
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<Representative>>() {}.getType();
+            return gson.fromJson(peopleArray, listType);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw e;
+        }
     }
 }
