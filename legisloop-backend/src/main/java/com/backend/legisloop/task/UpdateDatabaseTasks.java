@@ -105,6 +105,8 @@ public class UpdateDatabaseTasks {
 			}
 		}
 		
+		representativeRepository.flush();
+		
 		log.info("Done updating legislators, {} updates.", added);
 		
 	}
