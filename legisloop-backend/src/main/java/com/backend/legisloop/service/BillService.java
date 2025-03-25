@@ -303,7 +303,7 @@ public class BillService {
         Page<LegislationEntity> legislationEntities = legislationRepository.findBySponsors(representative, pageable);
         return legislationEntities.map(LegislationEntity::toModel);
     }
-
+    
     /**
      * Get all {@link Legislation} by its session id (paginated)
      * @param sessionId sessionId id
