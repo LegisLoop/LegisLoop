@@ -15,7 +15,9 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+
 import jakarta.persistence.EntityNotFoundException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,15 +35,22 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class RepresentativeService {
+	
+	private final RepresentativeRepository representativeRepository;
+    private final LegislationRepository legislationRepository;
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
     @Value("${legiscan.base.url}")
     private String url;
 
-    private final LegislationRepository legislationRepository;
-    private final RepresentativeRepository representativeRepository;
-
+    /**
+     * Get all the people who have participated in this session.
+     * @param sessionId The LegiScan session_id
+     * @return All representatives from the session.
+     * @throws UnirestException
+     * @apiNote LegiScan called.
+     */
     public List<Representative> getSessionPeople(int sessionId) throws UnirestException {
 
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
@@ -52,12 +61,10 @@ public class RepresentativeService {
 
         if (response.getStatus() == 200) {
             try {
-                Gson gson = new Gson();
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 JsonArray peopleArray = jsonObject.getAsJsonObject("sessionpeople").getAsJsonArray("people");
 
-                Type listType = new TypeToken<List<Representative>>() {}.getType();
-                return gson.fromJson(peopleArray, listType);
+                return fillRecords(peopleArray);
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw e;
@@ -69,6 +76,13 @@ public class RepresentativeService {
         }
     }
 
+    /**
+     * Get the most up-to-date version of a legislator.
+     * @param personId The LegiScan person_id 
+     * @return The Representative
+     * @throws UnirestException
+     * @apiNote LegiScan called.
+     */
     public Representative getRepresentativeById(int personId) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
@@ -78,11 +92,10 @@ public class RepresentativeService {
 
         if (response.getStatus() == 200) {
             try {
-                Gson gson = new Gson();
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 JsonObject person = jsonObject.getAsJsonObject("person");
 
-                return gson.fromJson(person, Representative.class);
+                return fillRecord(person);
             }
             catch (Exception e) {
                 log.error(e.getMessage());
@@ -95,6 +108,13 @@ public class RepresentativeService {
         }
     }
 
+    /**
+     * Get every bill that a representative has sponsored.
+     * @param personId The LegiScan person_id 
+     * @return A list of {@link Legislation} stubs
+     * @throws UnirestException
+     * @apiNote LegiScan called.
+     */
     public List<Legislation> getRepresentativeBills(int personId) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
@@ -131,5 +151,51 @@ public class RepresentativeService {
 
     public List<Representative> searchRepresentatives(String keyword) {
         return representativeRepository.searchByName(keyword).stream().map(RepresentativeEntity::toModel).toList();
+    }
+    
+    /**
+     * Save the {@link Representative} to the DB, if it has changed.
+     * @param newer The newer {@link Representative} to check
+     * @param older The original {@link Representative} to check, presumably from our database.
+     * @return The newer Representative
+     * @throws UnirestException
+     */
+    public Representative update(Representative newer, Representative older) throws UnirestException {
+    	if (newer.getPerson_hash() != older.getPerson_hash()) {	// Something has changed.
+    		representativeRepository.saveAndFlush(newer.toEntity());
+		}
+		
+		return newer;
+    }
+    
+    /**
+     * Take an object of a person and return the Representative using Gson
+     * @param personObject The JSON Object from the LegiScan API
+     * @return The representative
+     */
+    public static Representative fillRecord(JsonObject personObject) {
+        try {
+        	Gson gson = new Gson();
+        	return gson.fromJson(personObject, Representative.class);
+    	} catch (Exception e) {
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+    
+    /**
+     * Take an array of people and return the Representatives using Gson
+     * @param peopleArray The array from the LegiScan API
+     * @return The representatives
+     */
+    public static List<Representative> fillRecords(JsonArray peopleArray) {
+    	try {
+            Gson gson = new Gson();
+            Type listType = new TypeToken<List<Representative>>() {}.getType();
+            return gson.fromJson(peopleArray, listType);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw e;
+        }
     }
 }

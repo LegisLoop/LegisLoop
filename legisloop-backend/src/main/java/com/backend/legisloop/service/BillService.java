@@ -2,16 +2,21 @@ package com.backend.legisloop.service;
 
 import com.backend.legisloop.entities.LegislationEntity;
 import com.backend.legisloop.entities.RepresentativeEntity;
+import com.backend.legisloop.entities.RollCallEntity;
 import com.backend.legisloop.enums.StateEnum;
+import com.backend.legisloop.repository.LegislationDocumentRepository;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.repository.RepresentativeRepository;
+import com.backend.legisloop.repository.RollCallRepository;
 import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.LegislationDocument;
 import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.model.RollCall;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -41,7 +46,9 @@ import java.util.*;
 public class BillService {
 
     private final LegislationRepository legislationRepository;
+    private final LegislationDocumentRepository legislationDocumentRepository;
     private final RepresentativeRepository representativeRepository;
+    private final RollCallRepository rollCallRepository;
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
@@ -83,10 +90,42 @@ public class BillService {
         }
     }
 
+    public List<Legislation> getMasterListChange(String state) throws UnirestException {
+
+        HttpResponse<JsonNode> response = Unirest.get(url + "/")
+                .queryString("key", API_KEY)
+                .queryString("op", "getMasterListRaw")
+                .queryString("state", state)
+                .asJson();
+
+        if (response.getStatus() == 200) {
+            try {
+                Gson gson = new Gson();
+                JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
+                Utils.checkLegiscanResponseStatus(jsonObject);
+
+                JsonObject masterlistObject = jsonObject.getAsJsonObject("masterlist");
+
+                Type mapType = new TypeToken<Map<String, Legislation>>() {}.getType();
+                Map<String, Legislation> billsMap = gson.fromJson(masterlistObject, mapType);
+                billsMap.remove("session"); // remove the session identifier object
+
+                return new ArrayList<>(billsMap.values());
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                throw e;
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Failed to fetch bills, server responded with status: " + response.getStatus());
+        }
+    }
+
     /**
      * Get a complete {@link Legislation} from a 'stub' (presumably from {@link #getMasterList(String)}).
      * @param legislation The {@link Legislation} with, at minimum, a filled {@link Legislation#bill_id}
      * @return A completed {@link Legislation} with texts, sans {@link LegislationDocument#docContent}
+     * @apiNote LegiScan called.
      * @throws UnirestException
      * @throws URISyntaxException
      */
@@ -102,78 +141,87 @@ public class BillService {
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 Utils.checkLegiscanResponseStatus(jsonObject);
 
-                JsonArray textsArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("texts");
-                JsonArray sponsorsArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("sponsors");
-                JsonArray votesArray = jsonObject.getAsJsonObject("bill").getAsJsonArray("votes");
+                Gson gson = new Gson();
+                JsonObject billObject = jsonObject.getAsJsonObject("bill");
+
+                Legislation incomingLegislation = gson.fromJson(billObject, Legislation.class);
+                final Legislation effectiveLegislation = 
+                	    (incomingLegislation.getChange_hash() != legislation.getChange_hash()) 
+                	        ? incomingLegislation 
+                	        : legislation;
+                
+                JsonArray textsArray = billObject.getAsJsonArray("texts");
+                JsonArray sponsorsArray = billObject.getAsJsonArray("sponsors");
+                JsonArray votesArray = billObject.getAsJsonArray("votes");
                 
                 List<RollCall> rollCalls = new ArrayList<RollCall>();
                 votesArray.forEach(roll_call -> {
-                	rollCalls.add(RollCallService.fillRecord(roll_call.getAsJsonObject()));
+                	RollCall rollCallToAdd = RollCall.fillRecord(roll_call.getAsJsonObject());
+                	rollCallToAdd.setBill_id(effectiveLegislation.getBill_id());
+                	rollCalls.add(rollCallToAdd);
                 });
-                legislation.setRoll_calls(rollCalls);
+                effectiveLegislation.setRoll_calls(rollCalls);
+                updateRollCalls(rollCalls);
 
                 textsArray.forEach(text -> {
-                    LegislationDocument possibleNewLegislationDocument = LegislationDocument.builder()
-                            .billId(legislation.getBill_id())
-                            .textHash(text.getAsJsonObject().get("text_hash").getAsString())
-                            .legiscanLink(URI.create(text.getAsJsonObject().get("url").getAsString()))
-                            .externalLink(URI.create(text.getAsJsonObject().get("state_link").getAsString()))
-                            .docId(text.getAsJsonObject().get("doc_id").getAsInt())
-                            .mime(text.getAsJsonObject().get("mime").getAsString())
-                            .mimeId(text.getAsJsonObject().get("mime_id").getAsInt())
-                            .type(text.getAsJsonObject().get("type").getAsString())
-                            .typeId(text.getAsJsonObject().get("type_id").getAsInt())
-                            .build();
+                    LegislationDocument possibleNewLegislationDocument = LegislationDocument.fillDocument(text.getAsJsonObject());
+                    possibleNewLegislationDocument.setBillId(effectiveLegislation.getBill_id());
 
-                    List<LegislationDocument> documents = legislation.getDocuments();
+                    List<LegislationDocument> documents = effectiveLegislation.getDocuments();
                     boolean replacedDoc = false;
                     if (documents != null) {
 	                    for (LegislationDocument document : documents) {
 	                        if (document.getDocId() == possibleNewLegislationDocument.getDocId()) {
 	                            if (Objects.equals(document.getTextHash(), possibleNewLegislationDocument.getTextHash())) break;
-	                            legislation.documents.remove(document);
-	                            legislation.documents.add(possibleNewLegislationDocument); // TODO: Should refetech the doc content for this doc
+	                            try {
+	                            	possibleNewLegislationDocument = getDocContent(possibleNewLegislationDocument); // It's new, so we'll fetch the actual doc content
+								} catch (UnirestException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+	                            effectiveLegislation.documents.remove(document);
+	                            effectiveLegislation.documents.add(possibleNewLegislationDocument);
+	                            updateDocument(possibleNewLegislationDocument); // Save it to our repository
 	                            replacedDoc = true;
 	                            break;
 	                        }
 	                    }
 	
-	                    if (!replacedDoc) legislation.documents.add(possibleNewLegislationDocument);
+	                    if (!replacedDoc) effectiveLegislation.documents.add(possibleNewLegislationDocument);
                     }
 
                 });
                 
-                List<Representative> billSponsors = legislation.getSponsors();
+                List<Representative> billSponsors = effectiveLegislation.getSponsors();
                 if (billSponsors != null) {
+            		log.info("Legislation {} already has sponsors...", effectiveLegislation.getBill_id());
+                	if (incomingLegislation.getChange_hash() != legislation.getChange_hash()) { // Incoming Legislation is new AND already has sponsors
+                		log.info("Adding stubs", effectiveLegislation.getBill_id());
+                		billSponsors.forEach(sponsor -> { // Add stubs from the db legislation
+	                        representativeRepository.saveIfDoesNotExist(sponsor.toEntity());
+                		});
+                    }
 	                sponsorsArray.forEach(sponsor -> {
 	                    int peopleId = sponsor.getAsJsonObject().get("people_id").getAsInt();
 	                    boolean exists = billSponsors.stream().anyMatch(rep -> rep.getPeople_id() == peopleId);
-	                    if (!exists) {
-	                        Representative representativeToAdd = Representative.builder()
-	                                .people_id(sponsor.getAsJsonObject().get("people_id").getAsInt())
-	                                .person_hash(sponsor.getAsJsonObject().get("person_hash").getAsString())
-	                                .party_id(sponsor.getAsJsonObject().get("party_id").getAsInt())
-	                                .state_id(sponsor.getAsJsonObject().get("state_id").getAsInt())
-	                                .party(sponsor.getAsJsonObject().get("party").getAsString())
-	                                .role_id(sponsor.getAsJsonObject().get("role_id").getAsInt())
-	                                .role(sponsor.getAsJsonObject().get("role").getAsString())
-	                                .name(sponsor.getAsJsonObject().get("name").getAsString())
-	                                .first_name(sponsor.getAsJsonObject().get("first_name").getAsString())
-	                                .last_name(sponsor.getAsJsonObject().get("last_name").getAsString())
-	                                .district(sponsor.getAsJsonObject().get("district").getAsString())
-	                                .ftm_eid(sponsor.getAsJsonObject().get("ftm_eid").getAsInt())
-	                                .votesmart_id(sponsor.getAsJsonObject().get("votesmart_id").getAsInt())
-	                                .knowwho_pid(sponsor.getAsJsonObject().get("knowwho_pid").getAsInt())
-	                                .build();
+	                    log.info("Representative {} {} exist in the DB already", peopleId, (exists ? "does" : "does not"));
+	                    if (!exists) { // This sponsor wasn't on the bill before
+	                        Representative representativeToAdd = RepresentativeService.fillRecord(sponsor.getAsJsonObject());
 	                        billSponsors.add(representativeToAdd);
+	                        updateRepresentative(representativeToAdd);
 	                    }
 	                });
+                } else {
+                	
+                	log.warn("Bill {} getSponsors was empty", effectiveLegislation.getBill_id());
                 }
                 
-                legislation.setStateLink(new URI(jsonObject.getAsJsonObject("bill").get("state_link").getAsString()));
+                effectiveLegislation.setStateLink(new URI(jsonObject.getAsJsonObject("bill").get("state_link").getAsString()));
 
                 int stateId = Integer.parseInt(jsonObject.getAsJsonObject("bill").get("state_id").getAsString());
-                legislation.setState(StateEnum.fromStateID(stateId));
+                effectiveLegislation.setState(StateEnum.fromStateID(stateId));
+                
+                legislation = effectiveLegislation; // TODO: Make an update function for legislation.
             } catch (Exception e) {
                 log.error(e.getMessage());
                 throw e;
@@ -196,16 +244,9 @@ public class BillService {
             JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
             Utils.checkLegiscanResponseStatus(jsonObject);
 
-            JsonObject text = jsonObject.getAsJsonObject("text");
+            JsonObject textObject = jsonObject.get("text").getAsJsonObject();
 
-            legislationDocument.setMime(text.getAsJsonObject("mime").getAsString());
-            legislationDocument.setMimeId(text.getAsJsonObject("mime_id").getAsInt());
-            legislationDocument.setTypeId(text.getAsJsonObject("type_id").getAsInt());
-            legislationDocument.setType(text.getAsJsonObject("type").getAsString());
-            legislationDocument.setDocContent(text.getAsJsonObject("doc").getAsString());
-
-            return legislationDocument;
-
+            return LegislationDocument.fillDocument(textObject);
 
         }
         log.error("Failed to fetch bill text");
@@ -237,4 +278,42 @@ public class BillService {
         Page<LegislationEntity> legislationEntities = legislationRepository.findBySessionId(sessionId, pageable);
         return legislationEntities.map(LegislationEntity::toModel);
     }
+    
+    /**
+     * From a list of roll calls, add or update the DB entries
+     * @param rollCalls
+     */
+    private void updateRollCalls(List<RollCall> rollCalls) {
+    	if (rollCalls.isEmpty()) return;
+    	List<RollCallEntity> rollCallEntities = new ArrayList<RollCallEntity>();
+    	for (RollCall rollCall : rollCalls) {
+    		rollCallEntities.add(rollCall.toEntity());
+    	}
+    	rollCallRepository.saveAllAndFlush(rollCallEntities);
+    }
+    
+    /**
+     * Update the legislation document in our db
+     * @param document
+     */
+    private void updateDocument(LegislationDocument document) {
+    	legislationDocumentRepository.saveAndFlush(document.toEntity());
+    }
+    
+    /**
+     * From the provided {@link Representative}, fetch our DB one and update it if the incoming is different.
+     * @param rep {@link Representative} to insert/update
+     */
+    private void updateRepresentative(Representative rep) {
+    	Optional<RepresentativeEntity> representativeDB = representativeRepository.findById(rep.getPeople_id());
+    	
+    	if (representativeDB.isPresent() && representativeDB.get().getPerson_hash().equals(rep.getPerson_hash())) {	// Nothing has changed.
+			return;
+		}
+    	
+    	log.info("Saving rep {} with person_hash {} to the db", rep.getPeople_id(), rep.getPerson_hash());
+		representativeRepository.saveAndFlush(rep.toEntity());
+		return;
+    }
+
 }

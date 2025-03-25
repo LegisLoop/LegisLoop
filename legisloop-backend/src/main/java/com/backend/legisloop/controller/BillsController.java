@@ -30,6 +30,11 @@ public class BillsController {
 
         return new ResponseEntity<>(legislationRepository.getReferenceById(legislationId).toModel(), HttpStatus.OK);
     }
+    
+    @GetMapping("/getMasterListChange")
+    public ResponseEntity<List<Legislation>> getMasterListChangeByState(@RequestParam String state) throws UnirestException {
+        return new ResponseEntity<>(billService.getMasterListChange(state), HttpStatus.OK);
+    }
 
     // get all legislation by state abbreviation (NJ, CA, etc.) (paginated)
     @GetMapping("/state/{state}/paginated")
@@ -41,6 +46,7 @@ public class BillsController {
 
         return new ResponseEntity<>(billService.getLegislationByState(state, page, size).stream().map(LegislationEntity::toModel).toList(), HttpStatus.OK);
     }
+
     // get all legislation by stateId (paginated)
     @GetMapping("/stateId/{stateId}/paginated")
     public ResponseEntity<Page<Legislation>> getLegislationByStateId(
@@ -50,6 +56,7 @@ public class BillsController {
     ) {
         return new ResponseEntity<>(billService.getLegislationByStateId(stateId, page, size), HttpStatus.OK);
     }
+    
     // Get a person's sponsored bills (paginated)
     @GetMapping("/sponsoredBills/{personId}/paginated")
     public ResponseEntity<Page<Legislation>> getSponsoredBills(
@@ -66,6 +73,7 @@ public class BillsController {
     public ResponseEntity<List<Legislation>> getLegislationBySessionId(@PathVariable int sessionId) {
         return new ResponseEntity<>(legislationRepository.findBySessionId(sessionId).stream().map(LegislationEntity::toModel).toList(), HttpStatus.OK);
     }
+    
     // get legislation by session id (paginated)
     @GetMapping("/session/{sessionId}/paginated")
     public ResponseEntity<Page<Legislation>> getLegislationBySessionIdPaginated(
