@@ -268,7 +268,7 @@ public class BillService {
      */
     public Page<Legislation> getLegislationByState(StateEnum state, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<LegislationEntity> legislationEntities = legislationRepository.findByState(state, pageable);
+        Page<LegislationEntity> legislationEntities = legislationRepository.findByStateOrderByStatusDateDesc(state, pageable);
         return legislationEntities.map(LegislationEntity::toModel);
     }
 
@@ -282,7 +282,7 @@ public class BillService {
     public Page<Legislation> getLegislationByStateId(int stateId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         StateEnum state = StateEnum.fromStateID(stateId);
-        Page<LegislationEntity> legislationEntities = legislationRepository.findByState(state, pageable);
+        Page<LegislationEntity> legislationEntities = legislationRepository.findByStateOrderByStatusDateDesc(state, pageable);
         return legislationEntities.map(LegislationEntity::toModel);
     }
 
@@ -298,7 +298,7 @@ public class BillService {
                 .orElseThrow(() -> new EntityNotFoundException("Representative not found"));
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<LegislationEntity> legislationEntities = legislationRepository.findBySponsors(representative, pageable);
+        Page<LegislationEntity> legislationEntities = legislationRepository.findBySponsorsOrderByStatusDateDesc(representative, pageable);
         return legislationEntities.map(LegislationEntity::toModel);
     }
     

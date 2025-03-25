@@ -9,8 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.net.URI;
+import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @AllArgsConstructor
@@ -36,6 +36,7 @@ public class Legislation {
     private StateEnum state;
     private int status;
     private Date status_date;
+    private Date dateIntroduced;
 
     public LegislationEntity toEntity() {
         return LegislationEntity.builder()
@@ -54,6 +55,7 @@ public class Legislation {
                 .state(this.state)
                 .status(this.status)
                 .status_date(this.status_date)
+                .dateIntroduced(this.dateIntroduced)
                 .build();
     }
 }
