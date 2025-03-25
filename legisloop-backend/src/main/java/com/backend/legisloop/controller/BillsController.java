@@ -38,13 +38,13 @@ public class BillsController {
 
     // get all legislation by state abbreviation (NJ, CA, etc.) (paginated)
     @GetMapping("/state/{state}/paginated")
-    public ResponseEntity<List<Legislation>> getLegislationByState(
+    public ResponseEntity<Page<Legislation>> getLegislationByState(
             @PathVariable StateEnum state,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
 
-        return new ResponseEntity<>(billService.getLegislationByState(state, page, size).stream().toList(), HttpStatus.OK);
+        return new ResponseEntity<>(billService.getLegislationByState(state, page, size), HttpStatus.OK);
     }
 
     // get all legislation by stateId (paginated)

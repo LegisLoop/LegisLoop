@@ -14,9 +14,7 @@ import com.backend.legisloop.model.LegislationDocument;
 import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.model.RollCall;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -316,6 +314,7 @@ public class BillService {
         Page<LegislationEntity> legislationEntities = legislationRepository.findBySessionId(sessionId, pageable);
         return legislationEntities.map(LegislationEntity::toModel);
     }
+
     
     /**
      * From a list of roll calls, add or update the DB entries
