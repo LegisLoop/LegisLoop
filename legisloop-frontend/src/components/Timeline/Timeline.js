@@ -6,11 +6,13 @@
  ****************************************************************
  * Last Updated: February 21, 2025.
  ***************************************************************/
-import React, { useState, useLayoutEffect, useRef } from "react";
+import React, { useState, useLayoutEffect, useRef, useEffect } from "react";
 import { DocumentTextIcon } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
 import TimelineEventCard from "../Cards/TimelineEventCard";
+import axios from 'axios';
 
+/*
 const events = [
     { date: "MAR 2024", title: "Bill Title", type: "vote" },
     { date: "MAR 2024", title: "Bill Title", type: "sponsoredBill" },
@@ -21,11 +23,59 @@ const events = [
     { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" },
     { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" },
     { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" }
-];
+];*/
 
-const Timeline = () => {
+const Timeline = ({ personID }) => {
     const [showAll, setShowAll] = useState(false);
-    const visibleEvents = showAll ? events : events.slice(0, 5);
+    const [votes, setVotes] = useState([]);
+    const [sponsoredLegislation, setSponsoredLegislation] = useState([]);
+
+    console.log(personID);
+
+    useEffect(() => {
+        const fetchVotes = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/v1/vote/votedBills/${personID}/paginated`);
+                console.log('votes response', response.data);
+                setVotes(response.data.content);
+            } catch (error) {
+                console.error("Error fetching votes:", error);
+            }
+        };
+        
+        const fetchSponsoredLegislation = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/v1/legislation/sponsoredBills/${personID}/paginated`);
+                console.log('spongeosed legislation response', response.data);
+                setSponsoredLegislation(response.data.content);
+            } catch (error) {
+                console.error("Error fetching sponsored legislation:", error);
+            }
+        };
+
+        fetchVotes();
+        fetchSponsoredLegislation();
+
+    }, [personID]);
+
+    const combinedEvents = [
+        ...votes.map((vote) => ({
+            date: "SAMPLE DATE", // adjust if necessary (e.g., vote.voteDate)
+            title: vote.bill_title, // adjust if necessary (e.g., vote.billTitle)
+            position: vote.vote_position,
+            type: "vote",
+            personId: vote.personId || personID, // fallback to passed in personID if not present
+        })),
+        ...sponsoredLegislation.map((bill) => ({
+            date: "SAMPLE DATE", // adjust if necessary (e.g., bill.proposalDate)
+            title: bill.title,
+            type: "sponsoredBill",
+            position: null,
+            personId: bill.personId || personID,
+        })),
+    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    const visibleEvents = showAll ? combinedEvents : combinedEvents.slice(0, 5);
     const timelineRef = useRef(null);
     const lastEventRef = useRef(null);
     const [timelineHeight, setTimelineHeight] = useState("5rem");
@@ -36,7 +86,7 @@ const Timeline = () => {
             const lastEventBottom = lastEventRef.current.getBoundingClientRect().bottom;
             setTimelineHeight(`${lastEventBottom - timelineTop}px`);
         }
-    }, [visibleEvents]); // Runs immediately when visibleEvents change
+    }, [visibleEvents, timelineRef, lastEventRef]); // Runs immediately when visibleEvents change
 
     return (
         <div className="relative max-w-4xl mx-auto p-6">
@@ -68,6 +118,7 @@ const Timeline = () => {
                                 title={event.title}
                                 date={event.date}
                                 personId={event.personId}
+                                position={event.position}
                             />
                         </div>
                     ) : (
@@ -83,6 +134,7 @@ const Timeline = () => {
                                 title={event.title}
                                 date={event.date}
                                 personId={event.personId}
+                                position={event.position}
                             />
                         </div>
                     ) : (
@@ -90,7 +142,7 @@ const Timeline = () => {
                     )}
                 </div>
             ))}
-            {events.length > 5 && (
+            {combinedEvents.length > 5 && (
                 <div className="text-center mt-4 relative z-10 bg-white p-4">
                     <button
                         onClick={() => setShowAll(!showAll)}
@@ -100,19 +152,6 @@ const Timeline = () => {
                     </button>
                 </div>
             )}
-        </div>
-    );
-};
-
-const EventCard = ({ event }) => {
-    return (
-        <div className="bg-white shadow-lg rounded-lg p-4 w-64">
-            <div className="flex items-center space-x-2">
-                <span className={`w-3 h-3 rounded-full ${event.type === "vote" ? "bg-custom-cyan" : "bg-custom-red"}`}></span>
-                <span className="text-gray-500 text-sm">{event.date}</span>
-            </div>
-            <h3 className="font-semibold text-custom-blue mt-2">{event.title}</h3>
-            <p className="text-gray-600 text-sm">{event.type === "vote" ? "Vote" : "Bill Topic"}</p>
         </div>
     );
 };
