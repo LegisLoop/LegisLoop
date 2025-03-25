@@ -142,6 +142,11 @@ public class RepresentativeService {
         }
     }
 
+    /**
+     * For a {@link Representative}, get all of their sponsored bills
+     * @param billId
+     * @return a list of representative objects
+     */
     public List<Representative> getSponsorsByBillId(int billId) {
         LegislationEntity bill = legislationRepository.findById(billId)
                 .orElseThrow(() -> new EntityNotFoundException("Legislation not found"));
@@ -149,6 +154,11 @@ public class RepresentativeService {
         return representativeRepository.findBySponsoredBills(bill).stream().map(RepresentativeEntity::toModel).toList();
     }
 
+    /**
+     * Search representatives by first and last name included
+     * @param keyword search term
+     * @return a list of representative objects
+     */
     public List<Representative> searchRepresentatives(String keyword) {
         return representativeRepository.searchByName(keyword).stream().map(RepresentativeEntity::toModel).toList();
     }

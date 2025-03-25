@@ -232,7 +232,14 @@ public class BillService {
         }
         return legislation;
     }
-    
+
+    /**
+     * For a piece of {@link Legislation}, get the documents
+     * @param legislationDocument
+     * @return The original input with the documents added
+     * @apiNote LegiScan called.
+     * @throws UnirestException
+     */
     private LegislationDocument getDocContent(LegislationDocument legislationDocument) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
@@ -253,11 +260,27 @@ public class BillService {
         return legislationDocument;
     }
 
-    public Page<LegislationEntity> getLegislationByState(StateEnum state, int page, int size) {
+    /**
+     * For a piece of {@link Legislation}, get all of them by state (paginated)
+     * @param state abbreviation
+     * @param page page number
+     * @param size number of legislation per page
+     * @return a page of legislation objects
+     * @apiNote LegiScan called.
+     */
+    public Page<Legislation> getLegislationByState(StateEnum state, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return legislationRepository.findByState(state, pageable);
+        Page<LegislationEntity> legislationEntities = legislationRepository.findByState(state, pageable);
+        return legislationEntities.map(LegislationEntity::toModel);
     }
 
+    /**
+     * For a piece of {@link Legislation}, get all of them by state (paginated)
+     * @param stateId
+     * @param page page number
+     * @param size number of legislation per page
+     * @return a list of legislation objects
+     */
     public Page<Legislation> getLegislationByStateId(int stateId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         StateEnum state = StateEnum.fromStateID(stateId);
@@ -265,6 +288,13 @@ public class BillService {
         return legislationEntities.map(LegislationEntity::toModel);
     }
 
+    /**
+     * Get all {@link Legislation} for who a representative is a sponsor (paginated)
+     * @param repId rep id
+     * @param page page number
+     * @param size number of legislation per page
+     * @return a list of legislation objects
+     */
     public Page<Legislation> getLegislationByRepresentativeIdPaginated(int repId, int page, int size) {
         RepresentativeEntity representative = representativeRepository.findById(repId)
                 .orElseThrow(() -> new EntityNotFoundException("Representative not found"));
@@ -273,6 +303,14 @@ public class BillService {
         Page<LegislationEntity> legislationEntities = legislationRepository.findBySponsors(representative, pageable);
         return legislationEntities.map(LegislationEntity::toModel);
     }
+
+    /**
+     * Get all {@link Legislation} by its session id (paginated)
+     * @param sessionId sessionId id
+     * @param page page number
+     * @param size number of legislation per page
+     * @return a list of legislation objects
+     */
     public Page<Legislation> getLegislationBySessionIdPaginated(int sessionId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<LegislationEntity> legislationEntities = legislationRepository.findBySessionId(sessionId, pageable);
