@@ -26,7 +26,7 @@ public class Legislation {
     private String change_hash;
     private GoverningBody governingBody;
     private int bill_id;
-    private int session_id;
+    private Integer session_id;
     private URI url; // legiscan link
     private URI stateLink;
     private List<RollCall> roll_calls;

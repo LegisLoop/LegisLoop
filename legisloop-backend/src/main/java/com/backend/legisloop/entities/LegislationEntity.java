@@ -23,7 +23,7 @@ public class LegislationEntity {
     private int bill_id;
 
     @Column(name = "session_id")
-    private int session_id;
+    private Integer session_id;
 
     @Column(name = "title", columnDefinition = "TEXT")
     private String title;
