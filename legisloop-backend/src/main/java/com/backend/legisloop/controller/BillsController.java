@@ -25,8 +25,13 @@ public class BillsController {
     public ResponseEntity<List<Legislation>> getMasterListByState(@RequestParam String state) throws UnirestException {
         return new ResponseEntity<>(billService.getMasterList(state), HttpStatus.OK);
     }
+    
+    @GetMapping("/getMasterListChange")
+    public ResponseEntity<List<Legislation>> getMasterListChangeByState(@RequestParam String state) throws UnirestException {
+        return new ResponseEntity<>(billService.getMasterListChange(state), HttpStatus.OK);
+    }
 
-    @GetMapping("/getBill")
+    @GetMapping("/getBillUsingMaster")
     public ResponseEntity<Legislation> getBill(@RequestParam int bill_id, @RequestParam String state) throws UnirestException, URISyntaxException {
         List<Legislation> masterList = billService.getMasterList(state);
         Legislation legislationToFind = masterList.stream()
@@ -35,6 +40,12 @@ public class BillsController {
                 .orElse(null);
         return new ResponseEntity<>(billService.getBill(legislationToFind), HttpStatus.OK);
     }
+
+    @GetMapping("/getBillUsingID")
+    public ResponseEntity<Legislation> getBill(@RequestParam int bill_id) throws UnirestException, URISyntaxException {
+        return new ResponseEntity<>(billService.getBill(Legislation.builder().bill_id(bill_id).build()), HttpStatus.OK);
+    }
+    
     //TODO delete eventually
     @GetMapping("/testDb")
     public ResponseEntity<List<Legislation>> getAllLegislation() {
