@@ -273,6 +273,7 @@ public class BillService {
         Page<LegislationEntity> legislationEntities = legislationRepository.findBySponsors(representative, pageable);
         return legislationEntities.map(LegislationEntity::toModel);
     }
+    
     public Page<Legislation> getLegislationBySessionIdPaginated(int sessionId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<LegislationEntity> legislationEntities = legislationRepository.findBySessionId(sessionId, pageable);
