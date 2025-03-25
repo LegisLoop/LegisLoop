@@ -9,17 +9,18 @@
 import React, { useState, useLayoutEffect, useRef } from "react";
 import { DocumentTextIcon } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
+import TimelineEventCard from "../Cards/TimelineEventCard";
 
 const events = [
     { date: "MAR 2024", title: "Bill Title", type: "vote" },
-    { date: "MAR 2024", title: "Bill Title", type: "bill" },
+    { date: "MAR 2024", title: "Bill Title", type: "sponsoredBill" },
     { date: "JAN 2024", title: "Bill Title", type: "vote" },
-    { date: "OCT 2023", title: "Bill Title", type: "bill" },
+    { date: "OCT 2023", title: "Bill Title", type: "sponsoredBill" },
     { date: "JUN 2023", title: "Bill Title", type: "vote" },
-    { date: "MAR 2023", title: "Bill Title", type: "bill" },
-    { date: "MAR 2023", title: "Bill Title", type: "bill" },
-    { date: "MAR 2023", title: "Bill Title", type: "bill" },
-    { date: "MAR 2023", title: "Bill Title", type: "bill" }
+    { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" },
+    { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" },
+    { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" },
+    { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" }
 ];
 
 const Timeline = () => {
@@ -58,11 +59,16 @@ const Timeline = () => {
                 <div
                     key={index}
                     className="flex items-center mb-6 relative"
-                    ref={index === visibleEvents.length - 1 ? lastEventRef : null} // Attach ref to last event
+                    ref={index === visibleEvents.length - 1 ? lastEventRef : null}
                 >
                     {event.type === "vote" ? (
                         <div className="w-1/2 flex justify-end pr-6">
-                            <EventCard event={event} />
+                            <TimelineEventCard
+                                type={event.type}
+                                title={event.title}
+                                date={event.date}
+                                personId={event.personId}
+                            />
                         </div>
                     ) : (
                         <div className="w-1/2"></div>
@@ -70,9 +76,14 @@ const Timeline = () => {
                     <div className="w-6 h-6 rounded-full flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-500">
                         <span className={`${event.type === "vote" ? "bg-custom-cyan" : "bg-custom-red"} w-4 h-4 rounded-full`}></span>
                     </div>
-                    {event.type === "bill" ? (
+                    {event.type === "sponsoredBill" ? (
                         <div className="w-1/2 flex justify-start pl-6">
-                            <EventCard event={event} />
+                            <TimelineEventCard
+                                type={event.type}
+                                title={event.title}
+                                date={event.date}
+                                personId={event.personId}
+                            />
                         </div>
                     ) : (
                         <div className="w-1/2"></div>
