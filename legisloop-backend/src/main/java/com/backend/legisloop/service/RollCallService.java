@@ -112,7 +112,14 @@ public class RollCallService {
     	temp.setBill_id(bill_id);
     	return getRollCallsForLegislation(temp);
     }
-    
+    /**
+     * For a piece of {@link Legislation}, get the server-side roll calls paginated
+     * @param billId the LegiScan bill_id
+     * @param page, the page number
+     * @param size, the size of the page
+     * @return The List of RollCalls
+     * @apiNote LegiScan called.
+     */
     public Page<RollCall> getRollCallsByBillIdPaginated(int billId, int page, int size) {
         LegislationEntity legislation = legislationRepository.findById(billId)
                 .orElseThrow(() -> new EntityNotFoundException("Legislation not found"));

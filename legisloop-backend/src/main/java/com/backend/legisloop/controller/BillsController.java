@@ -44,7 +44,7 @@ public class BillsController {
             @RequestParam(defaultValue = "10") int size
     ) {
 
-        return new ResponseEntity<>(billService.getLegislationByState(state, page, size).stream().map(LegislationEntity::toModel).toList(), HttpStatus.OK);
+        return new ResponseEntity<>(billService.getLegislationByState(state, page, size).stream().toList(), HttpStatus.OK);
     }
 
     // get all legislation by stateId (paginated)
