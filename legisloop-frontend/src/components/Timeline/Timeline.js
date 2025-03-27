@@ -60,18 +60,18 @@ const Timeline = ({ personID }) => {
 
     const combinedEvents = [
         ...votes.map((vote) => ({
-            date: "SAMPLE DATE", // adjust if necessary (e.g., vote.voteDate)
-            title: vote.bill_title, // adjust if necessary (e.g., vote.billTitle)
+            date: vote.date,
+            title: vote.bill_title,
             position: vote.vote_position,
             type: "vote",
-            personId: vote.personId || personID, // fallback to passed in personID if not present
+            description: vote.description,
         })),
         ...sponsoredLegislation.map((bill) => ({
-            date: "SAMPLE DATE", // adjust if necessary (e.g., bill.proposalDate)
+            date: bill.dateIntroduced,
             title: bill.title,
             type: "sponsoredBill",
             position: null,
-            personId: bill.personId || personID,
+            description: (bill.description == bill.title ? "" : bill.description),
         })),
     ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -117,7 +117,7 @@ const Timeline = ({ personID }) => {
                                 type={event.type}
                                 title={event.title}
                                 date={event.date}
-                                personId={event.personId}
+                                description={event.description}
                                 position={event.position}
                             />
                         </div>
@@ -133,7 +133,7 @@ const Timeline = ({ personID }) => {
                                 type={event.type}
                                 title={event.title}
                                 date={event.date}
-                                personId={event.personId}
+                                description={event.description}
                                 position={event.position}
                             />
                         </div>

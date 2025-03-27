@@ -347,6 +347,14 @@ public class InitializationService {
     }
     
     private static void saveBase64ZipToFile(String base64String, String filePath) {
+    	
+    	File file = new File(filePath);
+        // Create parent directories if they do not exist
+        File parentDir = file.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+    	
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
             // Decode the Base64 string into byte array
             byte[] decodedBytes = Base64.getDecoder().decode(base64String);
@@ -354,9 +362,9 @@ public class InitializationService {
             // Write to file
             fileOutputStream.write(decodedBytes);
 
-            System.out.println("Zip file saved successfully at: " + filePath);
+            log.info("Zip file saved successfully at: " + filePath);
         } catch (IOException e) {
-            System.err.println("Error saving zip file: " + e.getMessage());
+            log.error("Error saving zip file: " + e.getMessage());
         }
     }
 }

@@ -1,6 +1,6 @@
 import React from "react";
 
-const TimelineEventCard = ({ type, title, date, personId, position }) => {
+const TimelineEventCard = ({ type, title, date, description, position }) => {
     return (
         <div className="bg-white shadow-lg rounded-lg p-4 w-64">
             <div className="flex items-center space-x-2">
@@ -9,7 +9,7 @@ const TimelineEventCard = ({ type, title, date, personId, position }) => {
             </div>
             <h3 className="font-semibold text-custom-blue mt-2">{type === "vote" ? ("Voted '" + `${position}` + "'") : "Sponsored Bill"}</h3>
             <p className="text-gray-600 text-sm">{title}</p>
-            {personId && <p className="text-gray-500 text-xs">Person ID: {personId}</p>}
+            <p className="text-gray-500 text-xs">{description}</p>
         </div>
     );
 };
