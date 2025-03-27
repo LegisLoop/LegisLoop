@@ -18,15 +18,17 @@ import java.util.List;
 @Repository
 public interface LegislationRepository extends JpaRepository<LegislationEntity, Integer> {
 
-    Page<LegislationEntity> findByState(StateEnum state, Pageable pageable);
+    @Query("SELECT l FROM LegislationEntity l WHERE l.state = :state AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
+    Page<LegislationEntity> findByStateOrderByStatusDateDesc(@Param("state") StateEnum state, Pageable pageable);
 
     // Find all legislation where a specific representative is a sponsor
-    Page<LegislationEntity> findBySponsors(RepresentativeEntity sponsor, Pageable pageable);
+    @Query("SELECT l FROM LegislationEntity l JOIN l.sponsors s WHERE s = :sponsor AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
+    Page<LegislationEntity> findBySponsorsOrderByStatusDateDesc(@Param("sponsor") RepresentativeEntity sponsor, Pageable pageable);
 
-    @Query("SELECT l FROM LegislationEntity l WHERE l.session_id = :sessionId")
+    @Query("SELECT l FROM LegislationEntity l WHERE l.session_id = :sessionId AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
     List<LegislationEntity> findBySessionId(@Param("sessionId") int sessionId);
 
-    @Query("SELECT l FROM LegislationEntity l WHERE l.session_id = :sessionId")
+    @Query("SELECT l FROM LegislationEntity l WHERE l.session_id = :sessionId AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
     Page<LegislationEntity> findBySessionId(@Param("sessionId") int sessionId, Pageable pageable);
 	
 	/**

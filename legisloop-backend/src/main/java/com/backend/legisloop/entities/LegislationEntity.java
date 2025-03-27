@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 @Entity
@@ -68,6 +69,15 @@ public class LegislationEntity {
     @Column(name = "state")
     private StateEnum state;
 
+    @Column(name = "status")
+    private int status;
+
+    @Column(name = "status_date")
+    private Date status_date;
+
+    @Column(name = "date_introduced")
+    private Date dateIntroduced;
+
     public Legislation toModel() {
         return Legislation.builder()
                 .bill_id(this.bill_id)
@@ -83,6 +93,9 @@ public class LegislationEntity {
                 .roll_calls(this.rollCalls.stream().map(RollCallEntity::toModel).toList())
                 .state(this.state)
                 .change_hash(this.change_hash)
+                .status(this.status)
+                .status_date(this.status_date)
+                .dateIntroduced(this.dateIntroduced)
                 .build();
     }
 
