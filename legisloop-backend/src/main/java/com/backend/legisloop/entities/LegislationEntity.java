@@ -78,6 +78,7 @@ public class LegislationEntity {
                 .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())
                 .roll_calls(this.rollCalls.stream().map(RollCallEntity::toModel).toList())
                 .state(this.state)
+                .change_hash(this.change_hash)
                 .build();
     }
 

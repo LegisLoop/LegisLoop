@@ -30,9 +30,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.swing.plaf.nimbus.State;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
@@ -116,19 +118,28 @@ public class InitializationService {
                     "Failed to fetch bills, server responded with status: " + response.getStatus());
         }
     }
+    
     public String initializeDbFromLegisacn() throws UnirestException, IOException {
-        //TODO: Should fetch for all states
+
         List<LegiscanDataset> datasetList = getDatasetListByYear(2025);
-        LegiscanDataset legiscanDataset = datasetList.get(0);
-
-        LegiscanDataset encodedZip = getDatasetByAccessKeyAndSession(legiscanDataset.getSession_id(), legiscanDataset.getAccess_key());
-
-        Map<String, List<JsonObject>> dataMap = DatasetUtils.unzipJsonFiles(encodedZip.getZip());
-
-        saveDataFromZip(dataMap);
+        for (LegiscanDataset dataset : datasetList) {
+	
+	        LegiscanDataset encodedZip = getDatasetByAccessKeyAndSession(dataset.getSession_id(), dataset.getAccess_key());
+	
+	        // Get the current date in YYYY-MM-DD format
+	        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+	
+	        String outputFilePath = "../Datasets/" + StateEnum.fromStateID(dataset.getState_id()) + "_" + date + ".zip";
+	        saveBase64ZipToFile(encodedZip.getZip(), outputFilePath);
+	
+	        Map<String, List<JsonObject>> dataMap = DatasetUtils.unzipJsonFiles(encodedZip.getZip());
+	
+	        saveDataFromZip(dataMap);
+        }
 
         return "Initialized from API data";
     }
+    
     public String initializeDbFromFilesystem(String filePath) throws IOException {
         File zipFile = new File(filePath);
         if (!zipFile.exists() || !zipFile.isFile()) {
@@ -315,5 +326,19 @@ public class InitializationService {
 
         // Save Roll Calls Again to Update with Votes
         rollCallRepository.saveAll(Arrays.asList(rollCall1, rollCall2));
+    }
+    
+    private static void saveBase64ZipToFile(String base64String, String filePath) {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
+            // Decode the Base64 string into byte array
+            byte[] decodedBytes = Base64.getDecoder().decode(base64String);
+
+            // Write to file
+            fileOutputStream.write(decodedBytes);
+
+            System.out.println("Zip file saved successfully at: " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error saving zip file: " + e.getMessage());
+        }
     }
 }
