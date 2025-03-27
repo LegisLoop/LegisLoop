@@ -36,7 +36,7 @@ class BillServiceTest {
     private RepresentativeRepository representativeRepository;
 
     @InjectMocks
-    private BillService billService;
+    private LegislationService billService;
 
     @Test
     void testGetLegislationByState() {

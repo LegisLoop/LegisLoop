@@ -41,7 +41,7 @@ import java.util.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class BillService {
+public class LegislationService {
 
     private final LegislationRepository legislationRepository;
     private final LegislationDocumentRepository legislationDocumentRepository;

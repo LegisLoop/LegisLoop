@@ -1,11 +1,11 @@
 package com.backend.legisloop.task;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import com.backend.legisloop.service.LegislationService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +16,6 @@ import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.repository.RepresentativeRepository;
-import com.backend.legisloop.service.BillService;
 import com.backend.legisloop.service.RepresentativeService;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
@@ -31,7 +30,7 @@ public class UpdateDatabaseTasks {
 
     private final LegislationRepository legislationRepository;
     private final RepresentativeRepository representativeRepository;
-    private final BillService billService;
+    private final LegislationService billService;
     private final RepresentativeService representativeService;
 	
 	@Scheduled(timeUnit = TimeUnit.MINUTES,
