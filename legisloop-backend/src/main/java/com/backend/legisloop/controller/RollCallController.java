@@ -1,5 +1,7 @@
 package com.backend.legisloop.controller;
 
+import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.entities.RollCallEntity;
 import com.backend.legisloop.model.RollCall;
 import com.backend.legisloop.repository.RollCallRepository;
 import com.backend.legisloop.service.RollCallService;
@@ -10,36 +12,34 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/rollCall")
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 public class RollCallController {
 	
     private final RollCallService rollCallService;
     private final RollCallRepository rollCallRepository;
 
-    @GetMapping("/getRollCall")
-    public ResponseEntity<RollCall> getRollCallByID(@RequestParam int roll_call_id) throws UnirestException {
-    	return new ResponseEntity<>(rollCallService.getRollCallByID(roll_call_id), HttpStatus.OK);
+    @GetMapping("/{rollCallId}")
+    public ResponseEntity<RollCall> getRollCallByID(@PathVariable int rollCallId) {
+    	return new ResponseEntity<>(rollCallService.getRollCallByID_DB(rollCallId), HttpStatus.OK);
     }
-    
-    @GetMapping("/getRollCallsForLegislation")
-    public ResponseEntity<List<RollCall>> getRollCallsForLegislation(@RequestParam int bill_id) throws UnirestException, URISyntaxException {
-    	List<RollCall> rollCalls = rollCallService.getRollCallsForLegislation(bill_id);
-    	log.info("{}", rollCalls);
-    	return new ResponseEntity<>(rollCalls, HttpStatus.OK);
-    }
-    //TODO delete eventually
-    @GetMapping("/testRollCallDb")
-    public ResponseEntity<RollCall> testRollCallDb(@RequestParam int roll_call_id) {
-        return new ResponseEntity<>(rollCallRepository.getReferenceById(roll_call_id).toModel(), HttpStatus.OK);
+
+    @GetMapping("/byBillId/{billId}")
+    public ResponseEntity<Page<RollCall>> getRollCallsByBillIdPaginated(
+            @PathVariable int billId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<RollCall> rollCalls = rollCallService.getRollCallsByBillIdPaginated(billId, page, size);
+        return ResponseEntity.ok(rollCalls);
+
     }
 }

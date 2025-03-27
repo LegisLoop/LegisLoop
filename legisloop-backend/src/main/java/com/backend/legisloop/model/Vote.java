@@ -19,6 +19,8 @@ public class Vote {
 
     private int roll_call_id;
     private int person_id;
+    private int bill_id; // Not stored in the DB
+    private String bill_title; // Not stored in the DB 
     private VotePosition vote_position;
 
     public VoteEntity toEntity() {
