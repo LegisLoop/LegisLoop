@@ -29,7 +29,7 @@ public class RollCallController {
 
     @GetMapping("/{rollCallId}")
     public ResponseEntity<RollCall> getRollCallByID(@PathVariable int rollCallId) {
-    	return new ResponseEntity<>(rollCallRepository.getReferenceById(rollCallId).toModel(), HttpStatus.OK);
+    	return new ResponseEntity<>(rollCallService.getRollCallByID_DB(rollCallId), HttpStatus.OK);
     }
 
     @GetMapping("/byBillId/{billId}")

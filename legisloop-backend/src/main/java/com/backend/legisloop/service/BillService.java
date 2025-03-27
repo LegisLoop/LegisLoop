@@ -258,6 +258,10 @@ public class BillService {
         return legislationDocument;
     }
 
+    public Legislation getLegislationById(int legislationId) {
+        return legislationRepository.getReferenceById(legislationId).toModel();
+    }
+
     /**
      * For a piece of {@link Legislation}, get all of them by state (paginated)
      * @param state abbreviation

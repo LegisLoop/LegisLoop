@@ -28,7 +28,7 @@ public class BillsController {
     @GetMapping("/{legislationId}")
     public ResponseEntity<Legislation> getBill(@PathVariable int legislationId)  {
 
-        return new ResponseEntity<>(legislationRepository.getReferenceById(legislationId).toModel(), HttpStatus.OK);
+        return new ResponseEntity<>(billService.getLegislationById(legislationId), HttpStatus.OK);
     }
     
     @GetMapping("/getMasterListChange")

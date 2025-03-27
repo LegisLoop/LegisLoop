@@ -85,7 +85,11 @@ public class RollCallService {
                     "Failed to fetch bills, server responded with status: " + response.getStatus());
         }
     }
-    
+
+
+    public RollCall getRollCallByID_DB(int rollCallId) {
+        return rollCallRepository.getReferenceById(rollCallId).toModel();
+    }
     /**
      * For a piece of {@link Legislation}, get the server-side roll calls
      * @param legislation
