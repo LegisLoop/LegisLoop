@@ -2,7 +2,6 @@ package com.backend.legisloop.controller;
 
 import com.backend.legisloop.model.RollCall;
 import com.backend.legisloop.repository.RollCallRepository;
-import com.backend.legisloop.repository.UserRepository;
 import com.backend.legisloop.service.RollCallService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +17,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -35,9 +33,6 @@ class RollCallControllerTest {
 
     @MockBean
     private RollCallService rollCallService;
-    
-    @MockBean
-    private UserRepository userRepository; // Needed for any repository. Source: The Oracle ChatGPT
     
     @MockBean
     private RollCallRepository rollCallReposity; // Needed for any repository. Source: The Oracle ChatGPT
