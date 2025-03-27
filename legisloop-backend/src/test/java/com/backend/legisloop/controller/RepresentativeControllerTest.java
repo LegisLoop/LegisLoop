@@ -4,7 +4,6 @@ import com.backend.legisloop.entities.RepresentativeEntity;
 import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.service.RepresentativeService;
 import com.backend.legisloop.repository.RepresentativeRepository;
-import com.backend.legisloop.repository.UserRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +30,6 @@ class RepresentativeControllerTest {
 
     @MockBean
     private RepresentativeRepository representativeRepository; // Needed for any repository involved. Source: The Oracle ChatGPT
-    
-    @MockBean
-    private UserRepository userRepository;
 
     // Test for GET /api/v1/representative/getSessionPeople
     @Test

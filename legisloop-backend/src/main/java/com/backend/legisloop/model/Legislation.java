@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.net.URI;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +34,9 @@ public class Legislation {
     private List<Representative> endorsements;
     public List<LegislationDocument> documents = new ArrayList<>();
     private StateEnum state;
+    private int status;
+    private Date status_date;
+    private Date dateIntroduced;
 
     public LegislationEntity toEntity() {
         return LegislationEntity.builder()
@@ -46,9 +50,12 @@ public class Legislation {
                 .state_link(this.url != null ? this.stateLink.toString() : null)
                 .documents(this.documents != null ? this.documents.stream().map(LegislationDocument::toEntity).toList() : new ArrayList<>())
                 .sponsors(this.sponsors != null ? this.sponsors.stream().map(Representative::toEntity).toList() : new ArrayList<>())
-                // .endorsements(this.endorsements != null ? this.endorsements.stream().map(Representative::toEntity).toList() : new ArrayList<>())
+                .endorsements(this.endorsements != null ? this.endorsements.stream().map(Representative::toEntity).toList() : new ArrayList<>())
                 .rollCalls(this.roll_calls != null ? this.roll_calls.stream().map(RollCall::toEntity).toList() : new ArrayList<>())
                 .state(this.state)
+                .status(this.status)
+                .status_date(this.status_date)
+                .dateIntroduced(this.dateIntroduced)
                 .build();
     }
 }

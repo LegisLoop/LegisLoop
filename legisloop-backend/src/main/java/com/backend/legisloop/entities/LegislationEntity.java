@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 @Entity
@@ -68,6 +69,15 @@ public class LegislationEntity {
     @Column(name = "state")
     private StateEnum state;
 
+    @Column(name = "status")
+    private int status;
+
+    @Column(name = "status_date")
+    private Date status_date;
+
+    @Column(name = "date_introduced")
+    private Date dateIntroduced;
+
     public Legislation toModel() {
         return Legislation.builder()
                 .bill_id(this.bill_id)
@@ -75,14 +85,17 @@ public class LegislationEntity {
                 .title(this.title)
                 .description(this.description)
                 .summary(this.summary)
-                .url(URI.create(this.url))
-                .stateLink(URI.create(this.state_link))
+                .url(this.url == null ? null : URI.create(this.url))
+                .stateLink(this.state_link == null ? null: URI.create(this.state_link))
                 .documents(this.documents.stream().map(LegislationDocumentEntity::toModel).toList())
                 .sponsors(this.sponsors.stream().map(RepresentativeEntity::toModel).toList())
-                // .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())
+                .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())
                 .roll_calls(this.rollCalls.stream().map(RollCallEntity::toModel).toList())
                 .state(this.state)
                 .change_hash(this.change_hash)
+                .status(this.status)
+                .status_date(this.status_date)
+                .dateIntroduced(this.dateIntroduced)
                 .build();
     }
 

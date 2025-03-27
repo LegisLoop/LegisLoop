@@ -4,17 +4,9 @@ import com.backend.legisloop.entities.LegislationEntity;
 import com.backend.legisloop.entities.RollCallEntity;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.RollCall;
-import com.backend.legisloop.model.Vote;
-import com.backend.legisloop.repository.LegislationDocumentRepository;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.repository.RollCallRepository;
-import com.backend.legisloop.serial.BooleanSerializer;
 import com.backend.legisloop.util.Utils;
-import com.backend.legisloop.entities.RollCallEntity;
-import com.backend.legisloop.enums.VotePosition;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mashape.unirest.http.HttpResponse;
@@ -25,7 +17,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -48,7 +38,7 @@ public class RollCallService {
     @Value("${legiscan.base.url}")
     private String url;
     
-    private final BillService billService;
+    private final LegislationService billService;
 
     private final LegislationRepository legislationRepository;
     private final RollCallRepository rollCallRepository;
@@ -85,7 +75,11 @@ public class RollCallService {
                     "Failed to fetch bills, server responded with status: " + response.getStatus());
         }
     }
-    
+
+
+    public RollCall getRollCallByID_DB(int rollCallId) {
+        return rollCallRepository.getReferenceById(rollCallId).toModel();
+    }
     /**
      * For a piece of {@link Legislation}, get the server-side roll calls
      * @param legislation

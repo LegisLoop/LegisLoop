@@ -4,8 +4,7 @@ import com.backend.legisloop.entities.LegislationEntity;
 import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.repository.LegislationRepository;
-import com.backend.legisloop.service.BillService;
-import com.backend.legisloop.service.RepresentativeService;
+import com.backend.legisloop.service.LegislationService;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,16 +18,16 @@ import java.util.List;
 @RequestMapping("/api/v1/legislation")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000")
-public class BillsController {
+public class LegislationController {
 
-    private final BillService billService;
+    private final LegislationService billService;
     private final LegislationRepository legislationRepository;
 
     // get legislation by id
     @GetMapping("/{legislationId}")
     public ResponseEntity<Legislation> getBill(@PathVariable int legislationId)  {
 
-        return new ResponseEntity<>(legislationRepository.getReferenceById(legislationId).toModel(), HttpStatus.OK);
+        return new ResponseEntity<>(billService.getLegislationById(legislationId), HttpStatus.OK);
     }
     
     @GetMapping("/getMasterListChange")
@@ -38,13 +37,13 @@ public class BillsController {
 
     // get all legislation by state abbreviation (NJ, CA, etc.) (paginated)
     @GetMapping("/state/{state}/paginated")
-    public ResponseEntity<List<Legislation>> getLegislationByState(
+    public ResponseEntity<Page<Legislation>> getLegislationByState(
             @PathVariable StateEnum state,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
 
-        return new ResponseEntity<>(billService.getLegislationByState(state, page, size).stream().toList(), HttpStatus.OK);
+        return new ResponseEntity<>(billService.getLegislationByState(state, page, size), HttpStatus.OK);
     }
 
     // get all legislation by stateId (paginated)
