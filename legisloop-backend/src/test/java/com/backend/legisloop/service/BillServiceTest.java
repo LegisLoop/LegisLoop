@@ -51,12 +51,12 @@ class BillServiceTest {
         );
         Page<LegislationEntity> mockPage = new PageImpl<>(mockEntities, pageable, mockEntities.size());
 
-        when(legislationRepository.findByState(state, pageable)).thenReturn(mockPage);
+        when(legislationRepository.findByStateOrderByStatusDateDesc(state, pageable)).thenReturn(mockPage);
 
         Page<Legislation> result = billService.getLegislationByState(state, page, size);
 
         assertEquals(2, result.getContent().size());
-        verify(legislationRepository).findByState(state, pageable);
+        verify(legislationRepository).findByStateOrderByStatusDateDesc(state, pageable);
     }
 
     @Test
@@ -73,12 +73,12 @@ class BillServiceTest {
         );
         Page<LegislationEntity> mockPage = new PageImpl<>(mockEntities, pageable, mockEntities.size());
 
-        when(legislationRepository.findByState(state, pageable)).thenReturn(mockPage);
+        when(legislationRepository.findByStateOrderByStatusDateDesc(state, pageable)).thenReturn(mockPage);
 
         Page<Legislation> result = billService.getLegislationByStateId(stateId, page, size);
 
         assertEquals(2, result.getContent().size());
-        verify(legislationRepository).findByState(state, pageable);
+        verify(legislationRepository).findByStateOrderByStatusDateDesc(state, pageable);
     }
 
     @Test
@@ -95,13 +95,13 @@ class BillServiceTest {
         Page<LegislationEntity> mockPage = new PageImpl<>(mockEntities, pageable, size);
 
         when(representativeRepository.findById(repId)).thenReturn(Optional.of(rep));
-        when(legislationRepository.findBySponsors(rep, pageable)).thenReturn(mockPage);
+        when(legislationRepository.findBySponsorsOrderByStatusDateDesc(rep, pageable)).thenReturn(mockPage);
 
         Page<Legislation> result = billService.getLegislationByRepresentativeIdPaginated(repId, page, size);
 
         assertEquals(1, result.getContent().size());
         verify(representativeRepository).findById(repId);
-        verify(legislationRepository).findBySponsors(rep, pageable);
+        verify(legislationRepository).findBySponsorsOrderByStatusDateDesc(rep, pageable);
     }
 
     @Test
