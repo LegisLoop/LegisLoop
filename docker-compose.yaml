@@ -18,8 +18,6 @@ services:
       - "8080:8080"
     networks:
       - legisloop-network
-    environment:
-      - DB_HOST=postgres_db
     depends_on:
       - postgres_db
 
