@@ -32,6 +32,9 @@ public class InitializationController {
         return new ResponseEntity<>(initializationService.initializeDbFromLegisacn(), HttpStatus.OK);
     }
 
+    @Operation(summary = "Initialize DB from LegiScan DB ZIP files.",
+    		description = "Takes multiple hours.",
+            security = {@SecurityRequirement(name = "apiKey")})
     @PostMapping(value = "/initializeDb/files")
     public ResponseEntity<String> initializeDbZip(@RequestParam String filePath) throws IOException {
         return new ResponseEntity<>(initializationService.initializeDbFromFilesystem(filePath), HttpStatus.OK);
