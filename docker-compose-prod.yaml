@@ -9,6 +9,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       NEWSAPI_API_KEY: ${NEWSAPI_API_KEY}
       LEGISCAN_API_KEY: ${LEGISCAN_API_KEY}
+      LEGISLOOP_API_KEY: ${LEGISLOOP_API_KEY}
     depends_on:
       - frontend
     networks:
