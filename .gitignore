@@ -22,3 +22,7 @@ yarn-error.log
 
 # All log files
 *.log
+
+# Environment
+.env 
+.env.prod 
