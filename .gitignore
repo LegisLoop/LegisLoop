@@ -14,7 +14,6 @@ yarn-error.log
 
 # Visual Studio Code
 .vscode/*
-!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -22,6 +21,9 @@ yarn-error.log
 
 # All log files
 *.log
+
+# Datasets
+/Datasets
 
 # Environment
 .env 
