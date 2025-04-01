@@ -24,3 +24,7 @@ yarn-error.log
 
 # Datasets
 /Datasets
+
+# Environment
+.env 
+.env.prod 
