@@ -6,15 +6,15 @@ import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
 import Tooltip from "../components/ToolTips/ToolTip";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import useLegislation from "../hooks/useLegislation";
+import useLegislation from "../Hooks/useLegislation";
+import useGeoLocation from "../Hooks/useGeoLocation";
 
 function LandingPage() {
     const [activeLevel, setActiveLevel] = useState("Federal");
     const [activePolicy, setActivePolicy] = useState(null);
-    const [activeStateId] = useState(30);
+    const [activeStateId, setActiveStateId] = useState(10);
     const [pageNumber, setPageNumber] = useState(0);
 
-    // Reset pageNumber when activeLevel or activeStateId changes.
     useEffect(() => {
         setPageNumber(0);
     }, [activeLevel, activeStateId]);
@@ -24,6 +24,13 @@ function LandingPage() {
         activeStateId,
         pageNumber
     );
+
+    const { stateId, error: locationError } = useGeoLocation();
+    useEffect(() => {
+        if (stateId !== null) {
+            setActiveStateId(stateId);
+        }
+    }, [stateId]);
 
     // Ref for the scroll container.
     const scrollContainerRef = useRef(null);
@@ -46,7 +53,6 @@ function LandingPage() {
         prevScrollHeightRef.current = container.scrollHeight;
     }, [bills, pageNumber]);
 
-    // Infinite scroll: detect when user scrolls near the bottom.
     const handleScroll = (e) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target;
         if (scrollTop + clientHeight >= scrollHeight - 50 && !loading) {

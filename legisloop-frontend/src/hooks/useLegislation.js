@@ -20,6 +20,7 @@ function useLegislation(activeLevel, activeStateId, pageNumber, pageSize = 10) {
                     },
                 });
                 const newBills = response.data.content || response.data;
+                console.log('new bills', newBills)
                 setData((prevData) =>
                     pageNumber === 0 ? newBills : [...prevData, ...newBills]
                 );
