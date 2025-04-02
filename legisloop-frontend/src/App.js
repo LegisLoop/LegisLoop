@@ -9,7 +9,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import LegislationPage from "./pages/LegislationPage";
-import SpendingPage from "./pages/SpendingPage";
 import RepresentativePage from "./pages/RepresentativePage";
 import ConnectPage from "./pages/ConnectPage";
 import FindYourRepresentativesPage from "./pages/FindYourRepresentativePage";
@@ -20,7 +19,6 @@ function App() {
           <Routes>
               <Route path="/" element={<LandingPage/>} />
               <Route path="/legislation" element={<LegislationPage/>} />
-              <Route path="/spending" element={<SpendingPage/>} />
               <Route path="/findrepresentatives" element={<FindYourRepresentativesPage/>} />
               <Route path="/representative/:name" element={<RepresentativePage/>}/>
               <Route path="/connect" element={<ConnectPage/>} />

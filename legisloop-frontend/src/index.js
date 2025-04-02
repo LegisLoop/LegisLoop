@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { pdfjs } from "react-pdf";
+
+// Make sure to use the correct relative path if the worker is in /public
+pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.worker.min.mjs";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
