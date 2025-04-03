@@ -23,7 +23,14 @@ The following software should be installed to accommodate the environment.
 
 # Backend Setup
 ### Build and run 
-Make sure to fill in any API keys in the respective application.properties files (and don't push them them to the repo :D)
+Make sure to fill in any API keys by creating a `.env` file in the root project directory (and don't push them them to the repo :D)
+Example:
+```bash
+NEWSAPI_API_KEY=...
+LEGISCAN_API_KEY=...
+LEGISLOOP_API_KEY=...
+```
+
 Terminal: 
 ```bash
 cd legisloop-backend
