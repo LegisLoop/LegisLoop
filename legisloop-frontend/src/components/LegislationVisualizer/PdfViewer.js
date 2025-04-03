@@ -1,29 +1,40 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Document, Page } from "react-pdf";
 
+function DownloadIcon({ className }) {
+    return (
+        <svg
+            className={className}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M8 12l4 4 4-4M12 4v8"
+            />
+        </svg>
+    );
+}
+
 function PdfViewer({ file, title = "PDF Viewer" }) {
-    // Hooks are declared unconditionally.
     const [numPages, setNumPages] = useState(null);
     const [jumpInput, setJumpInput] = useState("1");
     const [scale, setScale] = useState(1.0);
     const containerRef = useRef(null);
     const pageRefs = useRef([]);
 
-    // When PDF is loaded successfully.
     const onDocumentLoadSuccess = ({ numPages }) => {
         setNumPages(numPages);
         setJumpInput("1");
-        // Create an array of refs—one per page.
         pageRefs.current = Array.from({ length: numPages }, () => React.createRef());
     };
 
-    const handleZoomIn = () => {
-        setScale((prev) => prev + 0.25);
-    };
-
-    const handleZoomOut = () => {
-        setScale((prev) => Math.max(prev - 0.25, 0.25));
-    };
+    const handleZoomIn = () => setScale((prev) => prev + 0.25);
+    const handleZoomOut = () => setScale((prev) => Math.max(prev - 0.25, 0.25));
 
     const handleJumpToPage = () => {
         const pageNum = parseInt(jumpInput, 10);
@@ -45,7 +56,6 @@ function PdfViewer({ file, title = "PDF Viewer" }) {
         }
     };
 
-    // Update the jumpInput based on scroll position.
     const updateCurrentPage = useCallback(() => {
         if (!containerRef.current) return;
         const containerTop = containerRef.current.getBoundingClientRect().top;
@@ -71,18 +81,19 @@ function PdfViewer({ file, title = "PDF Viewer" }) {
         }
     }, [updateCurrentPage]);
 
+    if (!file) {
+        return <p className="text-center text-red-500">No file provided</p>;
+    }
+
     return (
         <div className="w-full flex flex-col items-center">
-            {/* Top Toolbar: All controls in one horizontal line */}
-            <div className="w-full flex items-center justify-between mb-4 px-4">
-                {/* Left: Document Title */}
+            <div className="w-full flex flex-wrap items-center justify-between gap-2 mb-4 px-4 text-sm">
                 <div className="text-gray-700 font-semibold">{title}</div>
-                {/* Center: Zoom and Page Controls */}
-                <div className="flex items-center space-x-6">
+                <div className="flex flex-wrap items-center justify-center gap-2">
                     <div className="flex items-center space-x-2">
                         <button
                             onClick={handleZoomOut}
-                            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                            className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
                         >
                             –
                         </button>
@@ -91,12 +102,13 @@ function PdfViewer({ file, title = "PDF Viewer" }) {
             </span>
                         <button
                             onClick={handleZoomIn}
-                            className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                            className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
                         >
                             +
                         </button>
                     </div>
-                    <div className="flex items-center space-x-2">
+
+                    <div className="flex items-center space-x-1">
                         <input
                             type="number"
                             min="1"
@@ -105,24 +117,22 @@ function PdfViewer({ file, title = "PDF Viewer" }) {
                             onChange={(e) => setJumpInput(e.target.value)}
                             onKeyDown={handleKeyDown}
                             onBlur={handleJumpToPage}
-                            className="w-16 border border-gray-300 rounded px-2 py-1 text-center"
+                            className="w-12 border border-gray-300 rounded px-1 py-1 text-center"
                         />
-                        <span className="text-gray-700">
-              / {numPages ? numPages : "-"}
-            </span>
+                        <span className="text-gray-700">/ {numPages || "-"}</span>
                     </div>
                 </div>
-                {/* Right: Download Button */}
+
                 <a
                     href={file}
                     download
-                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-gray-700 font-semibold"
+                    className="p-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700 font-semibold"
+                    aria-label="Download PDF"
                 >
-                    Download
+                    <DownloadIcon className="w-4 h-4" />
                 </a>
             </div>
 
-            {/* Scrollable PDF Container */}
             <div
                 ref={containerRef}
                 className="border border-gray-300 rounded-lg w-full h-[600px] overflow-auto p-4"

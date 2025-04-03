@@ -2,7 +2,6 @@ import React, { Suspense } from "react";
 const PdfViewer = React.lazy(() => import("./PdfViewer"));
 
 function LegislationVisualizer({ mimeType, mimeId }) {
-    // Early return: do this before calling any hooks.
     if (!mimeType || !mimeId) {
         return <p className="text-center text-red-500">Invalid legislation data</p>;
     }
