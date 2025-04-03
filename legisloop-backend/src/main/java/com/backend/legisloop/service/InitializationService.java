@@ -172,7 +172,12 @@ public class InitializationService {
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
             LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
+            
             legislationEntity.setState(StateEnum.fromStateID(legislationJson.get("state_id").getAsInt()));
+            
+            for (LegislationDocumentEntity doc : legislationEntity.getTexts()) {
+            	doc.setBill(LegislationEntity.builder().bill_id(legislationEntity.getBill_id()).build());
+            }
 
             JsonArray progress = legislationJson.getAsJsonArray("progress");
             // Find the date where event = 1 (introduced)
@@ -296,16 +301,16 @@ public class InitializationService {
 
         // Insert Legislation Documents
         LegislationDocumentEntity document = LegislationDocumentEntity.builder()
-                .docId(1)
+                .doc_id(1)
                 .bill(legislation)
-                .textHash("doc_hash_123")
-                .legiscanLink(URI.create("https://example.com/document/1"))
-                .externalLink(URI.create("https://external.example.com/document/1"))
+                .text_hash("doc_hash_123")
+                .url(URI.create("https://example.com/document/1"))
+                .state_link(URI.create("https://external.example.com/document/1"))
                 .mime("application/pdf")
                 .mimeId(1)
                 .docContent("Sample document content")
                 .type("Bill Text")
-                .typeId(101)
+                .type_id(101)
                 .build();
 
         legislationDocumentRepository.save(document);

@@ -15,20 +15,20 @@ import java.net.URI;
 public class LegislationDocumentEntity {
 
     @Id
-    private int docId;
+    private int doc_id;
 
     @ManyToOne
     @JoinColumn(name = "bill_id", nullable = false)
     private LegislationEntity bill;
 
     @Column(name = "textHash")
-    private String textHash;
+    private String text_hash;
 
-    @Column(nullable = true)
-    private URI legiscanLink;
+    @Column(name = "legiscan_link", nullable = true)
+    private URI url;
 
-    @Column(nullable = true)
-    private URI externalLink;
+    @Column(name = "external_link", nullable = true)
+    private URI state_link;
 
     @Column(name = "mime")
     private String mime;
@@ -42,21 +42,21 @@ public class LegislationDocumentEntity {
     @Column(name = "type")
     private String type;
 
-    @Column(name = "typeId")
-    private int typeId;
+    @Column(name = "type_id")
+    private int type_id;
 
     public LegislationDocument toModel() {
         return LegislationDocument.builder()
-                .docId(this.docId)
+                .docId(this.doc_id)
                 .billId(this.bill.getBill_id())
-                .textHash(this.textHash)
-                .legiscanLink(this.legiscanLink)
-                .externalLink(this.externalLink)
+                .textHash(this.text_hash)
+                .legiscanLink(this.url)
+                .externalLink(this.state_link)
                 .mime(this.mime)
                 .mimeId(this.mimeId)
                 .docContent(this.docContent)
                 .type(this.type)
-                .typeId(this.typeId)
+                .typeId(this.type_id)
                 .build();
     }
 }

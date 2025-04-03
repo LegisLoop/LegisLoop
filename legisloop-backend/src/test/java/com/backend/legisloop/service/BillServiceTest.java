@@ -147,7 +147,7 @@ class BillServiceTest {
                 .url("https://example.com/bill/1")
                 .state_link("https://state.example.com/bill/1")
                 .state(StateEnum.NJ)
-                .documents(new ArrayList<>())
+                .texts(new ArrayList<>())
                 .sponsors(new ArrayList<>())
                 .endorsements(new ArrayList<>())
                 .rollCalls(new ArrayList<>())

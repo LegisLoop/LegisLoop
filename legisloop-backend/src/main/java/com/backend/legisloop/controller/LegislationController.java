@@ -25,7 +25,7 @@ public class LegislationController {
     // get legislation by id
     @GetMapping("/{legislationId}")
     public ResponseEntity<Legislation> getBill(@PathVariable int legislationId)  {
-
+    	
         return new ResponseEntity<>(billService.getLegislationById(legislationId), HttpStatus.OK);
     }
     

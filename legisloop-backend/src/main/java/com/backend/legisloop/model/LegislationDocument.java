@@ -30,16 +30,16 @@ public class LegislationDocument {
 
     public LegislationDocumentEntity toEntity() {
         return LegislationDocumentEntity.builder()
-                .docId(this.docId)
+                .doc_id(this.docId)
                 .bill(LegislationEntity.builder().bill_id(this.billId).build())
-                .textHash(this.textHash)
-                .legiscanLink(this.legiscanLink)
-                .externalLink(this.externalLink)
+                .text_hash(this.textHash)
+                .url(this.legiscanLink)
+                .state_link(this.externalLink)
                 .mime(this.mime)
                 .mimeId(this.mimeId)
                 .docContent(this.docContent)
                 .type(this.type)
-                .typeId(this.typeId)
+                .type_id(this.typeId)
                 .build();
     }
     
