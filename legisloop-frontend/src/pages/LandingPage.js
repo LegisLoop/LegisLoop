@@ -7,7 +7,7 @@ import { CalendarEventIcon } from "../components/Icons/Icons";
 import Tooltip from "../components/ToolTips/ToolTip";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import useGeoLocation from "../customHooks/useGeoLocation";
-import useLegislation from "../hooksballs/useLegislation";
+import useLegislation from "../customHooks/useLegislation";
 
 function LandingPage() {
     const [activeLevel, setActiveLevel] = useState("Federal");
