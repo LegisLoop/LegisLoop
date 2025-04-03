@@ -1,4 +1,4 @@
-import {EventBannerIcon, UserIcon} from "../Icons/Icons";
+import {UserIcon} from "../Icons/Icons";
 
 function VoteCard({ name, vote }) {
     return (

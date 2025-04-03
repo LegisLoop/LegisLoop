@@ -1,7 +1,14 @@
 import { useState } from "react";
 import VoteCard from "../Cards/VoteCard";
-import { BuildingIcon, CompassIcon, DropDownArrowIcon, LibraryIcon, MapIcon, MapPinIcon } from "../Icons/Icons";
+import {
+    BookOpenIcon,
+    DocumentDuplicateIcon,
+    DocumentTextIcon,
+    DropDownArrowIcon,
+    MapPinIcon
+} from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
+import {NewspaperIcon} from "lucide-react";
 
 function LegislationSidebar({ votes = [] }) {
     // Count votes
@@ -16,7 +23,6 @@ function LegislationSidebar({ votes = [] }) {
     );
 
     const [activeLevel, setActiveLevel] = useState("Easy");
-    const [activePolicy, setActivePolicy] = useState(null);
     const [isLevelOpen, setIsLevelOpen] = useState(true);
     const [isVotingRecordOpen, setIsVotingRecordOpen] = useState(false);
 
@@ -57,9 +63,10 @@ function LegislationSidebar({ votes = [] }) {
                         <div className="block w-full py-1 font-sans text-sm antialiased font-light leading-normal text-gray-700">
                             <nav className="flex min-w-[240px] flex-col gap-1 p-0 font-sans text-base font-normal text-blue-gray-700">
                                 {[
-                                    { icon: <LibraryIcon />, label: "Easy" },
-                                    { icon: <MapIcon />, label: "Medium" },
-                                    { icon: <BuildingIcon />, label: "Hard" }
+                                    { icon: <DocumentTextIcon />, label: "Un-edited" },
+                                    { icon: <BookOpenIcon />, label: "Moderate-read" },
+                                    { icon: <NewspaperIcon />, label: "Easy-read" },
+                                    { icon: <DocumentDuplicateIcon />, label: "1-page" }
                                 ].map((item, index) => (
                                     <div
                                         key={index}
