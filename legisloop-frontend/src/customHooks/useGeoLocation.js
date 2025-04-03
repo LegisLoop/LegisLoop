@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from 'axios';
-import { stateMapping } from "../constants/statemap";
+import stateMapping from "../constants/statemap";
 
 function useGeoLocation(shouldRequest) {
     const [stateId, setStateId] = useState(null);
