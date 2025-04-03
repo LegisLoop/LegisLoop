@@ -1,4 +1,3 @@
-// src/pages/LandingPage.js
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import LegislationSideBar from "../components/SideBar/LegislationSideBar";
@@ -7,8 +6,8 @@ import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
 import Tooltip from "../components/ToolTips/ToolTip";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import useLegislation from "../Hooks/useLegislation";
-import useGeoLocation from "../Hooks/useGeoLocation";
+import useGeoLocation from "../customHooks/useGeoLocation";
+import useLegislation from "../hooksballs/useLegislation";
 
 function LandingPage() {
     const [activeLevel, setActiveLevel] = useState("Federal");
