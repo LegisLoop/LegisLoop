@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-function useLegislation(activeLevel, activeStateId, pageNumber, pageSize = 10) {
+function useLegislation(activeLevel, activeStateId, pageNumber, pageSize, shouldRequest) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchLegislation = async () => {
-            const apiId = activeLevel === "Federal" ? 52 : activeStateId;
-            const url = `http://localhost:8080/api/v1/legislation/stateId/${apiId}/paginated`;
+            console.log("activeid", activeStateId);
+            const url = `/api/v1/legislation/stateId/${activeStateId}/paginated`;
 
             setLoading(true);
             try {
@@ -20,21 +19,23 @@ function useLegislation(activeLevel, activeStateId, pageNumber, pageSize = 10) {
                     },
                 });
                 const newBills = response.data.content || response.data;
-                console.log('new bills', newBills)
+                console.log("new bills", newBills);
                 setData((prevData) =>
                     pageNumber === 0 ? newBills : [...prevData, ...newBills]
                 );
             } catch (err) {
-                setError(err);
+                console.error(err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchLegislation();
-    }, [activeLevel, activeStateId, pageNumber, pageSize]);
+        if (shouldRequest) {
+            fetchLegislation();
+        }
+    }, [activeLevel, activeStateId, pageNumber, pageSize, shouldRequest]);
 
-    return { data, loading, error };
+    return { data, loading };
 }
 
 export default useLegislation;

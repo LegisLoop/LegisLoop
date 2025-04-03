@@ -1,3 +1,4 @@
+// src/pages/LandingPage.js
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import LegislationSideBar from "../components/SideBar/LegislationSideBar";
@@ -12,32 +13,34 @@ import useGeoLocation from "../Hooks/useGeoLocation";
 function LandingPage() {
     const [activeLevel, setActiveLevel] = useState("Federal");
     const [activePolicy, setActivePolicy] = useState(null);
-    const [activeStateId, setActiveStateId] = useState(10);
+    const [activeStateId, setActiveStateId] = useState(52);
     const [pageNumber, setPageNumber] = useState(0);
+    const [locationRequested, setLocationRequested] = useState(false);
+    const pageSize = 10;
+
+    const { stateId } = useGeoLocation(locationRequested);
 
     useEffect(() => {
         setPageNumber(0);
     }, [activeLevel, activeStateId]);
 
-    const { data: bills, loading, error } = useLegislation(
-        activeLevel,
-        activeStateId,
-        pageNumber
-    );
-
-    const { stateId, error: locationError } = useGeoLocation();
     useEffect(() => {
         if (stateId !== null) {
             setActiveStateId(stateId);
         }
     }, [stateId]);
 
-    // Ref for the scroll container.
+    const { data: bills, loading } = useLegislation(
+        activeLevel,
+        activeStateId,
+        pageNumber,
+        pageSize,
+        locationRequested
+    );
+
     const scrollContainerRef = useRef(null);
-    // Ref to store the previous scrollHeight.
     const prevScrollHeightRef = useRef(0);
 
-    // When new bills are loaded, adjust the scroll position based on the change in scroll height.
     useLayoutEffect(() => {
         const container = scrollContainerRef.current;
         if (!container) return;
@@ -58,6 +61,10 @@ function LandingPage() {
         if (scrollTop + clientHeight >= scrollHeight - 50 && !loading) {
             setPageNumber((prev) => prev + 1);
         }
+    };
+
+    const handleRequestLocation = () => {
+        setLocationRequested(true);
     };
 
     return (
@@ -81,15 +88,24 @@ function LandingPage() {
                             Explore the latest legislative proposals and updates.
                         </p>
                     </div>
+                    {/* Show the location button only when State-level data is requested and state id is federal (52) */}
+                    {activeLevel === "State" && activeStateId === 52 && !locationRequested && (
+                        <div className="mb-4">
+                            <button
+                                className="px-4 py-2 bg-blue-500 text-white rounded"
+                                onClick={handleRequestLocation}
+                            >
+                                Use my location for state legislation
+                            </button>
+                        </div>
+                    )}
                     <div
                         ref={scrollContainerRef}
                         className="overflow-scroll max-h-screen space-y-6"
                         onScroll={handleScroll}
                     >
                         {loading && <p>Loading...</p>}
-                        {error && <p>Error Fetching Data: {error.message}</p>}
                         {!loading &&
-                            !error &&
                             bills.map((bill) => (
                                 <LegislationPreviewCard
                                     key={bill.id}
