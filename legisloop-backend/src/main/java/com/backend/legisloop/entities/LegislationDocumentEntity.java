@@ -4,6 +4,7 @@ import com.backend.legisloop.model.LegislationDocument;
 import jakarta.persistence.*;
 import lombok.*;
 import java.net.URI;
+import java.sql.Date;
 
 @Entity
 @Table(name = "legislation_documents")
@@ -20,6 +21,9 @@ public class LegislationDocumentEntity {
     @ManyToOne
     @JoinColumn(name = "bill_id", nullable = false)
     private LegislationEntity bill;
+
+    @Column(name = "date")
+    private Date date;
 
     @Column(name = "textHash")
     private String text_hash;
@@ -49,6 +53,7 @@ public class LegislationDocumentEntity {
         return LegislationDocument.builder()
                 .docId(this.doc_id)
                 .billId(this.bill.getBill_id())
+                .date(this.date)
                 .textHash(this.text_hash)
                 .legiscanLink(this.url)
                 .externalLink(this.state_link)

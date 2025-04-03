@@ -2,6 +2,7 @@ package com.backend.legisloop.service;
 
 import com.backend.legisloop.repository.LegislationDocumentRepository;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.backend.legisloop.entities.LegislationEntity;
 import com.backend.legisloop.model.LegislationDocument;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,17 @@ public class LegislationDocumentService {
 
     public LegislationDocument getLegislationById(int legislationDocumentId) throws UnirestException {
     	LegislationDocument doc = legislationDocumentRepository.getReferenceById(legislationDocumentId).toModel();
+    	
+    	if (doc.getDocContent() == null) {
+    		doc = legislationService.getDocContent(doc);
+    		legislationDocumentRepository.saveAndFlush(doc.toEntity());
+    	}
+    	
+    	return doc;
+    }
+    
+    public LegislationDocument getLatestDocForLegislation(int billId) throws UnirestException {
+    	LegislationDocument doc = legislationDocumentRepository.findMostRecentByBill(LegislationEntity.builder().bill_id(billId).build()).toModel();
     	
     	if (doc.getDocContent() == null) {
     		doc = legislationService.getDocContent(doc);
