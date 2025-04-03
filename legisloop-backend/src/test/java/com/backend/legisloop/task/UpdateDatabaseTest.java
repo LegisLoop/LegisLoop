@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
+import com.backend.legisloop.service.LegislationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +22,6 @@ import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.repository.RepresentativeRepository;
-import com.backend.legisloop.service.BillService;
 import com.backend.legisloop.service.RepresentativeService;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +31,7 @@ class UpdateDatabaseTest {
 	private LegislationRepository legislationRepository;
 
 	@Mock
-	private BillService billService;
+	private LegislationService billService;
 	
 	@Mock
 	private RepresentativeRepository representativeRepository;

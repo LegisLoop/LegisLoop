@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 class RollCallServiceTest {
 
     @Mock
-    private BillService billService;
+    private LegislationService billService;
 
     @InjectMocks
     private RollCallService rollCallService;
