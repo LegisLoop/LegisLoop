@@ -238,7 +238,7 @@ public class LegislationService {
      * @apiNote LegiScan called.
      * @throws UnirestException
      */
-    private LegislationDocument getDocContent(LegislationDocument legislationDocument) throws UnirestException {
+    protected LegislationDocument getDocContent(LegislationDocument legislationDocument) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
                 .queryString("op", "getBillText")

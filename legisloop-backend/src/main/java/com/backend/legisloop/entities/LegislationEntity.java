@@ -45,7 +45,7 @@ public class LegislationEntity {
     private String state_link;
 
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<LegislationDocumentEntity> documents = new ArrayList<>();
+    private List<LegislationDocumentEntity> texts = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -87,7 +87,7 @@ public class LegislationEntity {
                 .summary(this.summary)
                 .url(this.url == null ? null : URI.create(this.url))
                 .stateLink(this.state_link == null ? null: URI.create(this.state_link))
-                .documents(this.documents.stream().map(LegislationDocumentEntity::toModel).toList())
+                .documents(this.texts.stream().map(LegislationDocumentEntity::toModel).toList())
                 .sponsors(this.sponsors.stream().map(RepresentativeEntity::toModel).toList())
                 .endorsements(this.endorsements.stream().map(RepresentativeEntity::toModel).toList())
                 .roll_calls(this.rollCalls.stream().map(RollCallEntity::toModel).toList())
