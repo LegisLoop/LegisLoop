@@ -27,55 +27,37 @@ const events = [
 
 const Timeline = ({ personID }) => {
     const [showAll, setShowAll] = useState(false);
-    const [votes, setVotes] = useState([]);
-    const [sponsoredLegislation, setSponsoredLegislation] = useState([]);
+    const [events, setEvents] = useState([]);
 
     console.log(personID);
 
     useEffect(() => {
-        const fetchVotes = async () => {
+        const fetchEvents = async () => {
             try {
-                const response = await axios.get(`http://localhost:8080/api/v1/vote/votedBills/${personID}/paginated`);
-                console.log('votes response', response.data);
-                setVotes(response.data.content);
+                const response = await axios.get(`/api/v1/event/${personID}/paginated`);
+                console.log('events response', response.data);
+                setEvents(response.data.content);
             } catch (error) {
                 console.error("Error fetching votes:", error);
             }
         };
-        
-        const fetchSponsoredLegislation = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8080/api/v1/legislation/sponsoredBills/${personID}/paginated`);
-                console.log('spongeosed legislation response', response.data);
-                setSponsoredLegislation(response.data.content);
-            } catch (error) {
-                console.error("Error fetching sponsored legislation:", error);
-            }
-        };
 
-        fetchVotes();
-        fetchSponsoredLegislation();
+        fetchEvents();
 
     }, [personID]);
 
-    const combinedEvents = [
-        ...votes.map((vote) => ({
-            date: vote.date,
-            title: vote.bill_title,
-            position: vote.vote_position,
-            type: "vote",
-            description: vote.description,
-        })),
-        ...sponsoredLegislation.map((bill) => ({
-            date: bill.dateIntroduced,
-            title: bill.title,
-            type: "sponsoredBill",
-            position: null,
-            description: (bill.description == bill.title ? "" : bill.description),
-        })),
-    ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const eventsMap = [
+        ...events.map((event) => ({
+            date: event.date,
+            title: event.event_title,
+            position: event.vote_position,
+            type: event.type,
+            description: event.event_description,
+            bill_id: event.bill_id
+        }))
+    ];
 
-    const visibleEvents = showAll ? combinedEvents : combinedEvents.slice(0, 5);
+    const visibleEvents = showAll ? eventsMap : eventsMap.slice(0, 5);
     const timelineRef = useRef(null);
     const lastEventRef = useRef(null);
     const [timelineHeight, setTimelineHeight] = useState("5rem");
@@ -111,7 +93,7 @@ const Timeline = ({ personID }) => {
                     className="flex items-center mb-6 relative"
                     ref={index === visibleEvents.length - 1 ? lastEventRef : null}
                 >
-                    {event.type === "vote" ? (
+                    {event.type === "VOTE" ? (
                         <div className="w-1/2 flex justify-end pr-6">
                             <TimelineEventCard
                                 type={event.type}
@@ -119,15 +101,16 @@ const Timeline = ({ personID }) => {
                                 date={event.date}
                                 description={event.description}
                                 position={event.position}
+                                bill_id={event.bill_id}
                             />
                         </div>
                     ) : (
                         <div className="w-1/2"></div>
                     )}
                     <div className="w-6 h-6 rounded-full flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-500">
-                        <span className={`${event.type === "vote" ? "bg-custom-cyan" : "bg-custom-red"} w-4 h-4 rounded-full`}></span>
+                        <span className={`${event.type === "VOTE" ? "bg-custom-cyan" : "bg-custom-red"} w-4 h-4 rounded-full`}></span>
                     </div>
-                    {event.type === "sponsoredBill" ? (
+                    {event.type === "SPONSORED" ? (
                         <div className="w-1/2 flex justify-start pl-6">
                             <TimelineEventCard
                                 type={event.type}
@@ -135,6 +118,7 @@ const Timeline = ({ personID }) => {
                                 date={event.date}
                                 description={event.description}
                                 position={event.position}
+                                bill_id={event.bill_id}
                             />
                         </div>
                     ) : (
@@ -142,7 +126,7 @@ const Timeline = ({ personID }) => {
                     )}
                 </div>
             ))}
-            {combinedEvents.length > 5 && (
+            {eventsMap.length > 5 && (
                 <div className="text-center mt-4 relative z-10 bg-white p-4">
                     <button
                         onClick={() => setShowAll(!showAll)}
