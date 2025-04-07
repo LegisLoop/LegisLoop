@@ -5,11 +5,10 @@ import com.backend.legisloop.entities.*;
 import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.enums.VotePosition;
 import com.backend.legisloop.model.LegiscanDataset;
-import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.RollCall;
-import com.backend.legisloop.model.Vote;
 import com.backend.legisloop.repository.*;
 import com.backend.legisloop.serial.BooleanSerializer;
+import com.backend.legisloop.serial.DateSerializer;
 import com.backend.legisloop.util.DatasetUtils;
 import com.backend.legisloop.util.Utils;
 import com.google.gson.*;
@@ -19,23 +18,23 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.swing.plaf.nimbus.State;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.sql.Date;
 
 @Service
 @Slf4j
@@ -127,7 +126,7 @@ public class InitializationService {
 	        LegiscanDataset encodedZip = getDatasetByAccessKeyAndSession(dataset.getSession_id(), dataset.getAccess_key());
 	
 	        // Get the current date in YYYY-MM-DD format
-	        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+	        String date = new SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
 	
 	        String outputFilePath = "../Datasets/" + StateEnum.fromStateID(dataset.getState_id()) + "_" + date + ".zip";
 	        saveBase64ZipToFile(encodedZip.getZip(), outputFilePath);
@@ -154,7 +153,9 @@ public class InitializationService {
     }
 
     private void saveDataFromZip(Map<String, List<JsonObject>> dataMap) {
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(java.sql.Date.class, new DateSerializer()) // Register adapter
+                .create();
 
         // Save Representatives
         List<JsonObject> representativeData = dataMap.getOrDefault("people", Collections.emptyList());
@@ -172,6 +173,23 @@ public class InitializationService {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
             LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
             legislationEntity.setState(StateEnum.fromStateID(legislationJson.get("state_id").getAsInt()));
+
+            JsonArray progress = legislationJson.getAsJsonArray("progress");
+            // Find the date where event = 1 (introduced)
+            LocalDate event1Date = null;
+            if(progress != null) {
+                for (JsonElement element : progress) {
+                    JsonObject progressObject = element.getAsJsonObject();
+                    int event = progressObject.get("event").getAsInt();
+
+                    if (event == 1) {
+                        String dateIntroduced = progressObject.get("date").getAsString();
+                        event1Date = LocalDate.parse(dateIntroduced, DateTimeFormatter.ISO_DATE);
+                        break;
+                    }
+                }
+            }
+            legislationEntity.setDateIntroduced((event1Date != null) ? Date.valueOf(event1Date) : null);
             legislationToAdd.add(legislationEntity);
         });
         legislationRepository.saveAll(legislationToAdd);
@@ -270,7 +288,7 @@ public class InitializationService {
                 .url("https://example.com/legislation/101")
                 .state_link("https://state.example.com/legislation/101")
                 .sponsors(List.of(rep1, rep2))
-                .endorsements(List.of(rep1))
+                // .endorsements(List.of(rep1))
                 .rollCalls(List.of(rollCall1, rollCall2))
                 .build();
 

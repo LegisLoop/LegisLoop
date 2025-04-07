@@ -1,5 +1,7 @@
 package com.backend.legisloop.service;
 
+import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.entities.RepresentativeEntity;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.repository.LegislationRepository;
@@ -14,9 +16,14 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+import jakarta.persistence.EntityNotFoundException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,6 +37,7 @@ import java.util.List;
 public class RepresentativeService {
 	
 	private final RepresentativeRepository representativeRepository;
+    private final LegislationRepository legislationRepository;
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
@@ -132,6 +140,27 @@ public class RepresentativeService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Failed to fetch bills, server responded with status: " + response.getStatus());
         }
+    }
+
+    /**
+     * For a {@link Representative}, get all of their sponsored bills
+     * @param billId
+     * @return a list of representative objects
+     */
+    public List<Representative> getSponsorsByBillId(int billId) {
+        LegislationEntity bill = legislationRepository.findById(billId)
+                .orElseThrow(() -> new EntityNotFoundException("Legislation not found"));
+
+        return representativeRepository.findBySponsoredBills(bill).stream().map(RepresentativeEntity::toModel).toList();
+    }
+
+    /**
+     * Search representatives by first and last name included
+     * @param keyword search term
+     * @return a list of representative objects
+     */
+    public List<Representative> searchRepresentatives(String keyword) {
+        return representativeRepository.searchByName(keyword).stream().map(RepresentativeEntity::toModel).toList();
     }
     
     /**
