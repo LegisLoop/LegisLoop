@@ -14,6 +14,7 @@ import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
 import Tooltip from "../components/ToolTips/ToolTip";
 
+
 function LandingPage() {
     return (
         <>
@@ -104,7 +105,7 @@ function LandingPage() {
                         <EventCard
                             title="Event 1"
                             description="This is a description."
-                            signUpLink="link to sign up"
+                            signUpLink="/legislation/1804666"
                         />
                         <EventCard
                             title="Event 2"
