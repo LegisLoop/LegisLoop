@@ -153,15 +153,6 @@ public class RepresentativeService {
 
         return representativeRepository.findBySponsoredBills(bill).stream().map(RepresentativeEntity::toModel).toList();
     }
-
-    /**
-     * Search representatives by first and last name included
-     * @param keyword search term
-     * @return a list of representative objects
-     */
-    public List<Representative> searchRepresentatives(String keyword) {
-        return representativeRepository.searchByName(keyword).stream().map(RepresentativeEntity::toModel).toList();
-    }
     
     /**
      * Save the {@link Representative} to the DB, if it has changed.

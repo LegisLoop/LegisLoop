@@ -1,17 +1,21 @@
 package com.backend.legisloop.controller;
 
 import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.enums.PolicyAreasEnum;
 import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.service.LegislationService;
+import com.backend.legisloop.service.SearchService;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.search.engine.search.query.SearchResult;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Policy;
 import java.util.List;
 
 @RestController
@@ -21,6 +25,7 @@ public class LegislationController {
 
     private final LegislationService billService;
     private final LegislationRepository legislationRepository;
+    private final SearchService searchService;
 
     // get legislation by id
     @GetMapping("/{legislationId}")
@@ -81,5 +86,24 @@ public class LegislationController {
     ) {
         Page<Legislation> legislationPage = billService.getLegislationBySessionIdPaginated(sessionId, page, size);
         return ResponseEntity.ok(legislationPage);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> searchLegislation(
+            @RequestParam(value = "query") String query,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+
+        return ResponseEntity.ok(searchService.searchLegislation(query, page, size));
+    }
+
+    @GetMapping("/search/keyword")
+    public ResponseEntity<?> searchLegislationKeyword(
+            @RequestParam(value = "keyword")PolicyAreasEnum keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(searchService.searchLegislationKeywords(keyword, page, size));
     }
 }

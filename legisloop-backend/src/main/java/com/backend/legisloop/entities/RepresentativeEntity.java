@@ -3,12 +3,15 @@ package com.backend.legisloop.entities;
 import com.backend.legisloop.model.Representative;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "representatives")
+@Indexed
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,6 +41,7 @@ public class RepresentativeEntity {
     private String role;
 
     @Column(name = "name")
+    @FullTextField
     private String name;
 
     @Column(name = "first_name")

@@ -20,12 +20,6 @@ public interface RepresentativeRepository extends JpaRepository<RepresentativeEn
 
     @Query("SELECT r FROM RepresentativeEntity r WHERE r.state_id = :stateId")
     List<RepresentativeEntity> findByStateId(int stateId);
-
-    @Query("SELECT r FROM RepresentativeEntity r " +
-            "WHERE LOWER(r.first_name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(r.last_name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR LOWER(CONCAT(r.first_name, ' ', r.last_name)) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    List<RepresentativeEntity> searchByName(@Param("keyword") String keyword);
     
 	/**
 	 * Save a legislator to the db if it isn't in there already.

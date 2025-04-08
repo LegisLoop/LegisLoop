@@ -110,6 +110,24 @@
 			<version>2.1.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.hibernate.search</groupId>
+			<artifactId>hibernate-search-mapper-orm</artifactId>
+			<version>7.2.3.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate.search</groupId>
+			<artifactId>hibernate-search-backend-lucene</artifactId>
+			<version>7.2.3.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.logging</groupId>
+			<artifactId>jboss-logging</artifactId>
+			<version>3.6.0.Final</version>
+		</dependency>
+
+
+
 	</dependencies>
 
 	<repositories>
