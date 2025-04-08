@@ -15,7 +15,6 @@ import axios from 'axios';
 
 const Timeline = ({ personID }) => {
 
-    const [showAll, setShowAll] = useState(false);
     const [events, setEvents] = useState([]);
 
     // State for filtering
