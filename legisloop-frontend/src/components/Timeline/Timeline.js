@@ -14,6 +14,7 @@ import axios from 'axios';
 
 
 const Timeline = ({ personID }) => {
+
     const [showAll, setShowAll] = useState(false);
     const [events, setEvents] = useState([]);
 
@@ -22,20 +23,39 @@ const Timeline = ({ personID }) => {
     const [endDate, setEndDate] = useState("");
     const [filterActive, setFilterActive] = useState(false);
 
+    // Pagination state.
+    const [currentPage, setCurrentPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+
     useEffect(() => {
-        const fetchPaginatedEvents = async () => {
-            try {
-                const response = await axios.get(`/api/v1/event/${personID}/paginated`);
-                setEvents(response.data.content);
-            } catch (error) {
-                console.error("Error fetching paginated events:", error);
-            }
-        };
+        if (!filterActive) {
+            const fetchPaginatedEvents = async () => {
+                try {
+                    const response = await axios.get(`/api/v1/event/${personID}/paginated`, {
+                        params: { page: currentPage }
+                    });
+                    const newEvents = response.data.content;
+                    
+                    // Append events for pages beyond the first.
+                    if (currentPage === 0) {
+                        setEvents(newEvents);
+                    } else {
+                        setEvents(prev => [...prev, ...newEvents]);
+                    }
+                    
+                    if (response.data.last) {
+                        setHasMore(false);
+                    }
+                } catch (error) {
+                    console.error("Error fetching paginated events:", error);
+                }
+            };
+
+            fetchPaginatedEvents();
+        }
+      }, [personID, currentPage, filterActive]);
     
-        fetchPaginatedEvents();
-    }, [personID]);
-    
-      // Handler for the Filter button (fetches events based on the provided dates)
+    // Handler for the Filter button (fetches events based on the provided dates)
     const handleFilter = async (e) => {
         e.preventDefault();
         try {
@@ -45,6 +65,7 @@ const Timeline = ({ personID }) => {
             // Assuming the filter endpoint returns an array of events.
             setEvents(response.data);
             setFilterActive(true);
+            setHasMore(false); // Disable paginated "Show More" when filtering.
         } catch (error) {
             console.error("Error fetching filtered events:", error);
         }
@@ -55,9 +76,16 @@ const Timeline = ({ personID }) => {
         setStartDate("");
         setEndDate("");
         setFilterActive(false);
+        setCurrentPage(0);
+        setHasMore(true);
         try {
-            const response = await axios.get(`/api/v1/event/${personID}/paginated`);
+            const response = await axios.get(`/api/v1/event/${personID}/paginated`, {
+                params: { page: 0 }
+            });
             setEvents(response.data.content);
+            if (response.data.last) {
+              setHasMore(false);
+            }
         } catch (error) {
             console.error("Error fetching paginated events:", error);
         }
@@ -74,7 +102,6 @@ const Timeline = ({ personID }) => {
         }))
     ];
 
-    const visibleEvents = showAll ? eventsMap : eventsMap.slice(0, 5);
     const timelineRef = useRef(null);
     const lastEventRef = useRef(null);
     const [timelineHeight, setTimelineHeight] = useState("5rem");
@@ -85,7 +112,7 @@ const Timeline = ({ personID }) => {
             const lastEventBottom = lastEventRef.current.getBoundingClientRect().bottom;
             setTimelineHeight(`${lastEventBottom - timelineTop}px`);
         }
-    }, [visibleEvents, timelineRef, lastEventRef]); // Runs immediately when visibleEvents change
+    }, [events, timelineRef, lastEventRef]); // Runs immediately when events change
 
     return (
         <div className="relative max-w-4xl mx-auto p-6">
@@ -153,11 +180,11 @@ const Timeline = ({ personID }) => {
                 style={{ height: timelineHeight }}
             ></div>
 
-            {visibleEvents.map((event, index) => (
+            {eventsMap.map((event, index) => (
                 <div
                     key={index}
                     className="flex items-center mb-6 relative"
-                    ref={index === visibleEvents.length - 1 ? lastEventRef : null}
+                    ref={index === eventsMap.length - 1 ? lastEventRef : null}
                 >
                     {event.type === "VOTE" ? (
                         <div className="w-1/2 flex justify-end pr-6">
@@ -192,13 +219,13 @@ const Timeline = ({ personID }) => {
                     )}
                 </div>
             ))}
-            {eventsMap.length > 5 && !filterActive && (
+            {!filterActive && hasMore && (
                 <div className="text-center mt-4 relative z-10 bg-white p-4">
                     <button
-                        onClick={() => setShowAll(!showAll)}
+                        onClick={() => setCurrentPage(prev => prev + 1)}
                         className="bg-custom-blue text-white px-4 py-2 rounded-lg shadow-lg"
                     >
-                        {showAll ? "Show Less" : "Show More"}
+                        Show More
                     </button>
                 </div>
             )}

@@ -37,18 +37,21 @@ public class EventController {
             @RequestParam(defaultValue = "10") int size
     ) {
 
-        Page<Legislation> legislationPage = legislationService.getLegislationByRepresentativeIdPaginated(personId, page, size);
-        Page<Vote> votesPage = voteService.getVotesByRepresentativeIdPaginated(personId, page, size);
-        
-        List<Legislation> legislations = legislationPage.getContent();
-        List<Vote> votes = votesPage.getContent();
+        List<Legislation> legislations = legislationService.getLegislationByRepresentativeId(personId);
+        List<Vote> votes = voteService.getVotesByRepresentativeId(personId);
 
         // Merge the two sorted lists into a single list of events.
-        List<Event> mergedEvents = mergeSortedEvents(legislations, votes, size);
+        List<Event> mergedEvents = mergeSortedEvents(legislations, votes);
 
         // Wrap the merged list into a Page.
         Pageable pageable = PageRequest.of(page, size);
-        Page<Event> eventPage = new PageImpl<>(mergedEvents, pageable, mergedEvents.size());
+        
+        // Calculate start and end indexes for the requested page.
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), mergedEvents.size());
+        List<Event> pageContent = mergedEvents.subList(start, end);
+
+        Page<Event> eventPage = new PageImpl<>(pageContent, pageable, mergedEvents.size());
         return ResponseEntity.ok(eventPage);
     }
     
@@ -107,7 +110,7 @@ public class EventController {
         return true;
     }
 
-    private List<Event> mergeSortedEvents(List<Legislation> legislations, List<Vote> votes, int limit) {
+    private List<Event> mergeSortedEvents(List<Legislation> legislations, List<Vote> votes) {
         List<Event> merged = new ArrayList<>();
 
         // Convert and add legislations to merged events.
@@ -124,10 +127,7 @@ public class EventController {
         // Sort the merged list by date descending (newest first)
         merged.sort((e1, e2) -> e2.getDate().compareTo(e1.getDate()));
         
-        log.info(merged.toString());
-        
-        // Return up to the specified limit.
-        return merged.size() > limit ? merged.subList(0, limit) : merged;
+        return merged;
     }
 
 }
