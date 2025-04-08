@@ -18,6 +18,12 @@ public class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Da
 
     @Override
     public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-        return Date.valueOf(LocalDate.parse(json.getAsString(), FORMATTER)); // Convert String to SQL Date
+    	Date ret;
+        try {
+        	ret = Date.valueOf(LocalDate.parse(json.getAsString(), FORMATTER)); // Convert String to SQL Date
+        } catch (Exception e) {
+        	ret = null;
+        }
+        return ret;
     }
 }

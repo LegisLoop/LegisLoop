@@ -1,6 +1,6 @@
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
-import LegislationSideBar from "../components/SideBar/LegislationSideBar";
+import LandingSideBar from "../components/SideBar/LandingSideBar";
 import LegislationPreviewCard from "../components/Cards/LegislationPreviewCard";
 import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
@@ -8,6 +8,7 @@ import Tooltip from "../components/ToolTips/ToolTip";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import useGeoLocation from "../customHooks/useGeoLocation";
 import useLegislation from "../customHooks/useLegislation";
+
 
 function LandingPage() {
     const [activeLevel, setActiveLevel] = useState("Federal");
@@ -71,7 +72,7 @@ function LandingPage() {
             <NavBar />
             <div className="flex min-h-screen">
                 <div className="w-15/100 min-w-[250px]">
-                    <LegislationSideBar
+                    <LandingSideBar
                         activeLevel={activeLevel}
                         setActiveLevel={setActiveLevel}
                         activePolicy={activePolicy}
