@@ -105,7 +105,7 @@ function LandingPage() {
                         <EventCard
                             title="Event 1"
                             description="This is a description."
-                            signUpLink="/legislation/1804666"
+                            signUpLink="link to sign up"
                         />
                         <EventCard
                             title="Event 2"
