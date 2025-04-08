@@ -12,39 +12,56 @@ import Tooltip from "../ToolTips/ToolTip";
 import TimelineEventCard from "../Cards/TimelineEventCard";
 import axios from 'axios';
 
-/*
-const events = [
-    { date: "MAR 2024", title: "Bill Title", type: "vote" },
-    { date: "MAR 2024", title: "Bill Title", type: "sponsoredBill" },
-    { date: "JAN 2024", title: "Bill Title", type: "vote" },
-    { date: "OCT 2023", title: "Bill Title", type: "sponsoredBill" },
-    { date: "JUN 2023", title: "Bill Title", type: "vote" },
-    { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" },
-    { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" },
-    { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" },
-    { date: "MAR 2023", title: "Bill Title", type: "sponsoredBill" }
-];*/
 
 const Timeline = ({ personID }) => {
     const [showAll, setShowAll] = useState(false);
     const [events, setEvents] = useState([]);
 
-    console.log(personID);
+    // State for filtering
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [filterActive, setFilterActive] = useState(false);
 
     useEffect(() => {
-        const fetchEvents = async () => {
+        const fetchPaginatedEvents = async () => {
             try {
                 const response = await axios.get(`/api/v1/event/${personID}/paginated`);
-                console.log('events response', response.data);
                 setEvents(response.data.content);
             } catch (error) {
-                console.error("Error fetching votes:", error);
+                console.error("Error fetching paginated events:", error);
             }
         };
-
-        fetchEvents();
-
+    
+        fetchPaginatedEvents();
     }, [personID]);
+    
+      // Handler for the Filter button (fetches events based on the provided dates)
+    const handleFilter = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.get(`/api/v1/event/${personID}/filter`, {
+                params: { startDate, endDate },
+            });
+            // Assuming the filter endpoint returns an array of events.
+            setEvents(response.data);
+            setFilterActive(true);
+        } catch (error) {
+            console.error("Error fetching filtered events:", error);
+        }
+    };
+    
+    // Handler for clearing the filter and restoring paginated events.
+    const handleClearFilter = async () => {
+        setStartDate("");
+        setEndDate("");
+        setFilterActive(false);
+        try {
+            const response = await axios.get(`/api/v1/event/${personID}/paginated`);
+            setEvents(response.data.content);
+        } catch (error) {
+            console.error("Error fetching paginated events:", error);
+        }
+    };
 
     const eventsMap = [
         ...events.map((event) => ({
@@ -80,11 +97,60 @@ const Timeline = ({ personID }) => {
                     </h5>
                 </Tooltip>
             </div>
+
+            {/* Filter Form */}
+            <div className="mb-6">
+            <form onSubmit={handleFilter} className="flex gap-4 items-end">
+                <div>
+                <label htmlFor="startDate" className="block mb-1">
+                    Start Date:
+                </label>
+                <input
+                    id="startDate"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border rounded p-2"
+                />
+                </div>
+                <div>
+                <label htmlFor="endDate" className="block mb-1">
+                    End Date:
+                </label>
+                <input
+                    id="endDate"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border rounded p-2"
+                />
+                </div>
+                <div className="flex flex-col gap-2">
+                <button
+                    type="submit"
+                    className="bg-custom-blue text-white px-4 py-2 rounded-lg shadow-lg"
+                >
+                    Filter
+                </button>
+                {filterActive && (
+                    <button
+                    type="button"
+                    onClick={handleClearFilter}
+                    className="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-lg"
+                    >
+                    Clear Filter
+                    </button>
+                )}
+                </div>
+            </form>
+            </div>
+
+
             <hr className="my-2 border-blue-gray-50" />
             <div
                 ref={timelineRef}
                 className="absolute left-1/2 transform -translate-x-1/2 w-1 bg-gray-300 transition-all duration-500"
-                style={{ top: "5rem", height: timelineHeight }}
+                style={{ height: timelineHeight }}
             ></div>
 
             {visibleEvents.map((event, index) => (
@@ -126,7 +192,7 @@ const Timeline = ({ personID }) => {
                     )}
                 </div>
             ))}
-            {eventsMap.length > 5 && (
+            {eventsMap.length > 5 && !filterActive && (
                 <div className="text-center mt-4 relative z-10 bg-white p-4">
                     <button
                         onClick={() => setShowAll(!showAll)}
