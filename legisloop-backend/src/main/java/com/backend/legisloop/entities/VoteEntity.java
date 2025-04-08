@@ -37,6 +37,8 @@ public class VoteEntity {
                 .person_id(representative.getPeople_id())
                 .bill_id(this.rollCall.getLegislation().getBill_id())
                 .bill_title(this.rollCall.getLegislation().getTitle())
+                .date(this.rollCall.getDate())
+                .description(this.rollCall.getDesc())
                 .build();
     }
 

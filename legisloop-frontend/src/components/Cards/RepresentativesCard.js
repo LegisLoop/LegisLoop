@@ -6,7 +6,7 @@ export function RepresentativeGrid({ representatives = [] }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {representatives.map((rep) => (
                     <RepresentativeCard
-                        key={rep.people_id}
+                        id={rep.people_id}
                         name={rep.name}
                         title={rep.role}
                         service={`District ${rep.district}`}
@@ -20,12 +20,12 @@ export function RepresentativeGrid({ representatives = [] }) {
     );
 }
 
-export function RepresentativeCard({ name, title, service, topics }) {
+export function RepresentativeCard({ id, name, title, service, topics }) {
     const navigate = useNavigate();
 
     const handleClick = () => {
         navigate(`/representative/${name.replace(/\s+/g, "-").toLowerCase()}`, {
-            state: { name, title, service, topics }
+            state: { id, name, title, service, topics }
         });
     };
 
@@ -38,7 +38,7 @@ export function RepresentativeCard({ name, title, service, topics }) {
                 <span className="text-gray-400">Image Placeholder</span>
             </div>
             <h2 className="text-lg font-semibold">{name}</h2>
-            <p className="text-gray-600 font-bold">{title}</p>
+            <p className="text-gray-600 font-bold">{title} - {id}</p>
             <p className="text-sm text-gray-500">{service}</p>
             <p className="text-sm text-gray-500">{topics}</p>
         </div>

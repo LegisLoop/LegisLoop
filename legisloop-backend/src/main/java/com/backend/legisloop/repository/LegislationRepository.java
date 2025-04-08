@@ -25,6 +25,10 @@ public interface LegislationRepository extends JpaRepository<LegislationEntity, 
     @Query("SELECT l FROM LegislationEntity l JOIN l.sponsors s WHERE s = :sponsor AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
     Page<LegislationEntity> findBySponsorsOrderByStatusDateDesc(@Param("sponsor") RepresentativeEntity sponsor, Pageable pageable);
 
+    // Find all legislation where a specific representative is a sponsor
+    @Query("SELECT l FROM LegislationEntity l JOIN l.sponsors s WHERE s = :sponsor AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
+    List<LegislationEntity> findBySponsorsOrderByStatusDateDesc(@Param("sponsor") RepresentativeEntity sponsor);
+
     @Query("SELECT l FROM LegislationEntity l WHERE l.session_id = :sessionId AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
     List<LegislationEntity> findBySessionId(@Param("sessionId") int sessionId);
 

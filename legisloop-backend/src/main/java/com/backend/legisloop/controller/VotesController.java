@@ -27,7 +27,7 @@ public class VotesController {
         return new ResponseEntity<>(voteRepository.getReferenceById(voteId).toModel(), HttpStatus.OK);
     }
     
-    // Get a person's sponsored bills (paginated)
+    // Get a person's voted bills (paginated)
     @GetMapping("/votedBills/{personId}/paginated")
     public ResponseEntity<Page<Vote>> getSponsoredBills(
             @PathVariable int personId,
