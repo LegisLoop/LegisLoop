@@ -98,12 +98,22 @@ public class LegislationController {
         return ResponseEntity.ok(searchService.searchLegislation(query, page, size));
     }
 
-    @GetMapping("/search/keyword")
-    public ResponseEntity<?> searchLegislationKeyword(
-            @RequestParam(value = "keyword")PolicyAreasEnum keyword,
+    @GetMapping("/search/policy")
+    public ResponseEntity<?> searchLegislationPolicy(
+            @RequestParam(value = "policy") PolicyAreasEnum policyAreasEnum,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(searchService.searchLegislationKeywords(keyword, page, size));
+        return ResponseEntity.ok(searchService.searchLegislationByCategory(policyAreasEnum, page, size));
+    }
+
+    @GetMapping("/search/keyword/policy")
+    public ResponseEntity<?> searchLegislationKeywordAndPolicy(
+            @RequestParam(value = "keyword") PolicyAreasEnum keyword,
+            @RequestParam(value = "query") String query,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(searchService.searchLegislationByCategoryAndTerm(keyword, query, page, size));
     }
 }

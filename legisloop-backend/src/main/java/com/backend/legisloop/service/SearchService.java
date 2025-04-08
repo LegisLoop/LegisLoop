@@ -49,14 +49,31 @@ public class SearchService {
                 .toList();
     }
 
-    public List<Legislation> searchLegislationKeywords(PolicyAreasEnum policyArea, int page, int size) {
+    public List<Legislation> searchLegislationByCategory(PolicyAreasEnum policyArea, int page, int size) {
         SearchSession searchSession = Search.session(entityManager);
-
         String keyword = policyArea.getPolicyArea();
+
         return searchSession.search(LegislationEntity.class)
                 .where(f -> {
                     BooleanPredicateClausesStep<?> boolBuilder = f.bool();
                     boolBuilder.should(f.match().fields("title", "description", "summary").matching(keyword));
+                    return boolBuilder;
+                })
+                .fetchHits(page * size, size)
+                .stream()
+                .map(LegislationEntity::toModel)
+                .toList();
+    }
+
+    public List<Legislation> searchLegislationByCategoryAndTerm(PolicyAreasEnum policyArea, String term, int page, int size) {
+        SearchSession searchSession = Search.session(entityManager);
+        String keyword = policyArea.getPolicyArea();
+
+        return searchSession.search(LegislationEntity.class)
+                .where(f -> {
+                    BooleanPredicateClausesStep<?> boolBuilder = f.bool();
+                    boolBuilder.should(f.match().fields("title", "description").matching(keyword));
+                    boolBuilder.should(f.match().fields("summary").matching(term));
                     return boolBuilder;
                 })
                 .fetchHits(page * size, size)
