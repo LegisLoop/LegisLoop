@@ -3,6 +3,7 @@ package com.backend.legisloop.controller;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.Vote;
 import com.backend.legisloop.model.Event;
+import com.backend.legisloop.service.EventService;
 import com.backend.legisloop.service.LegislationService;
 import com.backend.legisloop.service.VoteService;
 
@@ -41,7 +42,7 @@ public class EventController {
         List<Vote> votes = voteService.getVotesByRepresentativeId(personId);
 
         // Merge the two sorted lists into a single list of events.
-        List<Event> mergedEvents = mergeSortedEvents(legislations, votes);
+        List<Event> mergedEvents = EventService.mergeSortedEvents(legislations, votes);
 
         // Wrap the merged list into a Page.
         Pageable pageable = PageRequest.of(page, size);
@@ -77,13 +78,13 @@ public class EventController {
         List<Event> filteredEvents = new ArrayList<>();
         for (Legislation leg : legislations) {
         	Event temp = new Event(leg);
-            if (isWithinRange(temp.getDate(), start, end)) {
+            if (EventService.isWithinRange(temp.getDate(), start, end)) {
                 filteredEvents.add(temp);
             }
         }
         for (Vote vote : votes) {
         	Event temp = new Event(vote);
-            if (isWithinRange(temp.getDate(), start, end)) {
+            if (EventService.isWithinRange(temp.getDate(), start, end)) {
                 filteredEvents.add(temp);
             }
         }
@@ -92,42 +93,6 @@ public class EventController {
         filteredEvents.sort((e1, e2) -> e2.getDate().compareTo(e1.getDate()));
 
         return ResponseEntity.ok(filteredEvents);
-    }
-
-    /**
-     * Helper method to determine if a given eventDate falls within the start and end dates.
-     */
-    private boolean isWithinRange(Date eventDate, Date start, Date end) {
-        if (eventDate == null) {
-            return false;
-        }
-        if (start != null && eventDate.before(start)) {
-            return false;
-        }
-        if (end != null && eventDate.after(end)) {
-            return false;
-        }
-        return true;
-    }
-
-    private List<Event> mergeSortedEvents(List<Legislation> legislations, List<Vote> votes) {
-        List<Event> merged = new ArrayList<>();
-
-        // Convert and add legislations to merged events.
-        for (Legislation leg : legislations) {
-            Event e = new Event(leg);
-            merged.add(e);
-        }
-        
-        // Convert and add votes to merged events.
-        for (Vote vote : votes) {
-            merged.add(new Event(vote));
-        }
-
-        // Sort the merged list by date descending (newest first)
-        merged.sort((e1, e2) -> e2.getDate().compareTo(e1.getDate()));
-        
-        return merged;
     }
 
 }
