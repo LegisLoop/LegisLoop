@@ -52,13 +52,23 @@ public class InitializationService {
     @Value("${legiscan.base.url}")
     private String url;
 
-    public List<LegiscanDataset> getDatasetListByYear(int year) {
+    public List<LegiscanDataset> getDatasetListByYearAllStates(int year) throws UnirestException {
 
         StateEnum[] states = StateEnum.values();
         List<LegiscanDataset> datasetList = new ArrayList<>();
-        Gson gson = new Gson();
 
         for (StateEnum state : states) {
+            datasetList.addAll(getDatasetListByYearForState(year, state));
+        }
+
+        return datasetList;
+    }
+    
+    public List<LegiscanDataset> getDatasetListByYearForState(int year, StateEnum state) throws UnirestException {
+
+        Gson gson = new Gson();
+        List<LegiscanDataset> datasetList = new ArrayList<>();
+
             try {
                 HttpResponse<JsonNode> response = Unirest.get(url + "/")
                         .queryString("key", API_KEY)
@@ -86,9 +96,10 @@ public class InitializationService {
                 }
             } catch (UnirestException e) {
                 log.error("Error making API request for state: {}, year: {} - {}", state, year, e.getMessage(), e);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Failed to fetch bills, server responded with status: " + e.getMessage());
             }
-        }
-
+            
         return datasetList;
     }
 
@@ -118,11 +129,21 @@ public class InitializationService {
         }
     }
     
-    public String initializeDbFromLegisacn() throws UnirestException, IOException {
+    public String initializeDbFromLegiscanAll() throws UnirestException, IOException {
 
-        List<LegiscanDataset> datasetList = getDatasetListByYear(2025);
-        for (LegiscanDataset dataset : datasetList) {
-	
+        List<LegiscanDataset> datasetList = getDatasetListByYearAllStates(2025);
+        return initializeDbFromLegiscanDatasets(datasetList);
+    }
+    
+    public String initializeDbFromLegiscanByState(StateEnum state) throws UnirestException, IOException {
+
+        List<LegiscanDataset> datasetList = getDatasetListByYearForState(2025, state);
+        return initializeDbFromLegiscanDatasets(datasetList);
+    }
+    
+    private String initializeDbFromLegiscanDatasets(List<LegiscanDataset> datasetList) throws UnirestException, IOException {
+    	for (LegiscanDataset dataset : datasetList) {
+    		
 	        LegiscanDataset encodedZip = getDatasetByAccessKeyAndSession(dataset.getSession_id(), dataset.getAccess_key());
 	
 	        // Get the current date in YYYY-MM-DD format
