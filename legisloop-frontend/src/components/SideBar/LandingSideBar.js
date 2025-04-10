@@ -28,7 +28,6 @@ import {
     HomeIcon,
     BuildingBridgeIcon,
 } from "../Icons/Icons";
-import Tooltip from "../ToolTips/ToolTip";
 
 function LandingSideBar({ activeLevel, setActiveLevel, activePolicy, setActivePolicy }) {
     const [isLevelOpen, setIsLevelOpen] = useState(true);

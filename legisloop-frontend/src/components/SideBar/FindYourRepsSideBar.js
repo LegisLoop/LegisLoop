@@ -2,10 +2,7 @@ import { useState } from "react";
 import {
     CompassIcon,
     DropDownArrowIcon,
-    LibraryIcon,
     MapPinIcon,
-    BuildingIcon,
-    MapIcon,
     AdjustmentsIcon,
 } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
