@@ -104,17 +104,16 @@ function LandingPage() {
                         className="overflow-y-scroll max-h-screen space-y-6"
                         onScroll={handleScroll}
                     >
+                        {bills.map((bill) => (
+                            <LegislationPreviewCard
+                                id={bill.bill_id}
+                                category={bill.category}
+                                title={bill.title}
+                                date={bill.dateIntroduced}
+                                summary={bill.summary !== null ? bill.summary : (bill.description !== bill.title ? bill.description : "" )}
+                            />
+                        ))}
                         {loading && <p>Loading...</p>}
-                        {!loading &&
-                            bills.map((bill) => (
-                                <LegislationPreviewCard
-                                    key={bill.id}
-                                    category={bill.category}
-                                    title={bill.title}
-                                    year={bill.year}
-                                    summary={bill.description}
-                                />
-                            ))}
                     </div>
                 </div>
                 <div className="overflow-auto w-full max-h-screen-xl max-w-[20rem] bg-white p-4 shadow-xl shadow-blue-gray-900/5">
