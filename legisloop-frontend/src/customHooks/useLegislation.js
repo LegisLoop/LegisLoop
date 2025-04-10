@@ -6,6 +6,7 @@ function useLegislation(activeLevel, activeStateId, pageNumber, pageSize, should
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log('activeId', activeStateId);
         const fetchLegislation = async () => {
             console.log("activeid", activeStateId);
             const url = `/api/v1/legislation/stateId/${activeStateId}/paginated`;
@@ -30,7 +31,7 @@ function useLegislation(activeLevel, activeStateId, pageNumber, pageSize, should
             }
         };
 
-        if (shouldRequest) {
+        if (shouldRequest || activeStateId === 52) {
             fetchLegislation();
         }
     }, [activeLevel, activeStateId, pageNumber, pageSize, shouldRequest]);

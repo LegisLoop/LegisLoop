@@ -101,7 +101,7 @@ function LandingPage() {
                     )}
                     <div
                         ref={scrollContainerRef}
-                        className="overflow-scroll max-h-screen space-y-6"
+                        className="overflow-y-scroll max-h-screen space-y-6"
                         onScroll={handleScroll}
                     >
                         {loading && <p>Loading...</p>}
