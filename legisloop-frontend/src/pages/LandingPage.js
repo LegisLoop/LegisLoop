@@ -8,7 +8,7 @@ import Tooltip from "../components/ToolTips/ToolTip";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import useGeoLocation from "../customHooks/useGeoLocation";
 import useLegislation from "../customHooks/useLegislation";
-
+// import useSearchLegislation from "../customHooks/useSearchLegislation";
 
 function LandingPage() {
     const [activeLevel, setActiveLevel] = useState("Federal");
@@ -16,6 +16,8 @@ function LandingPage() {
     const [activeStateId, setActiveStateId] = useState(52);
     const [pageNumber, setPageNumber] = useState(0);
     const [locationRequested, setLocationRequested] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
     const pageSize = 10;
 
     const { stateId } = useGeoLocation(locationRequested);
@@ -35,8 +37,10 @@ function LandingPage() {
         activeStateId,
         pageNumber,
         pageSize,
-        locationRequested
+        locationRequested,
+        searchTerm
     );
+
 
     const scrollContainerRef = useRef(null);
     const prevScrollHeightRef = useRef(0);
@@ -69,7 +73,8 @@ function LandingPage() {
 
     return (
         <>
-            <NavBar />
+            {/* Pass the setSearchTerm function down as onSearch */}
+            <NavBar setSearchTerm={setSearchTerm} />
             <div className="flex min-h-screen">
                 <div className="w-15/100 min-w-[250px]">
                     <LandingSideBar
@@ -106,11 +111,12 @@ function LandingPage() {
                     >
                         {bills.map((bill) => (
                             <LegislationPreviewCard
+                                key={bill.bill_id}
                                 id={bill.bill_id}
                                 category={bill.category}
                                 title={bill.title}
                                 date={bill.dateIntroduced}
-                                summary={bill.summary !== null ? bill.summary : (bill.description !== bill.title ? bill.description : "" )}
+                                summary={bill.summary !== null ? bill.summary : (bill.description !== bill.title ? bill.description : "")}
                             />
                         ))}
                         {loading && <p>Loading...</p>}

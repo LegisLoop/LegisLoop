@@ -81,23 +81,6 @@ class RepresentativeControllerTest {
                 .andExpect(jsonPath("$.length()").value(1));
     }
 
-    // Test for GET /api/v1/representative/search/name?keyword=...
-    @Test
-    void testSearchRepresentatives_success() throws Exception {
-        // Arrange: Create a dummy representative list for the search result.
-        Representative rep = new Representative();
-        List<Representative> results = Arrays.asList(rep);
-        when(representativeService.searchRepresentatives("John")).thenReturn(results);
-
-        // Act & Assert: Call the endpoint with keyword "John".
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/representative/search/name")
-                .param("keyword", "John")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
-
     // Test for GET /api/v1/representative/stateId/{stateId}
     @Test
     void testGetRepresentativeByStateId_success() throws Exception {

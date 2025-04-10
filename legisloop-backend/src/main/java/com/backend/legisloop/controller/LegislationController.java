@@ -9,13 +9,11 @@ import com.backend.legisloop.service.LegislationService;
 import com.backend.legisloop.service.SearchService;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.search.engine.search.query.SearchResult;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Policy;
 import java.util.List;
 
 @RestController
