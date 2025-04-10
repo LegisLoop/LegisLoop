@@ -11,6 +11,7 @@ function RepresentativePage() {
 
     // Extract state from navigation
     const repData = location.state || {
+        id: null,
         name: "Unknown Representative",
         title: "Unknown Position",
         service: "Unknown Service Length",
@@ -50,7 +51,9 @@ function RepresentativePage() {
                         </div>
                         <div className="lg:col-span-2 flex justify-center">
                             <div className="w-full max-w-3xl bg-white shadow-lg border border-gray-300 rounded-lg p-6">
-                                <Timeline />
+                                <Timeline
+                                    personID={repData.id}
+                                />
                             </div>
                         </div>
                     </div>

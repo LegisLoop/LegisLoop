@@ -52,13 +52,23 @@ public class InitializationService {
     @Value("${legiscan.base.url}")
     private String url;
 
-    public List<LegiscanDataset> getDatasetListByYear(int year) {
+    public List<LegiscanDataset> getDatasetListByYearAllStates(int year) throws UnirestException {
 
         StateEnum[] states = StateEnum.values();
         List<LegiscanDataset> datasetList = new ArrayList<>();
-        Gson gson = new Gson();
 
         for (StateEnum state : states) {
+            datasetList.addAll(getDatasetListByYearForState(year, state));
+        }
+
+        return datasetList;
+    }
+    
+    public List<LegiscanDataset> getDatasetListByYearForState(int year, StateEnum state) throws UnirestException {
+
+        Gson gson = new Gson();
+        List<LegiscanDataset> datasetList = new ArrayList<>();
+
             try {
                 HttpResponse<JsonNode> response = Unirest.get(url + "/")
                         .queryString("key", API_KEY)
@@ -86,9 +96,10 @@ public class InitializationService {
                 }
             } catch (UnirestException e) {
                 log.error("Error making API request for state: {}, year: {} - {}", state, year, e.getMessage(), e);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Failed to fetch bills, server responded with status: " + e.getMessage());
             }
-        }
-
+            
         return datasetList;
     }
 
@@ -118,11 +129,21 @@ public class InitializationService {
         }
     }
     
-    public String initializeDbFromLegisacn() throws UnirestException, IOException {
+    public String initializeDbFromLegiscanAll() throws UnirestException, IOException {
 
-        List<LegiscanDataset> datasetList = getDatasetListByYear(2025);
-        for (LegiscanDataset dataset : datasetList) {
-	
+        List<LegiscanDataset> datasetList = getDatasetListByYearAllStates(2025);
+        return initializeDbFromLegiscanDatasets(datasetList);
+    }
+    
+    public String initializeDbFromLegiscanByState(StateEnum state) throws UnirestException, IOException {
+
+        List<LegiscanDataset> datasetList = getDatasetListByYearForState(2025, state);
+        return initializeDbFromLegiscanDatasets(datasetList);
+    }
+    
+    private String initializeDbFromLegiscanDatasets(List<LegiscanDataset> datasetList) throws UnirestException, IOException {
+    	for (LegiscanDataset dataset : datasetList) {
+    		
 	        LegiscanDataset encodedZip = getDatasetByAccessKeyAndSession(dataset.getSession_id(), dataset.getAccess_key());
 	
 	        // Get the current date in YYYY-MM-DD format
@@ -172,7 +193,12 @@ public class InitializationService {
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
             LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
+            
             legislationEntity.setState(StateEnum.fromStateID(legislationJson.get("state_id").getAsInt()));
+            
+            for (LegislationDocumentEntity doc : legislationEntity.getTexts()) {
+            	doc.setBill(LegislationEntity.builder().bill_id(legislationEntity.getBill_id()).build());
+            }
 
             JsonArray progress = legislationJson.getAsJsonArray("progress");
             // Find the date where event = 1 (introduced)
@@ -296,16 +322,16 @@ public class InitializationService {
 
         // Insert Legislation Documents
         LegislationDocumentEntity document = LegislationDocumentEntity.builder()
-                .docId(1)
+                .doc_id(1)
                 .bill(legislation)
-                .textHash("doc_hash_123")
-                .legiscanLink(URI.create("https://example.com/document/1"))
-                .externalLink(URI.create("https://external.example.com/document/1"))
+                .text_hash("doc_hash_123")
+                .url(URI.create("https://example.com/document/1"))
+                .state_link(URI.create("https://external.example.com/document/1"))
                 .mime("application/pdf")
                 .mimeId(1)
                 .docContent("Sample document content")
                 .type("Bill Text")
-                .typeId(101)
+                .type_id(101)
                 .build();
 
         legislationDocumentRepository.save(document);
@@ -347,6 +373,14 @@ public class InitializationService {
     }
     
     private static void saveBase64ZipToFile(String base64String, String filePath) {
+    	
+    	File file = new File(filePath);
+        // Create parent directories if they do not exist
+        File parentDir = file.getParentFile();
+        if (parentDir != null && !parentDir.exists()) {
+            parentDir.mkdirs();
+        }
+    	
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
             // Decode the Base64 string into byte array
             byte[] decodedBytes = Base64.getDecoder().decode(base64String);
@@ -354,9 +388,9 @@ public class InitializationService {
             // Write to file
             fileOutputStream.write(decodedBytes);
 
-            System.out.println("Zip file saved successfully at: " + filePath);
+            log.info("Zip file saved successfully at: " + filePath);
         } catch (IOException e) {
-            System.err.println("Error saving zip file: " + e.getMessage());
+            log.error("Error saving zip file: " + e.getMessage());
         }
     }
 }

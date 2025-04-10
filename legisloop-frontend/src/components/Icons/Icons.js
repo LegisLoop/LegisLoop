@@ -280,12 +280,22 @@ export const EmailIcon = () => (
     </svg>
 );
 
-export const DocumentTextIcon = () => (
+export const DocumentTextIcon = ({className= ""}) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"
-         className="size-8 text-custom-red">
+         className={`size-6 ${className}`} >
         <path strokeLinecap="round" strokeLinejoin="round"
               d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
     </svg>
+
+);
+
+export const DocumentDuplicateIcon = ({className = ""}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"
+         className={`size-6 ${className}`}>
+        <path strokeLinecap="round" strokeLinejoin="round"
+              d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75"/>
+    </svg>
+
 
 );
 
@@ -296,6 +306,14 @@ export const ArrowUpRightCircleIcon = () => (
         <circle cx="12" cy="12" r="9"/>
         <line x1="15" y1="9" x2="9" y2="15"/>
         <polyline points="15 15 15 9 9 9"/>
+    </svg>
+);
+
+export const UserIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-6">
+        <path fillRule="evenodd"
+              d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z"
+              clipRule="evenodd"/>
     </svg>
 );
 
@@ -357,4 +375,5 @@ export const LegisLoopLogo = (props) => (
         <path className="cls-1" d="M832.43,375a22.15,22.15,0,1,1,22.39-21.84A21.95,21.95,0,0,1,832.43,375Z"/>
         <path className="cls-1" d="M993.76,375a22.15,22.15,0,1,1,22.36-21.87A21.94,21.94,0,0,1,993.76,375Z"/>
     </svg>
-)
+);
+

@@ -37,6 +37,7 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -238,7 +239,7 @@ public class LegislationService {
      * @apiNote LegiScan called.
      * @throws UnirestException
      */
-    private LegislationDocument getDocContent(LegislationDocument legislationDocument) throws UnirestException {
+    protected LegislationDocument getDocContent(LegislationDocument legislationDocument) throws UnirestException {
         HttpResponse<JsonNode> response = Unirest.get(url + "/")
                 .queryString("key", API_KEY)
                 .queryString("op", "getBillText")
@@ -304,6 +305,21 @@ public class LegislationService {
         Pageable pageable = PageRequest.of(page, size);
         Page<LegislationEntity> legislationEntities = legislationRepository.findBySponsorsOrderByStatusDateDesc(representative, pageable);
         return legislationEntities.map(LegislationEntity::toModel);
+    }
+    
+    /**
+     * Get all {@link Legislation} for who a representative is a sponsor
+     * @param repId rep id
+     * @return a list of legislation objects
+     */
+    public List<Legislation> getLegislationByRepresentativeId(int repId) {
+        RepresentativeEntity representative = representativeRepository.findById(repId)
+                .orElseThrow(() -> new EntityNotFoundException("Representative not found"));
+
+        List<LegislationEntity> legislationEntities = legislationRepository.findBySponsorsOrderByStatusDateDesc(representative);
+        return legislationEntities.stream()
+                .map(LegislationEntity::toModel)
+                .collect(Collectors.toList());
     }
     
     /**

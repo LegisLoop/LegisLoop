@@ -14,10 +14,10 @@ function Footer() {
         <footer
             className="relative z-10 bg-[#A69B97] pb-5 pt-20 lg:pb-8 lg:pt-10 dark:bg-dark flex flex-col mt-auto bottom-0 "
         >
-            <div className="container mx-auto">
-                <div className="-mx-4 flex flex-wrap">
+            <div className="container mx-auto max-w-full overflow-hidden">
+            <div className="-mx-4 flex flex-wrap">
                     <div className="w-full px-4 sm:w-2/3 lg:w-3/12">
-                        <div className="mb-10 w-full">
+                        <div className="mb-10 w-full pl-2">
                             <p className="mb-7 text-base text-body-color dark:text-dark-6">
                                 Have any questions about LegisLoop? Stay in the loop and connect
                                 with the Developers.
@@ -64,8 +64,8 @@ function Footer() {
                             </ul>
                         </div>
                     </div>
-                    <div className="w-full px-4 sm:w-1/2 lg:w-3/12">
-                        <div className="mb-10 w-full">
+                    <div className="w-full pl-4 sm:w-1/2 lg:w-2/12">
+                        <div className="mb-10">
                             <h4 className="mb-9 text-lg font-semibold text-dark dark:text-white">Connect with Us On</h4>
                             <div className="mb-6 flex items-center"><a href="/" className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke text-dark hover:border-primary hover:bg-primary hover:text-white sm:mr-4 lg:mr-3 xl:mr-4 dark:border-dark-3 dark:text-white dark:hover:border-primary">
                                     <GitHubIcon/>

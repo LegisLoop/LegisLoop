@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
+import java.sql.Date;
 
 @AllArgsConstructor
 @Builder
@@ -19,6 +20,7 @@ public class LegislationDocument {
 
     private int docId;
     private int billId;
+    private Date date;
     private String textHash;
     private URI legiscanLink;
     private URI externalLink;
@@ -30,22 +32,24 @@ public class LegislationDocument {
 
     public LegislationDocumentEntity toEntity() {
         return LegislationDocumentEntity.builder()
-                .docId(this.docId)
+                .doc_id(this.docId)
                 .bill(LegislationEntity.builder().bill_id(this.billId).build())
-                .textHash(this.textHash)
-                .legiscanLink(this.legiscanLink)
-                .externalLink(this.externalLink)
+                .date(this.date)
+                .text_hash(this.textHash)
+                .url(this.legiscanLink)
+                .state_link(this.externalLink)
                 .mime(this.mime)
                 .mimeId(this.mimeId)
                 .docContent(this.docContent)
                 .type(this.type)
-                .typeId(this.typeId)
+                .type_id(this.typeId)
                 .build();
     }
     
     public static LegislationDocument fillDocument(JsonObject textObject) {
     	LegislationDocumentBuilder documentBuilder = LegislationDocument.builder()
 	        .textHash(textObject.get("text_hash").getAsString())
+	        .date(textObject.get("date").getAsString().equals("0000-00-00") ? null : Date.valueOf(textObject.get("date").getAsString()))
 	        .legiscanLink(URI.create(textObject.get("url").getAsString()))
 	        .externalLink(URI.create(textObject.get("state_link").getAsString()))
 	        .docId(textObject.get("doc_id").getAsInt())
