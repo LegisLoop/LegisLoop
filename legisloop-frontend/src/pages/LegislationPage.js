@@ -31,16 +31,30 @@ function LegislationPage() {
 
     // Store the legislation data from the API.
     const [legislation, setLegislation] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
         const fetchLegislation = async () => {
             try {
                 // Use the bill id from the URL
                 const response = await axios.get(`/api/v1/legislation-doc/latest/${id}`);
-                console.log("response", response.data);
-                setLegislation(response.data);
+                
+                // Check for HTTP 204 (no content)
+                if (response.status === 204) {
+                    setErrorMessage("No content for this legislation, yet.");
+                } else {
+                    setLegislation(response.data);
+                }
             } catch (error) {
-                console.error("Error fetching bill data:", error);
+                // If the error response is available, check for 404
+                if (error.response && error.response.status === 404) {
+                    setErrorMessage("Bill not found.");
+                } else {
+                    setErrorMessage("An error occurred while fetching data.");
+                }
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -49,15 +63,25 @@ function LegislationPage() {
         }
     }, [id]);
 
-    // If no legislation data is available, you can fall back to location.state or defaults.
-    const legislationData = legislation || {
-        name: "Unknown Representative",
-        mime: "application/pdf", // or "text/html" if that's your default
-        docContent: "" // Base64 string from backend
-    };
+    // Determine what to render in the content area.
+    let content;
+    if (loading) {
+        content = <p className="text-center text-blue-500">Fetching data...</p>;
+    } else if (errorMessage) {
+        content = <p className="text-center text-red-500">{errorMessage}</p>;
+    } else {
+        // Use the fetched legislation data; fall back to default values if for some reason data is absent.
+        const legislationData = legislation || {
+            name: "Unknown Representative",
+            mime: "application/pdf",
+            docContent: ""
+        };
 
-    // Convert the Base64 document content to a Blob URL.
-    const blobUrl = createBlobUrl(legislationData.docContent, legislationData.mime);
+        // Convert the Base64 document content to a Blob URL.
+        const blobUrl = createBlobUrl(legislationData.docContent, legislationData.mime);
+
+        content = <LegislationVisualizer mimeType={legislationData.mime} mimeId={blobUrl} />;
+    }
 
     return (
         <>
@@ -67,7 +91,7 @@ function LegislationPage() {
                     <LegislationSideBar votes={votes} />
                 </div>
                 <div className="flex-1 p-6 mx-auto max-w-[900px] lg:mx-2">
-                    <LegislationVisualizer mimeType={legislationData.mime} mimeId={blobUrl} />
+                    {content}
                 </div>
             </div>
             <Footer />
