@@ -22,10 +22,8 @@ const stateMap = {
 };
 
 function RepresentativeSideBar({ setStateId }) {
-    const [ setActiveLevel] = useState(null);
     const [selectedState, setSelectedState] = useState("");
     const [isLocationOpen, setIsLocationOpen] = useState(true);
-    const [, setIsLocalOpen] = useState(false);
 
     const handleStateSelection = (state) => {
         setSelectedState(state);
