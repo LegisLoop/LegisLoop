@@ -1,14 +1,39 @@
 package com.backend.legisloop.repository;
 
 import com.backend.legisloop.entities.LegislationEntity;
+import com.backend.legisloop.entities.RepresentativeEntity;
+import com.backend.legisloop.enums.StateEnum;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface LegislationRepository extends JpaRepository<LegislationEntity, Integer> {
+
+    @Query("SELECT l FROM LegislationEntity l WHERE l.state = :state AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
+    Page<LegislationEntity> findByStateOrderByStatusDateDesc(@Param("state") StateEnum state, Pageable pageable);
+
+    // Find all legislation where a specific representative is a sponsor
+    @Query("SELECT l FROM LegislationEntity l JOIN l.sponsors s WHERE s = :sponsor AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
+    Page<LegislationEntity> findBySponsorsOrderByStatusDateDesc(@Param("sponsor") RepresentativeEntity sponsor, Pageable pageable);
+
+    // Find all legislation where a specific representative is a sponsor
+    @Query("SELECT l FROM LegislationEntity l JOIN l.sponsors s WHERE s = :sponsor AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
+    List<LegislationEntity> findBySponsorsOrderByStatusDateDesc(@Param("sponsor") RepresentativeEntity sponsor);
+
+    @Query("SELECT l FROM LegislationEntity l WHERE l.session_id = :sessionId AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
+    List<LegislationEntity> findBySessionId(@Param("sessionId") int sessionId);
+
+    @Query("SELECT l FROM LegislationEntity l WHERE l.session_id = :sessionId AND l.status_date IS NOT NULL ORDER BY l.status_date DESC")
+    Page<LegislationEntity> findBySessionId(@Param("sessionId") int sessionId, Pageable pageable);
 	
 	/**
 	 * Save a piece of legislation to the db if it isn't in there already.

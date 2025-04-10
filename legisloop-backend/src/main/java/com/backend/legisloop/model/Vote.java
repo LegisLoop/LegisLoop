@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.net.URI;
+import java.sql.Date;
 
 import com.backend.legisloop.enums.VotePosition;
 
@@ -19,6 +20,10 @@ public class Vote {
 
     private int roll_call_id;
     private int person_id;
+    private int bill_id; // Not stored in the DB
+    private String bill_title; // Not stored in the DB
+    private Date date; // Not stored in the DB
+    private String description; // Not stored in the DB
     private VotePosition vote_position;
 
     public VoteEntity toEntity() {

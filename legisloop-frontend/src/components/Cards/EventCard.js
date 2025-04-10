@@ -6,7 +6,8 @@
  ****************************************************************
  * Last Updated: February 19, 2025.
  ***************************************************************/
-import { EventBannerIcon } from "../Icons/Icons";
+import {EventBannerIcon} from "../Icons/Icons";
+import { Link } from "react-router-dom";
 
 function EventCard({ title, description, signUpLink }) {
     return (
@@ -17,15 +18,14 @@ function EventCard({ title, description, signUpLink }) {
             <div className="flex-1">
                 <h3 className="text-lg font-bold text-gray-900">{title}</h3>
                 <p className="text-sm text-gray-500">{description}</p>
-                <a
-                    href={signUpLink}
+                <Link
+                    to={signUpLink}
                     className="text-sm text-gray-600 underline hover:text-gray-900 transition"
                 >
                     Link to sign up for event
-                </a>
+                </Link>
             </div>
         </div>
     );
 }
-
 export default EventCard;

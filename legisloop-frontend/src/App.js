@@ -18,7 +18,7 @@ function App() {
       <Router>
           <Routes>
               <Route path="/" element={<LandingPage/>} />
-              <Route path="/legislation" element={<LegislationPage/>} />
+              <Route path="/legislation/:id" element={<LegislationPage/>} />
               <Route path="/findrepresentatives" element={<FindYourRepresentativesPage/>} />
               <Route path="/representative/:name" element={<RepresentativePage/>}/>
               <Route path="/connect" element={<ConnectPage/>} />

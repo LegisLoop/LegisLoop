@@ -6,25 +6,101 @@
  ****************************************************************
  * Last Updated: February 21, 2025.
  ***************************************************************/
-import React, { useState, useLayoutEffect, useRef } from "react";
+import React, { useState, useLayoutEffect, useRef, useEffect } from "react";
 import { DocumentTextIcon } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
+import TimelineEventCard from "../Cards/TimelineEventCard";
+import axios from 'axios';
 
-const events = [
-    { date: "MAR 2024", title: "Bill Title", type: "vote" },
-    { date: "MAR 2024", title: "Bill Title", type: "bill" },
-    { date: "JAN 2024", title: "Bill Title", type: "vote" },
-    { date: "OCT 2023", title: "Bill Title", type: "bill" },
-    { date: "JUN 2023", title: "Bill Title", type: "vote" },
-    { date: "MAR 2023", title: "Bill Title", type: "bill" },
-    { date: "MAR 2023", title: "Bill Title", type: "bill" },
-    { date: "MAR 2023", title: "Bill Title", type: "bill" },
-    { date: "MAR 2023", title: "Bill Title", type: "bill" }
-];
 
-const Timeline = () => {
-    const [showAll, setShowAll] = useState(false);
-    const visibleEvents = showAll ? events : events.slice(0, 5);
+const Timeline = ({ personID }) => {
+
+    const [events, setEvents] = useState([]);
+
+    // State for filtering
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [filterActive, setFilterActive] = useState(false);
+
+    // Pagination state.
+    const [currentPage, setCurrentPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+
+    useEffect(() => {
+        if (!filterActive) {
+            const fetchPaginatedEvents = async () => {
+                try {
+                    const response = await axios.get(`/api/v1/event/${personID}/paginated`, {
+                        params: { page: currentPage }
+                    });
+                    const newEvents = response.data.content;
+                    
+                    // Append events for pages beyond the first.
+                    if (currentPage === 0) {
+                        setEvents(newEvents);
+                    } else {
+                        setEvents(prev => [...prev, ...newEvents]);
+                    }
+                    
+                    if (response.data.last) {
+                        setHasMore(false);
+                    }
+                } catch (error) {
+                    console.error("Error fetching paginated events:", error);
+                }
+            };
+
+            fetchPaginatedEvents();
+        }
+      }, [personID, currentPage, filterActive]);
+    
+    // Handler for the Filter button (fetches events based on the provided dates)
+    const handleFilter = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.get(`/api/v1/event/${personID}/filter`, {
+                params: { startDate, endDate },
+            });
+            // Assuming the filter endpoint returns an array of events.
+            setEvents(response.data);
+            setFilterActive(true);
+            setHasMore(false); // Disable paginated "Show More" when filtering.
+        } catch (error) {
+            console.error("Error fetching filtered events:", error);
+        }
+    };
+    
+    // Handler for clearing the filter and restoring paginated events.
+    const handleClearFilter = async () => {
+        setStartDate("");
+        setEndDate("");
+        setFilterActive(false);
+        setCurrentPage(0);
+        setHasMore(true);
+        try {
+            const response = await axios.get(`/api/v1/event/${personID}/paginated`, {
+                params: { page: 0 }
+            });
+            setEvents(response.data.content);
+            if (response.data.last) {
+              setHasMore(false);
+            }
+        } catch (error) {
+            console.error("Error fetching paginated events:", error);
+        }
+    };
+
+    const eventsMap = [
+        ...events.map((event) => ({
+            date: event.date,
+            title: event.event_title,
+            position: event.vote_position,
+            type: event.type,
+            description: event.event_description,
+            bill_id: event.bill_id
+        }))
+    ];
+
     const timelineRef = useRef(null);
     const lastEventRef = useRef(null);
     const [timelineHeight, setTimelineHeight] = useState("5rem");
@@ -35,7 +111,7 @@ const Timeline = () => {
             const lastEventBottom = lastEventRef.current.getBoundingClientRect().bottom;
             setTimelineHeight(`${lastEventBottom - timelineTop}px`);
         }
-    }, [visibleEvents]); // Runs immediately when visibleEvents change
+    }, [events, timelineRef, lastEventRef]); // Runs immediately when events change
 
     return (
         <div className="relative max-w-4xl mx-auto p-6">
@@ -47,61 +123,111 @@ const Timeline = () => {
                     </h5>
                 </Tooltip>
             </div>
+
+            {/* Filter Form */}
+            <div className="mb-6">
+            <form onSubmit={handleFilter} className="flex gap-4 items-end">
+                <div>
+                <label htmlFor="startDate" className="block mb-1">
+                    Start Date:
+                </label>
+                <input
+                    id="startDate"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border rounded p-2"
+                />
+                </div>
+                <div>
+                <label htmlFor="endDate" className="block mb-1">
+                    End Date:
+                </label>
+                <input
+                    id="endDate"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border rounded p-2"
+                />
+                </div>
+                <div className="flex flex-col gap-2">
+                <button
+                    type="submit"
+                    className="bg-custom-blue text-white px-4 py-2 rounded-lg shadow-lg"
+                >
+                    Filter
+                </button>
+                {filterActive && (
+                    <button
+                    type="button"
+                    onClick={handleClearFilter}
+                    className="bg-gray-400 text-white px-4 py-2 rounded-lg shadow-lg"
+                    >
+                    Clear Filter
+                    </button>
+                )}
+                </div>
+            </form>
+            </div>
+
+
             <hr className="my-2 border-blue-gray-50" />
             <div
                 ref={timelineRef}
                 className="absolute left-1/2 transform -translate-x-1/2 w-1 bg-gray-300 transition-all duration-500"
-                style={{ top: "5rem", height: timelineHeight }}
+                style={{ height: timelineHeight }}
             ></div>
 
-            {visibleEvents.map((event, index) => (
+            {eventsMap.map((event, index) => (
                 <div
                     key={index}
                     className="flex items-center mb-6 relative"
-                    ref={index === visibleEvents.length - 1 ? lastEventRef : null} // Attach ref to last event
+                    ref={index === eventsMap.length - 1 ? lastEventRef : null}
                 >
-                    {event.type === "vote" ? (
+                    {event.type === "VOTE" ? (
                         <div className="w-1/2 flex justify-end pr-6">
-                            <EventCard event={event} />
+                            <TimelineEventCard
+                                type={event.type}
+                                title={event.title}
+                                date={event.date}
+                                description={event.description}
+                                position={event.position}
+                                bill_id={event.bill_id}
+                            />
                         </div>
                     ) : (
                         <div className="w-1/2"></div>
                     )}
                     <div className="w-6 h-6 rounded-full flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 bg-white border-2 border-gray-500">
-                        <span className={`${event.type === "vote" ? "bg-custom-cyan" : "bg-custom-red"} w-4 h-4 rounded-full`}></span>
+                        <span className={`${event.type === "VOTE" ? "bg-custom-cyan" : "bg-custom-red"} w-4 h-4 rounded-full`}></span>
                     </div>
-                    {event.type === "bill" ? (
+                    {event.type === "SPONSORED" ? (
                         <div className="w-1/2 flex justify-start pl-6">
-                            <EventCard event={event} />
+                            <TimelineEventCard
+                                type={event.type}
+                                title={event.title}
+                                date={event.date}
+                                description={event.description}
+                                position={event.position}
+                                bill_id={event.bill_id}
+                            />
                         </div>
                     ) : (
                         <div className="w-1/2"></div>
                     )}
                 </div>
             ))}
-            {events.length > 5 && (
+            {!filterActive && hasMore && (
                 <div className="text-center mt-4 relative z-10 bg-white p-4">
                     <button
-                        onClick={() => setShowAll(!showAll)}
+                        onClick={() => setCurrentPage(prev => prev + 1)}
                         className="bg-custom-blue text-white px-4 py-2 rounded-lg shadow-lg"
                     >
-                        {showAll ? "Show Less" : "Show More"}
+                        Show More
                     </button>
                 </div>
             )}
-        </div>
-    );
-};
-
-const EventCard = ({ event }) => {
-    return (
-        <div className="bg-white shadow-lg rounded-lg p-4 w-64">
-            <div className="flex items-center space-x-2">
-                <span className={`w-3 h-3 rounded-full ${event.type === "vote" ? "bg-custom-cyan" : "bg-custom-red"}`}></span>
-                <span className="text-gray-500 text-sm">{event.date}</span>
-            </div>
-            <h3 className="font-semibold text-custom-blue mt-2">{event.title}</h3>
-            <p className="text-gray-600 text-sm">{event.type === "vote" ? "Vote" : "Bill Topic"}</p>
         </div>
     );
 };
