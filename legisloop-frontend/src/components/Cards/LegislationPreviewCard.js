@@ -6,15 +6,18 @@
  ****************************************************************
  * Last Updated: February 19, 2025.
  ***************************************************************/
-function LegislationPreviewCard({category, title, year, summary}) {
+
+import {Link} from "react-router-dom";
+
+function LegislationPreviewCard({id, category, title, date, summary}) {
     return (
         <div className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200 max-w-screen-lg">
             <div className="flex items-center gap-2 text-gray-600 text-sm font-semibold uppercase">
                 <div className="w-2 h-5 bg-teal-500 rounded"></div>
-                <span>{category}</span>
+                <span>{category ? category : ""}{category && date ? " : " : ""}{date ? date : ""}</span>
             </div>
             <h2 className="text-lg font-bold text-gray-900 mt-1">
-                {title} <span className="uppercase">{year}</span>
+                <Link to={`/legislation/${id}`}>{title}</Link>
             </h2>
             <p className="text-gray-500 text-sm mt-1">
                 {summary}

@@ -106,11 +106,11 @@ function LandingPage() {
                     >
                         {bills.map((bill) => (
                             <LegislationPreviewCard
-                                key={bill.id}
+                                id={bill.bill_id}
                                 category={bill.category}
                                 title={bill.title}
-                                year={bill.year}
-                                summary={bill.description}
+                                date={bill.dateIntroduced}
+                                summary={bill.summary !== null ? bill.summary : (bill.description != bill.title ? bill.description : "" )}
                             />
                         ))}
                         {loading && <p>Loading...</p>}
