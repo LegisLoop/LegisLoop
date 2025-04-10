@@ -22,7 +22,7 @@ const stateMap = {
 };
 
 function RepresentativeSideBar({ setStateId }) {
-    const [activeLevel, setActiveLevel] = useState(null);
+    const [ setActiveLevel] = useState(null);
     const [selectedState, setSelectedState] = useState("");
     const [isLocationOpen, setIsLocationOpen] = useState(true);
     const [, setIsLocalOpen] = useState(false);
@@ -32,14 +32,6 @@ function RepresentativeSideBar({ setStateId }) {
         setStateId(stateMap[state]); // Update state ID in parent
     };
 
-    const handleLevelClick = (level) => {
-        setActiveLevel(level);
-        if (level === "Local") {
-            setIsLocalOpen(true);
-        } else {
-            setIsLocalOpen(false);
-        }
-    };
     return (
         <div className="relative flex h-full w-full max-w-[20rem] flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 z-9">
 
