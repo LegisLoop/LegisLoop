@@ -28,7 +28,6 @@ function RepresentativeSideBar({ setStateId }) {
     const [activeLevel, setActiveLevel] = useState(null);
     const [selectedState, setSelectedState] = useState("");
     const [isLocationOpen, setIsLocationOpen] = useState(true);
-    const [isLevelOpen, setIsLevelOpen] = useState(false);
     const [, setIsLocalOpen] = useState(false);
 
     const handleStateSelection = (state) => {
@@ -74,8 +73,8 @@ function RepresentativeSideBar({ setStateId }) {
                 </button>
 
                 {/* Dropdown with Search */}
-                <div className={`transition-all duration-300 ${isLocationOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
-                <input
+                <div className="py-1 text-sm text-gray-700">
+                    <input
                         type="text"
                         placeholder="Search state..."
                         value={selectedState}
@@ -110,34 +109,6 @@ function RepresentativeSideBar({ setStateId }) {
                         <p className="mr-auto text-base font-bold">Select Government Level</p>
                         <span className="ml-4"><DropDownArrowIcon /></span>
                     </button>
-                    <div className={`overflow-hidden transition-all duration-300 ${isLevelOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}>
-                        <div className="py-1 text-sm text-gray-700">
-                            <nav className="flex flex-col gap-1">
-                                {[
-                                    { icon: <LibraryIcon />, label: "Federal" },
-                                    { icon: <MapIcon />, label: "State" },
-                                    { icon: <BuildingIcon />, label: "Local" },
-                                ].map((item, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => handleLevelClick(item.label)}
-                                        className={`flex items-center w-full p-2 md:p-3 transition-all rounded-lg text-start ${
-                                            activeLevel === item.label
-                                                ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red text-custom-red-dark font-semibold"
-                                                : "hover:bg-gray-200"
-                                        }`}
-                                    >
-                                        <div className={`grid mr-2 md:mr-4 place-items-center ${
-                                            activeLevel === item.label ? "text-custom-red-dark" : "text-custom-blue"
-                                        }`}>
-                                            {item.icon}
-                                        </div>
-                                        {item.label}
-                                    </button>
-                                ))}
-                            </nav>
-                        </div>
-                    </div>
                 </div>
             )}
         </div>
