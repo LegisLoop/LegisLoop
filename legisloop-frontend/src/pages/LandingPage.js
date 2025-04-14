@@ -38,7 +38,8 @@ function LandingPage() {
         pageNumber,
         pageSize,
         locationRequested,
-        searchTerm
+        searchTerm,
+        activePolicy
     );
 
 
@@ -74,7 +75,7 @@ function LandingPage() {
     return (
         <>
             {/* Pass the setSearchTerm function down as onSearch */}
-            <NavBar setSearchTerm={setSearchTerm} />
+            <NavBar setSearchTerm={setSearchTerm} setActiveLevel={setActiveLevel} setActivePolicy={setActivePolicy} />
             <div className="flex min-h-screen">
                 <div className="w-15/100 min-w-[250px]">
                     <LandingSideBar

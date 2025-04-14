@@ -86,7 +86,7 @@ public class LegislationController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchLegislation(
+    public ResponseEntity<List<Legislation>> searchLegislation(
             @RequestParam(value = "query") String query,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
@@ -96,7 +96,7 @@ public class LegislationController {
     }
 
     @GetMapping("/search/policy")
-    public ResponseEntity<?> searchLegislationPolicy(
+    public ResponseEntity<List<Legislation>> searchLegislationPolicy(
             @RequestParam(value = "policy") PolicyAreasEnum policyAreasEnum,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size
@@ -105,7 +105,7 @@ public class LegislationController {
     }
 
     @GetMapping("/search/keyword/policy")
-    public ResponseEntity<?> searchLegislationKeywordAndPolicy(
+    public ResponseEntity<List<Legislation>> searchLegislationKeywordAndPolicy(
             @RequestParam(value = "keyword") PolicyAreasEnum keyword,
             @RequestParam(value = "query") String query,
             @RequestParam(value = "page", defaultValue = "0") int page,

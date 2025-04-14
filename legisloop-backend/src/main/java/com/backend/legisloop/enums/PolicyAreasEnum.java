@@ -6,17 +6,17 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum PolicyAreasEnum {
-    PUBLIC_HEALTH("public health"),
-    ECONOMIC_POLICY("economic policy"),
-    EDUCATION_POLICY("education policy"),
+    PUBLIC_HEALTH("Public Health"),
+    ECONOMIC_POLICY("Economic Policy"),
+    EDUCATION_POLICY("Education Policy"),
     ENVIRONMENTAL_POLICY("environmental policy"),
-    RELIGIOUS_POLICY("religious_policy"),
+    RELIGIOUS_POLICY("religious policy"),
     LGBTQ_RIGHTS("LGBTQ rights"),
     CIVIL_RIGHTS("civil rights"),
     PUBLIC_SAFETY("public safety"),
     IMMIGRATION("immigration"),
     DATA_PRIVACY("data privacy"),
-    HOUSING_URBAN_POLICTY("housing urban policy"),
+    HOUSING_URBAN_POLICY("housing urban policy"),
     INFRASTRUCTURE("infrastructure");
 
     private final String policyArea;

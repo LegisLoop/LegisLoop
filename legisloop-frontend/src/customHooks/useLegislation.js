@@ -7,7 +7,8 @@ function useLegislation(
     pageNumber,
     pageSize,
     shouldRequest,
-    searchTerm = ""
+    searchTerm = "",
+    activePolicy
 ) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -19,13 +20,20 @@ function useLegislation(
                 let response;
                 // If a search term is provided, call the search endpoint
                 if (searchTerm && searchTerm.trim() !== "") {
-                    console.log('on honey im searching');
                     response = await axios.get("/api/v1/legislation/search", {
                         params: {
                             query: searchTerm,
                             page: pageNumber,
                             size: pageSize,
                         },
+                    });
+                } else if (activePolicy) {
+                    response = await axios.get("/api/v1/legislation/search/policy", {
+                        params: {
+                            policy: activePolicy,
+                            page: pageNumber,
+                            size: pageSize
+                        }
                     });
                 } else {
                     // Otherwise, call the regular paginated endpoint
@@ -54,7 +62,7 @@ function useLegislation(
         if ((searchTerm && searchTerm.trim() !== "") || shouldRequest || activeStateId === 52) {
             fetchLegislation();
         }
-    }, [activeLevel, activeStateId, pageNumber, pageSize, shouldRequest, searchTerm]);
+    }, [activeLevel, activeStateId, pageNumber, pageSize, shouldRequest, searchTerm, activePolicy]);
 
     return { data, loading };
 }

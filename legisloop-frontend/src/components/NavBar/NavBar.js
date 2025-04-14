@@ -10,8 +10,9 @@ import { Link, useLocation } from "react-router-dom";
 import SearchBar from "../SearchBar/SearchBar";
 import { LegisLoopLogo } from "../Icons/Icons";
 
-function NavBar({ setSearchTerm }) {
+function NavBar({ setSearchTerm, setActiveLevel, setActivePolicy }) {
     const location = useLocation();
+    const { pathname } = location;
 
     const navItems = [
         { path: "/", label: "LegisLoop" },
@@ -43,7 +44,7 @@ function NavBar({ setSearchTerm }) {
                 </ul>
             </div>
             <div className="hidden md:flex items-center space-x-6">
-                <SearchBar setSearchTerm={setSearchTerm} />
+                {pathname === '/' && (<SearchBar setSearchTerm={setSearchTerm} setActiveLevel={setActiveLevel} setActivePolicy={setActivePolicy} />)}
                 <ul className="flex space-x-6 items-center justify-center">
                     <li className="relative">
                         <Link

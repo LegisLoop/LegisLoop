@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 
-function SearchBar({ setSearchTerm }) {
+function SearchBar({ setSearchTerm, setActiveLevel, setActivePolicy }) {
     const [input, setInput] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setSearchTerm(input);
+        setActiveLevel(null);
+        // setActivePolicy(null);
     };
 
     return (

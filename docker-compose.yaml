@@ -57,4 +57,4 @@ networks:
 
 volumes:
   postgres_data:
-  indexes_data: # New volume for Hibernate Search indexes
+  indexes_data:
