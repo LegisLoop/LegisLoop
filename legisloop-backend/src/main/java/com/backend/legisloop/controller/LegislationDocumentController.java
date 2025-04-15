@@ -19,12 +19,12 @@ public class LegislationDocumentController {
     // get legislation document by id
     @GetMapping("/{docID}")
     public ResponseEntity<LegislationDocument> getDoc(@PathVariable int docID) throws UnirestException  {
-        return new ResponseEntity<>(legislationDocService.getLegislationById(docID), HttpStatus.OK);
+        return new ResponseEntity<>(legislationDocService.getLegislationDocById(docID), HttpStatus.OK);
     }
     
     // get the latest legislation document by bill id
     @GetMapping("/latest/{billID}")
     public ResponseEntity<LegislationDocument> getLatestDoc(@PathVariable int billID) throws UnirestException {
-        return new ResponseEntity<>(legislationDocService.getLatestDocForLegislation(billID), HttpStatus.OK);
+        return new ResponseEntity<>(legislationDocService.getLatestLegislationDocForLegislation(billID), HttpStatus.OK);
     }
 }
