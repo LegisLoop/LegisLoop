@@ -5,6 +5,7 @@ import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.service.RepresentativeService;
 import com.backend.legisloop.repository.RepresentativeRepository;
 
+import com.backend.legisloop.service.SearchService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,6 +31,9 @@ class RepresentativeControllerTest {
 
     @MockBean
     private RepresentativeRepository representativeRepository; // Needed for any repository involved. Source: The Oracle ChatGPT
+
+    @MockBean
+    private SearchService searchService;
 
     // Test for GET /api/v1/representative/getSessionPeople
     @Test

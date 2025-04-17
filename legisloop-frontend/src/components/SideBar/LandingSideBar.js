@@ -13,16 +13,7 @@ import {
     LibraryIcon,
     FilterIcon,
     MapPinIcon,
-    HeartIcon,
     MapIcon,
-    CurrencyDollarIcon,
-    BookOpenIcon,
-    GlobalAmericasIcon,
-    HandRaisedIcon,
-    SparklesIcon,
-    ScaleIcon,
-    ShieldIcon,
-    IdentificationIcon, LockIcon, HomeIcon, BuildingBridgeIcon
 } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
 import policyMap from "../../constants/policyMap";
