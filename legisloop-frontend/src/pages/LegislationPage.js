@@ -14,7 +14,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-// Helper function to convert a Base64 string to a Blob URL.
 function createBlobUrl(base64Data, mimeType) {
     if (!base64Data) return "";
     const byteCharacters = atob(base64Data);
@@ -28,54 +27,43 @@ function createBlobUrl(base64Data, mimeType) {
 }
 
 function LegislationPage() {
-    // Get the bill id from the route parameter.
     const { id } = useParams();
-
     const votes = [
         { representative: "John Doe", decision: "Yea" },
         { representative: "Jane Smith", decision: "Nay" },
-        { representative: "Alex Johnson", decision: "Abstain" }
+        { representative: "Alex Johnson", decision: "Abstain" },
     ];
-
-    // Store the legislation data from the API.
     const [legislation, setLegislation] = useState(null);
 
     useEffect(() => {
-        const fetchLegislation = async () => {
-            try {
-                // Use the bill id from the URL
-                const response = await axios.get(`/api/v1/legislation-doc/latest/${id}`);
-                console.log("response", response.data);
-                setLegislation(response.data);
-            } catch (error) {
-                console.error("Error fetching bill data:", error);
-            }
-        };
-
-        if (id) {
-            fetchLegislation();
-        }
+        if (!id) return;
+        axios
+            .get(`/api/v1/legislation-doc/latest/${id}`)
+            .then(res => setLegislation(res.data))
+            .catch(err => console.error("Error fetching bill data:", err));
     }, [id]);
 
-    // If no legislation data is available, you can fall back to location.state or defaults.
-    const legislationData = legislation || {
-        name: "Unknown Representative",
-        mime: "application/pdf", // or "text/html" if that's your default
-        docContent: "" // Base64 string from backend
+    const data = legislation || {
+        name: "Unknown Document",
+        mime: "application/pdf",
+        docContent: "",
     };
-
-    // Convert the Base64 document content to a Blob URL.
-    const blobUrl = createBlobUrl(legislationData.docContent, legislationData.mime);
+    const blobUrl = createBlobUrl(data.docContent, data.mime);
 
     return (
         <div className="flex flex-col min-h-screen">
             <NavBar />
-            <div className="flex-1 flex flex-col lg:flex-row items-stretch">
-                <LegislationSideBar votes={votes} />
-            </div>
-                <div className="flex-1 p-4 md:p-6 mx-auto w-full max-w-full lg:max-w-[900px]">
-                    <LegislationVisualizer mimeType={legislationData.mime} mimeId={blobUrl} />
+            <div className="flex flex-col lg:flex-row flex-1">
+                {/* Sidebar: full width on small, 1/3 on lg+ */}
+                <div className="w-full lg:w-1/3">
+                    <LegislationSideBar votes={votes} />
                 </div>
+                <div className="w-full lg:w-2/3 p-4 md:p-6 overflow-auto">
+                    <div className="mx-auto w-full max-w-full lg:max-w-none">
+                        <LegislationVisualizer mimeType={data.mime} mimeId={blobUrl} />
+                    </div>
+                </div>
+            </div>
             <Footer />
         </div>
     );
