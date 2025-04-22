@@ -1,32 +1,38 @@
 package com.backend.legisloop.controller;
 
+import com.backend.legisloop.enums.ReadingLevelEnum;
+import com.backend.legisloop.model.Summary;
 import com.backend.legisloop.service.SummaryService;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/summary")
 @RequiredArgsConstructor
 public class SummaryController {
 
     private final SummaryService summaryService;
 
-    @PostMapping("/summary")
+    @PostMapping
     public ResponseEntity<String> getSummary(@RequestBody String query) throws UnirestException {
 
         return new ResponseEntity<>(summaryService.getSummaryOfContent(query), HttpStatus.OK);
     }
     
-    @PostMapping("/summary/{age}")
-    public ResponseEntity<String> getSummaryByAge(@PathVariable int age, @RequestBody String query) throws UnirestException {
+    @PostMapping("/readingLevel")
+    public ResponseEntity<String> getSummaryByAge(@RequestParam ReadingLevelEnum readingLevel, @RequestBody String query) throws UnirestException {
 
-        return new ResponseEntity<>(summaryService.getSummaryOfContentByAge(query, age), HttpStatus.OK);
+        return new ResponseEntity<>(summaryService.getSummaryOfContentByReadingLevel(query, readingLevel), HttpStatus.OK);
+    }
+
+    @GetMapping("/readinvLevel/{docId}")
+    public ResponseEntity<Summary> getSummaryByDocIdAndReadingLevel(
+            @PathVariable int docId,
+            @RequestParam ReadingLevelEnum readingLevel
+    ) {
+        return ResponseEntity.ok(summaryService.getSummaryByDocIdAndReadingLevel(docId, readingLevel));
     }
 }

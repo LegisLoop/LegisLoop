@@ -1,8 +1,12 @@
 package com.backend.legisloop.service;
 
+import com.backend.legisloop.enums.ReadingLevelEnum;
+import com.backend.legisloop.model.Summary;
+import com.backend.legisloop.repository.SummaryRepository;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.json.JSONObject;
@@ -13,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class SummaryService {
 
     @Value("${readeasy.api.key}")
@@ -20,9 +25,11 @@ public class SummaryService {
     @Value("${readeasy.base.url}")
     private String url;
 
+    private final SummaryRepository summaryRepository;
+
     public String getSummaryOfContent(String query) throws UnirestException {
 
-        log.info("Fetching summary about {}...", query.substring(0, query.length() > 20 ? 20 : query.length()));
+        log.info("Fetching summary about {}...", query.substring(0, Math.min(query.length(), 20)));
         
     	JSONObject jsonBody = new JSONObject();
         jsonBody.put("text", query);
@@ -49,10 +56,9 @@ public class SummaryService {
         }
     }
     
-    public String getSummaryOfContentByAge(String query, int age) throws UnirestException {
-    	if (age < 5 || age > 21) throw new IllegalArgumentException("Age out of range");
-
-        log.info("Fetching summary for {} year olds about {}...", age, query.substring(0, query.length() > 20 ? 20 : query.length()));
+    public String getSummaryOfContentByReadingLevel(String query, ReadingLevelEnum readingLevelEnum) throws UnirestException {
+        int age = readingLevelEnum.getAge();
+        log.info("Fetching summary for {} year olds about {}...", age, query.substring(0, Math.min(query.length(), 20)));
         
     	JSONObject jsonBody = new JSONObject();
         jsonBody.put("text", query);
@@ -78,5 +84,11 @@ public class SummaryService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Failed to fetch summary, server responded with status: " + response.getStatus() + " and content:\n\t" + response.getBody());
         }
+    }
+
+    public Summary getSummaryByDocIdAndReadingLevel(int docId, ReadingLevelEnum readingLevel) {
+        return summaryRepository.findSummaryByDocIdAndReadingLevel(docId, readingLevel).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No summary found for docId: " + docId)
+        ).toModel();
     }
 }
