@@ -1,20 +1,26 @@
 package com.backend.legisloop.service;
 
 import com.backend.legisloop.repository.LegislationDocumentRepository;
+import com.backend.legisloop.repository.LegislationRepository;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.backend.legisloop.entities.LegislationDocumentEntity;
 import com.backend.legisloop.entities.LegislationEntity;
 import com.backend.legisloop.model.LegislationDocument;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class LegislationDocumentService {
 
 	private final LegislationService legislationService;
+    private final LegislationRepository legislationRepository;
     private final LegislationDocumentRepository legislationDocumentRepository;
 	
     @Value("${legiscan.api.key}")
@@ -23,10 +29,28 @@ public class LegislationDocumentService {
     private String url;
 
 
-    public LegislationDocument getLegislationById(int legislationDocumentId) throws UnirestException {
-    	LegislationDocument doc = legislationDocumentRepository.getReferenceById(legislationDocumentId).toModel();
+    public LegislationDocument getLegislationDocById(int legislationDocumentId) throws UnirestException {
+    	LegislationDocumentEntity doc = legislationDocumentRepository.getReferenceById(legislationDocumentId);
     	
-    	if (doc.getDocContent() == null) {
+    	return getDocContent(doc);
+    }
+    
+    public LegislationDocument getLatestLegislationDocForLegislation(int billId) throws UnirestException {
+    	if (legislationRepository.findById(billId).isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bill does not exist!");
+    	LegislationDocumentEntity doc = legislationDocumentRepository.findMostRecentByBill(LegislationEntity.builder().bill_id(billId).build());
+    	
+    	return getDocContent(doc);
+    }
+    
+    private LegislationDocument getDocContent(LegislationDocumentEntity incomingEntity) throws ResponseStatusException, UnirestException {
+    	
+    	if (incomingEntity == null) {
+	    	throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No doc for this bill!");
+    	}
+    	
+    	LegislationDocument doc = incomingEntity.toModel();
+                
+        if (doc.getDocContent() == null) {
     		doc = legislationService.getDocContent(doc);
     		legislationDocumentRepository.saveAndFlush(doc.toEntity());
     	}
@@ -34,16 +58,7 @@ public class LegislationDocumentService {
     	return doc;
     }
     
-    public LegislationDocument getLatestDocForLegislation(int billId) throws UnirestException {
-    	LegislationDocument doc = legislationDocumentRepository.findMostRecentByBill(LegislationEntity.builder().bill_id(billId).build()).toModel();
-    	
-    	if (doc.getDocContent() == null) {
-    		doc = legislationService.getDocContent(doc);
-    		legislationDocumentRepository.saveAndFlush(doc.toEntity());
-    	}
-    	
-    	return doc;
-    }
+    
 
 
 }
