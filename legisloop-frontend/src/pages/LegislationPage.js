@@ -34,21 +34,57 @@ function LegislationPage() {
         { representative: "Alex Johnson", decision: "Abstain" },
     ];
     const [legislation, setLegislation] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
-        if (!id) return;
-        axios
-            .get(`/api/v1/legislation-doc/latest/${id}`)
-            .then(res => setLegislation(res.data))
-            .catch(err => console.error("Error fetching bill data:", err));
+        const fetchLegislation = async () => {
+            try {
+                // Use the bill id from the URL
+                const response = await axios.get(`/api/v1/legislation-doc/latest/${id}`);
+                
+                // Check for HTTP 204 (no content)
+                if (response.status === 204) {
+                    setErrorMessage("No content for this legislation, yet.");
+                } else {
+                    setLegislation(response.data);
+                }
+            } catch (error) {
+                // If the error response is available, check for 404
+                if (error.response && error.response.status === 404) {
+                    setErrorMessage("Bill not found.");
+                } else {
+                    setErrorMessage("An error occurred while fetching data.");
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchLegislation();
+        }
     }, [id]);
 
-    const data = legislation || {
-        name: "Unknown Document",
-        mime: "application/pdf",
-        docContent: "",
-    };
-    const blobUrl = createBlobUrl(data.docContent, data.mime);
+    // Determine what to render in the content area.
+    let content;
+    if (loading) {
+        content = <p className="text-center text-blue-500">Fetching data...</p>;
+    } else if (errorMessage) {
+        content = <p className="text-center text-red-500">{errorMessage}</p>;
+    } else {
+        // Use the fetched legislation data; fall back to default values if for some reason data is absent.
+        const legislationData = legislation || {
+            name: "Unknown Representative",
+            mime: "application/pdf",
+            docContent: ""
+        };
+
+        // Convert the Base64 document content to a Blob URL.
+        const blobUrl = createBlobUrl(legislationData.docContent, legislationData.mime);
+
+        content = <LegislationVisualizer mimeType={legislationData.mime} mimeId={blobUrl} />;
+    }
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -60,7 +96,7 @@ function LegislationPage() {
                 </div>
                 <div className="w-full lg:w-2/3 p-4 md:p-6 overflow-auto">
                     <div className="mx-auto w-full max-w-full lg:max-w-none">
-                        <LegislationVisualizer mimeType={data.mime} mimeId={blobUrl} />
+                        {content}
                     </div>
                 </div>
             </div>
