@@ -1,11 +1,16 @@
 package com.backend.legisloop.service;
 
+import com.backend.legisloop.entities.LegislationDocumentEntity;
+import com.backend.legisloop.entities.SummaryEntity;
 import com.backend.legisloop.enums.ReadingLevelEnum;
 import com.backend.legisloop.model.Summary;
+import com.backend.legisloop.repository.LegislationDocumentRepository;
 import com.backend.legisloop.repository.SummaryRepository;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +31,7 @@ public class SummaryService {
     private String url;
 
     private final SummaryRepository summaryRepository;
+    private final LegislationDocumentRepository legislationDocumentRepository;
 
     public String getSummaryOfContent(String query) throws UnirestException {
 
@@ -55,8 +61,9 @@ public class SummaryService {
                     "Failed to fetch summary, server responded with status: " + response.getStatus() + " and content:\n\t" + response.getBody());
         }
     }
-    
-    public String getSummaryOfContentByReadingLevel(String query, ReadingLevelEnum readingLevelEnum) throws UnirestException {
+
+    @Transactional
+    public String getSummaryOfContentByReadingLevel(int docId, String query, ReadingLevelEnum readingLevelEnum) throws UnirestException {
         int age = readingLevelEnum.getAge();
         log.info("Fetching summary for {} year olds about {}...", age, query.substring(0, Math.min(query.length(), 20)));
         
@@ -73,7 +80,20 @@ public class SummaryService {
 
         if (response.getStatus() == 200) {
             try{
-                return response.getBody();
+                String summaryText = response.getBody();
+                LegislationDocumentEntity doc = legislationDocumentRepository.findById(docId)
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "No LegislationDocument with id=" + docId
+                        ));
+
+                SummaryEntity summaryToAdd = SummaryEntity.builder()
+                        .legislationDocument(doc)
+                        .summaryContent(summaryText)
+                        .readingLevel(readingLevelEnum)
+                        .build();
+                summaryRepository.save(summaryToAdd);
+
+                return summaryText;
             } catch (Exception e){
                 log.error(e.getMessage());
                 throw e;

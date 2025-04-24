@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ReadingLevelEnum {
-    BEGINNER(10),
-    INTERMEDIATE(15),
-    ADVANCED(21);
+    EASY(10),
+    MODERATE(15),
+    ONE_PAGE(21);
 
     private final int age;
 }

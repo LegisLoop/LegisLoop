@@ -25,6 +25,7 @@ public class SummaryEntity {
     @Column(name = "summary_content", columnDefinition = "TEXT")
     private String summaryContent;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "reading_level")
     private ReadingLevelEnum readingLevel;
 
