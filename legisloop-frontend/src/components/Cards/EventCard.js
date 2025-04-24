@@ -9,11 +9,11 @@
 import {EventBannerIcon} from "../Icons/Icons";
 import { Link } from "react-router-dom";
 
-function EventCard ({ title, description, signUpLink }){
+function EventCard({ title, description, signUpLink }) {
     return (
-        <div className="flex items-center gap-4 p-4 bg-white shadow-md border border-gray-200 max-w-md">
+        <div className="w-full md:max-w-md flex items-center gap-4 p-4 bg-white shadow-md border border-gray-200">
             <div className="flex items-center justify-center w-10 rounded-full bg-red-100 text-custom-red">
-            <EventBannerIcon/>
+                <EventBannerIcon/>
             </div>
             <div className="flex-1">
                 <h3 className="text-lg font-bold text-gray-900">{title}</h3>
