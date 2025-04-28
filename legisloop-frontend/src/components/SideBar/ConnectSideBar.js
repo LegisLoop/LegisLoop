@@ -7,10 +7,13 @@ function ConnectSideBar() {
     const [activeItem, setActiveItem] = useState("Home");
 
     return (
-        <div className="relative flex h-full w-full max-w-[20rem] flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 z-9">
+        <div className="flex flex-col w-full p-4 text-custom-blue">
             <div className="flex items-center gap-2 p-4">
                 <CompassIcon />
-                <Tooltip text="Use this sidebar explore posts made by fellow Americans to get the pulse of the nation." position="bottom">
+                <Tooltip
+                    text="Use this sidebar to explore posts made by fellow Americans."
+                    position="bottom"
+                >
                     <h5 className="text-xl font-sans font-semibold leading-snug text-blue-gray-900 cursor-pointer">
                         Connect Page
                     </h5>
@@ -29,12 +32,16 @@ function ConnectSideBar() {
                         key={index}
                         onClick={() => setActiveItem(item.label)}
                         className={`flex items-center w-full p-3 transition-all rounded-lg text-start ${
-                            activeItem === item.label ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red text-custom-red-dark font-semibold" : "hover:bg-gray-200"
+                            activeItem === item.label
+                                ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red text-custom-red-dark font-semibold"
+                                : "hover:bg-gray-200"
                         }`}
                     >
-                        <div className={`grid mr-4 place-items-center ${
-                            activeItem === item.label ? "text-custom-red-dark" : "text-custom-blue"
-                        }`}>
+                        <div
+                            className={`grid mr-4 place-items-center ${
+                                activeItem === item.label ? "text-custom-red-dark" : "text-custom-blue"
+                            }`}
+                        >
                             {item.icon}
                         </div>
                         {item.label}
