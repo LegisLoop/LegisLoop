@@ -14,6 +14,10 @@ function useLegislation(
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log('active level', activeLevel);
+        console.log('state', activeStateId);
+        console.log('search term', searchTerm);
+        console.log('policy', activePolicy);
         const fetchLegislation = async () => {
             setLoading(true);
             try {
@@ -28,6 +32,7 @@ function useLegislation(
                         },
                     });
                 } else if (activePolicy) {
+                    console.log('Policy Search', activePolicy);
                     response = await axios.get("/api/v1/legislation/search/policy", {
                         params: {
                             policy: activePolicy,

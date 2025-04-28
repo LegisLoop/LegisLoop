@@ -89,6 +89,7 @@ function LandingPage() {
                     setActiveLevel={setActiveLevel}
                     activePolicy={activePolicy}
                     setActivePolicy={setActivePolicy}
+                    setSearchTerm={setSearchTerm}
                 />
                 <div className="flex-1 w-auto p-6 space-y-6">
                     <div className="border-b-2 border-gray-300 pb-4 mb-4">
@@ -131,9 +132,9 @@ function LandingPage() {
                 <div className="w-full lg:w-[16rem] bg-white p-4 shadow-xl shadow-blue-gray-900/5">
                     <div className="flex items-center gap-4 p-4 mb-2">
                         <CalendarEventIcon />
-                            <h5 className="block font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-custom-blue cursor-pointer">
-                                Upcoming Events
-                            </h5>
+                        <h5 className="block font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-custom-blue cursor-pointer">
+                            Upcoming Events
+                        </h5>
                     </div>
                     <hr className="my-2 border-blue-gray-50" />
                     <div className="space-y-6 mt-6">
