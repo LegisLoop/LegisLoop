@@ -104,7 +104,7 @@ public class RepresentativeService {
         }
         else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Failed to fetch bills, server responded with status: " + response.getStatus());
+                    "Failed to fetch representative, server responded with status: " + response.getStatus());
         }
     }
 

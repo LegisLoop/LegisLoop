@@ -8,12 +8,14 @@ import com.backend.legisloop.repository.LegislationDocumentRepository;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.repository.RepresentativeRepository;
 import com.backend.legisloop.repository.RollCallRepository;
+import com.backend.legisloop.serial.DateSerializer;
 import com.backend.legisloop.util.Utils;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.LegislationDocument;
 import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.model.RollCall;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -64,7 +66,9 @@ public class LegislationService {
 
         if (response.getStatus() == 200) {
             try {
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(java.sql.Date.class, new DateSerializer()) // Register adapter
+                        .create();
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 Utils.checkLegiscanResponseStatus(jsonObject);
 
@@ -99,7 +103,9 @@ public class LegislationService {
 
         if (response.getStatus() == 200) {
             try {
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(java.sql.Date.class, new DateSerializer()) // Register adapter
+                        .create();
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 Utils.checkLegiscanResponseStatus(jsonObject);
 
@@ -140,7 +146,9 @@ public class LegislationService {
                 JsonObject jsonObject = JsonParser.parseString(response.getBody().toString()).getAsJsonObject();
                 Utils.checkLegiscanResponseStatus(jsonObject);
 
-                Gson gson = new Gson();
+                Gson gson = new GsonBuilder()
+                        .registerTypeAdapter(java.sql.Date.class, new DateSerializer()) // Register adapter
+                        .create();
                 JsonObject billObject = jsonObject.getAsJsonObject("bill");
 
                 Legislation incomingLegislation = gson.fromJson(billObject, Legislation.class);
@@ -193,9 +201,9 @@ public class LegislationService {
                 
                 List<Representative> billSponsors = effectiveLegislation.getSponsors();
                 if (billSponsors != null) {
-            		log.info("Legislation {} already has sponsors...", effectiveLegislation.getBill_id());
+            		log.info("Legislation {} already has sponsors... {}", effectiveLegislation.getBill_id(), billSponsors.size());
                 	if (incomingLegislation.getChange_hash() != legislation.getChange_hash()) { // Incoming Legislation is new AND already has sponsors
-                		log.info("Adding stubs", effectiveLegislation.getBill_id());
+                		log.info("Adding stubs for {}", effectiveLegislation.getBill_id());
                 		billSponsors.forEach(sponsor -> { // Add stubs from the db legislation
 	                        representativeRepository.saveIfDoesNotExist(sponsor.toEntity());
                 		});
@@ -203,8 +211,8 @@ public class LegislationService {
 	                sponsorsArray.forEach(sponsor -> {
 	                    int peopleId = sponsor.getAsJsonObject().get("people_id").getAsInt();
 	                    boolean exists = billSponsors.stream().anyMatch(rep -> rep.getPeople_id() == peopleId);
-	                    log.info("Representative {} {} exist in the DB already", peopleId, (exists ? "does" : "does not"));
 	                    if (!exists) { // This sponsor wasn't on the bill before
+		                    log.info("Representative {} does not exist in the DB already!", peopleId);
 	                        Representative representativeToAdd = RepresentativeService.fillRecord(sponsor.getAsJsonObject());
 	                        billSponsors.add(representativeToAdd);
 	                        updateRepresentative(representativeToAdd);
