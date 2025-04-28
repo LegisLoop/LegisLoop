@@ -4,7 +4,7 @@
  ****************************************************************
  * Connect Page Declaration.
  ****************************************************************
- * Last Updated: February 19, 2025.
+ * Last Updated: April 3, 2025.
  ***************************************************************/
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
@@ -13,28 +13,26 @@ import ConnectSideBar from "../components/SideBar/ConnectSideBar";
 
 function ConnectPage() {
     return (
-        <>
+        <div className="flex flex-col min-h-screen overflow-x-hidden">
             <NavBar />
-            <div className="flex flex-col md:flex-row">
-                {/* Sticky Sidebar */}
-                <div className="w-15/100 min-w-[250px]">
-                    <ConnectSideBar/>
+            <div className="flex-1 flex flex-col md:flex-row items-stretch">
+                <div className="w-full md:w-1/4 min-w-[250px] bg-white shadow-xl shadow-blue-gray-900/5 flex flex-col">
+                    <ConnectSideBar />
                 </div>
-
-                {/* Post Section */}
-                <div className="w-full md:w-3/4 lg:w-4/5 p-2 space-y-4">
+                <div className="flex-1 p-2 space-y-4">
                     <PostCard
                         username="username"
                         date="mm-dd-yyyy"
                         title="Title of Post"
-                        body="This is the body of the post. People can express their opinions and things"/>
+                        body="This is the body of the post. People can express their opinions and things."
+                    />
                     <PostCard />
                     <PostCard />
                     <PostCard />
                 </div>
             </div>
             <Footer />
-        </>
+        </div>
     );
 }
 
