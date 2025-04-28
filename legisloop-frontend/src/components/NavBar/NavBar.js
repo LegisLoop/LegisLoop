@@ -17,7 +17,6 @@ function NavBar() {
 
     const navItems = [
         { path: "/", label: "LegisLoop" },
-        { path: "/legislation", label: "Legislation" },
         { path: "/findrepresentatives", label: "Find Your Representatives" },
         { path: "/connect", label: "Connect" },
     ];
@@ -34,7 +33,7 @@ function NavBar() {
                         <LegisLoopLogo className="size-11 mr-4" />
                     </Link>
                     <ul className="hidden lg:flex space-x-4">
-                        {navItems.slice(0, 3).map((item) => (
+                        {navItems.slice(0, 2).map((item) => (
                             <li key={item.path}>
                                 <Link
                                     to={item.path}
