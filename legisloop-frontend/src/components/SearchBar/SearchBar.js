@@ -4,7 +4,7 @@
  ****************************************************************
  * SearchBar Declaration.
  ****************************************************************
- * Last Updated: February 18, 2025.
+ * Last Updated: April 3, 2025.
  ***************************************************************/
 function SearchBar() {
     return (
@@ -12,8 +12,11 @@ function SearchBar() {
             <div
                 className='flex w-full bg-gray-100 px-4 py-2 rounded outline outline-transparent border
                 focus-within:border-custom-cyan focus-within:bg-transparent transition-all'>
-                <input type='text' placeholder='Search for legislation...'
-                       className='w-full text-sm bg-transparent rounded outline-none pr-2'/>
+                <input
+                    type='text'
+                    placeholder='Search for legislation...'
+                    className='w-full text-sm bg-transparent rounded outline-none pr-2'
+                />
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192.904 192.904" width="20px"
                      className="cursor-pointer fill-custom-cyan">
                     <path
@@ -21,13 +24,6 @@ function SearchBar() {
                     </path>
                 </svg>
             </div>
-            <button id="toggleOpen" className='lg:hidden'>
-                <svg className="w-7 h-7" fill="#000" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd"
-                          d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                          clipRule="evenodd"></path>
-                </svg>
-            </button>
         </div>
     );
 }

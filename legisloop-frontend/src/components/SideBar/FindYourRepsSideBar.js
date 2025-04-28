@@ -23,6 +23,7 @@ const stateMap = {
 
 function RepresentativeSideBar({ setStateId }) {
     const [selectedState, setSelectedState] = useState("");
+    const [isLocationOpen, setIsLocationOpen] = useState(true);
 
     const handleStateSelection = (state) => {
         setSelectedState(state);
@@ -31,11 +32,12 @@ function RepresentativeSideBar({ setStateId }) {
 
     return (
         <div className="relative flex h-full w-full max-w-[20rem] flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 z-9">
+
             {/* Header */}
-            <div className="flex items-center gap-2 p-4">
+            <div className="flex items-center gap-2 p-2 md:p-4">
                 <CompassIcon />
                 <Tooltip text="Find your representatives by location and government level." position="bottom">
-                    <h5 className="text-xl font-sans font-semibold leading-snug text-blue-gray-900 cursor-pointer">
+                    <h5 className="text-lg md:text-xl font-sans font-semibold leading-snug text-blue-gray-900 cursor-pointer">
                         Legislator Finder
                     </h5>
                 </Tooltip>
@@ -44,16 +46,17 @@ function RepresentativeSideBar({ setStateId }) {
             <hr className="my-2 border-blue-gray-50" />
 
             {/* LOCATION SELECTOR */}
-            <div className="relative block w-full">
+            <div className="relative w-full">
                 <button
                     type="button"
-                    className="flex items-center justify-between w-full p-3 text-xl font-semibold leading-snug text-left transition-all duration-300 border-b border-gray-300 hover:bg-gray-200"
+                    onClick={() => setIsLocationOpen(!isLocationOpen)}
+                    className="flex items-center justify-between w-full p-2 md:p-3 text-lg md:text-xl font-semibold leading-snug text-left transition-all duration-300 border-b border-gray-300 hover:bg-gray-200"
                 >
-                    <div className="grid mr-4 place-items-center">
+                    <div className="grid mr-2 md:mr-4 place-items-center">
                         <MapPinIcon className="text-custom-red" />
                     </div>
-                    <p className="mr-auto text-base font-bold">Select Location</p>
-                    <span className="ml-4"><DropDownArrowIcon /></span>
+                    <p className="mr-auto text-base md:text-lg font-bold">Select Location</p>
+                    <span className="ml-2 md:ml-4"><DropDownArrowIcon /></span>
                 </button>
 
                 {/* Dropdown with Search */}
@@ -86,8 +89,7 @@ function RepresentativeSideBar({ setStateId }) {
                 <div className="relative block w-full mt-4">
                     <button
                         type="button"
-                        className="flex items-center justify-between w-full p-3 text-xl font-semibold leading-snug text-left transition-all duration-300 border-b border-gray-300 hover:bg-gray-200"
-                    >
+                        className="flex items-center justify-between w-full p-3 text-xl font-semibold leading-snug text-left transition-all duration-300 border-b border-gray-300 hover:bg-gray-200">
                         <div className="grid mr-4 place-items-center">
                             <AdjustmentsIcon className="text-custom-red" />
                         </div>
