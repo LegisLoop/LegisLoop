@@ -7,6 +7,7 @@ import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.repository.LegislationRepository;
 import com.backend.legisloop.repository.RepresentativeRepository;
 import com.backend.legisloop.service.RepresentativeService;
+import com.backend.legisloop.service.SearchService;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import java.util.List;
 public class RepresentativeController {
 
     private final RepresentativeService representativeService;
+    private final SearchService searchService;
 
     private final RepresentativeRepository representativeRepository;
 
@@ -45,9 +47,12 @@ public class RepresentativeController {
     }
 
     // search representatives by name (first and last included)
-    @GetMapping("/search/name")
-    public ResponseEntity<List<Representative>> searchRepresentatives(@RequestParam String keyword) {
-        return new ResponseEntity<>(representativeService.searchRepresentatives(keyword), HttpStatus.OK);
+    @GetMapping("/search")
+    public ResponseEntity<?> searchRepresentatives(
+            @RequestParam(value = "name") String name,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ResponseEntity.ok(searchService.searchRepresentatives(name, page, size));
     }
 
     // get representatives by state id

@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.net.URI;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;

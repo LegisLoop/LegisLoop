@@ -24,6 +24,8 @@ function LandingPage() {
     const [activeStateId, setActiveStateId] = useState(52);
     const [pageNumber, setPageNumber] = useState(0);
     const [locationRequested, setLocationRequested] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+
     const pageSize = 10;
 
     const { stateId } = useGeoLocation(locationRequested);
@@ -43,8 +45,11 @@ function LandingPage() {
         activeStateId,
         pageNumber,
         pageSize,
-        locationRequested
+        locationRequested,
+        searchTerm,
+        activePolicy
     );
+
 
     const scrollContainerRef = useRef(null);
     const prevScrollHeightRef = useRef(0);
@@ -77,13 +82,14 @@ function LandingPage() {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <NavBar />
+            <NavBar setSearchTerm={setSearchTerm} setActiveLevel={setActiveLevel} setActivePolicy={setActivePolicy} />
             <div className="flex-1 flex flex-col lg:flex-row items-stretch">
                 <LandingSideBar
                     activeLevel={activeLevel}
                     setActiveLevel={setActiveLevel}
                     activePolicy={activePolicy}
                     setActivePolicy={setActivePolicy}
+                    setSearchTerm={setSearchTerm}
                 />
                 <div className="flex-1 w-auto p-6 space-y-6">
                     <div className="border-b-2 border-gray-300 pb-4 mb-4">
@@ -112,11 +118,12 @@ function LandingPage() {
                     >
                         {bills.map((bill) => (
                             <LegislationPreviewCard
+                                key={bill.bill_id}
                                 id={bill.bill_id}
                                 category={bill.category}
                                 title={bill.title}
                                 date={bill.dateIntroduced}
-                                summary={bill.summary !== null ? bill.summary : (bill.description !== bill.title ? bill.description : "" )}
+                                summary={bill.summary !== null ? bill.summary : (bill.description !== bill.title ? bill.description : "")}
                             />
                         ))}
                         {loading && <p>Loading...</p>}
@@ -125,9 +132,9 @@ function LandingPage() {
                 <div className="w-full lg:w-[16rem] bg-white p-4 shadow-xl shadow-blue-gray-900/5">
                     <div className="flex items-center gap-4 p-4 mb-2">
                         <CalendarEventIcon />
-                            <h5 className="block font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-custom-blue cursor-pointer">
-                                Upcoming Events
-                            </h5>
+                        <h5 className="block font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-custom-blue cursor-pointer">
+                            Upcoming Events
+                        </h5>
                     </div>
                     <hr className="my-2 border-blue-gray-50" />
                     <div className="space-y-6 mt-6">

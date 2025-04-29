@@ -59,6 +59,9 @@ docker-compose down -v
 ```
 The -v is important to remove the volume and ensure that there is no persistent data left over for a future run. Currently a way to check for existing data is not implemented, so spring boot will throw an error when it tries to automatically create the tables.
 
+### Indexing the Database 
+If the search is not working, the database indexes can be manually created by making a post request to the `/api/v1/initializeDb/initializeIndex` endpoint. The legisloop api key must be included as `X-API-KEY` in the request headers. If using swagger, the api key can be entered at the top of the page by clicking the 'authorize' button.
+
 # Frontent Setup 
 ### Install Dependencies
 ```bash
@@ -88,7 +91,8 @@ If you have made changes to the code, you will need to run this instead:
 ```bash
 docker-compose up --build 
 ```
-The app should be available at http://localhost:3000/.
+The app should be available at http://localhost:3001/.
+The backend swagger page will be available at http://localhost:3001/swagger-ui/index.html.
 
 To stop the app do ctrl+c in the terminal or run this command: 
 ```bash
