@@ -90,6 +90,7 @@ function LandingPage() {
                     activePolicy={activePolicy}
                     setActivePolicy={setActivePolicy}
                     setSearchTerm={setSearchTerm}
+                    setActiveStateId={setActiveStateId}
                 />
                 <div className="flex-1 w-auto p-6 space-y-6">
                     <div className="border-b-2 border-gray-300 pb-4 mb-4">

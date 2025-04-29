@@ -12,12 +12,12 @@ function useLegislation(
 ) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
+    // clear data whenever the policy filter or state id switches
+    useEffect(() => {
+        setData([]);
+    }, [activePolicy, activeStateId]);
 
     useEffect(() => {
-        console.log('active level', activeLevel);
-        console.log('state', activeStateId);
-        console.log('search term', searchTerm);
-        console.log('policy', activePolicy);
         const fetchLegislation = async () => {
             setLoading(true);
             try {
@@ -42,6 +42,7 @@ function useLegislation(
                     });
                 } else {
                     // Otherwise, call the regular paginated endpoint
+                    console.log('state search', activeStateId);
                     const url = `/api/v1/legislation/stateId/${activeStateId}/paginated`;
                     response = await axios.get(url, {
                         params: {
