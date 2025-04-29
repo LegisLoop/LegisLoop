@@ -31,9 +31,8 @@ function RepresentativeSideBar({ setStateId }) {
     };
 
     return (
-        <div className="relative flex h-full w-full max-w-[20rem] flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 z-9">
-
-            {/* Header */}
+        <div className="relative flex flex-col w-full h-screen md:h-full bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 z-9">
+        {/* Header */}
             <div className="flex items-center gap-2 p-2 md:p-4">
                 <CompassIcon />
                 <Tooltip text="Find your representatives by location and government level." position="bottom">
