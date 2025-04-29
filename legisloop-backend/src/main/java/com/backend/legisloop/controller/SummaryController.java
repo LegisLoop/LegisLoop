@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/v1/summary")
 @RequiredArgsConstructor
@@ -26,10 +28,11 @@ public class SummaryController {
     public ResponseEntity<String> getSummaryByAge(
             @PathVariable int docId,
             @RequestParam ReadingLevelEnum readingLevel,
-            @RequestBody String query
-    ) throws UnirestException {
+            @RequestParam String mimeType,
+            @RequestBody String encodedString
+    ) throws UnirestException, IOException {
 
-        return new ResponseEntity<>(summaryService.getSummaryOfContentByReadingLevel(docId, query, readingLevel), HttpStatus.OK);
+        return new ResponseEntity<>(summaryService.getSummaryOfContentByReadingLevel(docId, encodedString, readingLevel, mimeType), HttpStatus.OK);
     }
 
     @GetMapping("/readingLevel/{docId}")

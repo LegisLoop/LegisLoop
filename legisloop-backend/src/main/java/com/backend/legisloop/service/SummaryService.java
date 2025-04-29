@@ -14,11 +14,22 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 @Service
 @Slf4j
@@ -62,10 +73,14 @@ public class SummaryService {
         }
     }
 
+    // query is the base64 encoded string from the db
     @Transactional
-    public String getSummaryOfContentByReadingLevel(int docId, String query, ReadingLevelEnum readingLevelEnum) throws UnirestException {
+    public String getSummaryOfContentByReadingLevel(int docId, String encodedString, ReadingLevelEnum readingLevelEnum, String mimeType) throws UnirestException, IOException {
+
         int age = readingLevelEnum.getAge();
-        log.info("Fetching summary for {} year olds about {}...", age, query.substring(0, Math.min(query.length(), 20)));
+        log.info("Fetching summary for reading level {}", readingLevelEnum);
+
+        String query = extractTextFromEncodedString(encodedString, mimeType);
         
     	JSONObject jsonBody = new JSONObject();
         jsonBody.put("text", query);
@@ -110,5 +125,23 @@ public class SummaryService {
         return summaryRepository.findSummaryByDocIdAndReadingLevel(docId, readingLevel).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No summary found for docId: " + docId)
         ).toModel();
+    }
+
+    private String extractTextFromEncodedString(String encodedString, String mimeType) throws IOException {
+        byte[] data = Base64.getDecoder().decode(encodedString);
+
+        if(mimeType.equalsIgnoreCase("application/pdf")){
+            InputStream pdfStream = new ByteArrayInputStream(data);
+            try(PDDocument doc = PDDocument.load(pdfStream)){
+                return new PDFTextStripper().getText(doc);
+            }
+        } else if (mimeType.equalsIgnoreCase("text/html")) {
+            String html = new String(data, StandardCharsets.UTF_8);
+            Document doc = Jsoup.parse(html);
+            return doc.body().text();
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported mime type: " + mimeType);
+        }
     }
 }
