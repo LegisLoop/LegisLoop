@@ -14,7 +14,12 @@ import java.sql.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "legislation")
+@Table(
+		name = "legislation",
+		indexes = {
+				@Index(name = "idx_leg_status_date", columnList = "status_date")
+				}
+		)
 @Indexed
 @AllArgsConstructor
 @NoArgsConstructor

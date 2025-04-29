@@ -11,7 +11,12 @@ import java.sql.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "roll_calls")
+@Table(
+		name = "roll_calls",
+		indexes = {
+				@Index(name = "idx_rollcall_date", columnList = "date")
+				}
+		)
 @Getter
 @Setter
 @NoArgsConstructor
