@@ -33,6 +33,6 @@ build/
 ### VS Code ###
 .vscode/
 
-### Indexes ###
+### DB Indexes ##
 LegislationEntity
 RepresentativeEntity

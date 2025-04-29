@@ -1,3 +1,11 @@
+/***************************************************************
+ * LegisLoop
+ * All rights reserved (c) 2025 - GNU General Public License v3.0
+ ****************************************************************
+ * LegislationPage Declaration.
+ ****************************************************************
+ * Last Updated: April 3, 2025.
+ ***************************************************************/
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import LegislationSideBar from "../components/SideBar/LegislationSideBar";
@@ -6,7 +14,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 
-// Helper function to convert a Base64 string to a Blob URL.
 function createBlobUrl(base64Data, mimeType) {
     if (!base64Data) return "";
     const byteCharacters = atob(base64Data);
@@ -20,16 +27,12 @@ function createBlobUrl(base64Data, mimeType) {
 }
 
 function LegislationPage() {
-    // Get the bill id from the route parameter.
     const { id } = useParams();
-
     const votes = [
         { representative: "John Doe", decision: "Yea" },
         { representative: "Jane Smith", decision: "Nay" },
-        { representative: "Alex Johnson", decision: "Abstain" }
+        { representative: "Alex Johnson", decision: "Abstain" },
     ];
-
-    // Store the legislation data from the API.
     const [legislation, setLegislation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
@@ -84,18 +87,21 @@ function LegislationPage() {
     }
 
     return (
-        <>
+        <div className="flex flex-col min-h-screen">
             <NavBar />
-            <div className="flex min-h-screen">
-                <div className="w-[20rem] flex-shrink-0">
+            <div className="flex flex-col lg:flex-row flex-1">
+                {/* Sidebar: full width on small, 1/3 on lg+ */}
+                <div className="w-full lg:w-1/3">
                     <LegislationSideBar votes={votes} />
                 </div>
-                <div className="flex-1 p-6 mx-auto max-w-[900px] lg:mx-2">
-                    {content}
+                <div className="w-full lg:w-2/3 p-4 md:p-6 overflow-auto">
+                    <div className="mx-auto w-full max-w-full lg:max-w-none">
+                        {content}
+                    </div>
                 </div>
             </div>
             <Footer />
-        </>
+        </div>
     );
 }
 

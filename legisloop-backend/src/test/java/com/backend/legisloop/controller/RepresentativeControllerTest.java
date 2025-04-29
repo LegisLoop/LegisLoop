@@ -5,6 +5,7 @@ import com.backend.legisloop.model.Representative;
 import com.backend.legisloop.service.RepresentativeService;
 import com.backend.legisloop.repository.RepresentativeRepository;
 
+import com.backend.legisloop.service.SearchService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,6 +31,9 @@ class RepresentativeControllerTest {
 
     @MockBean
     private RepresentativeRepository representativeRepository; // Needed for any repository involved. Source: The Oracle ChatGPT
+
+    @MockBean
+    private SearchService searchService;
 
     // Test for GET /api/v1/representative/getSessionPeople
     @Test
@@ -75,23 +79,6 @@ class RepresentativeControllerTest {
 
         // Act & Assert: Call the endpoint with billId=100.
         mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/representative/sponsorsOf/100")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
-
-    // Test for GET /api/v1/representative/search/name?keyword=...
-    @Test
-    void testSearchRepresentatives_success() throws Exception {
-        // Arrange: Create a dummy representative list for the search result.
-        Representative rep = new Representative();
-        List<Representative> results = Arrays.asList(rep);
-        when(representativeService.searchRepresentatives("John")).thenReturn(results);
-
-        // Act & Assert: Call the endpoint with keyword "John".
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/representative/search/name")
-                .param("keyword", "John")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())

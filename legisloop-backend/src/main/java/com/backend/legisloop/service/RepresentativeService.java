@@ -104,7 +104,7 @@ public class RepresentativeService {
         }
         else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Failed to fetch bills, server responded with status: " + response.getStatus());
+                    "Failed to fetch representative, server responded with status: " + response.getStatus());
         }
     }
 
@@ -152,15 +152,6 @@ public class RepresentativeService {
                 .orElseThrow(() -> new EntityNotFoundException("Legislation not found"));
 
         return representativeRepository.findBySponsoredBills(bill).stream().map(RepresentativeEntity::toModel).toList();
-    }
-
-    /**
-     * Search representatives by first and last name included
-     * @param keyword search term
-     * @return a list of representative objects
-     */
-    public List<Representative> searchRepresentatives(String keyword) {
-        return representativeRepository.searchByName(keyword).stream().map(RepresentativeEntity::toModel).toList();
     }
     
     /**

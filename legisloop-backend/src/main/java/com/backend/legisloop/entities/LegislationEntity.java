@@ -5,6 +5,8 @@ import com.backend.legisloop.model.Legislation;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "legislation")
+@Indexed
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -27,12 +30,15 @@ public class LegislationEntity {
     private Integer session_id;
 
     @Column(name = "title", columnDefinition = "TEXT")
+    @FullTextField
     private String title;
 
     @Column(name = "description", columnDefinition = "TEXT")
+    @FullTextField
     private String description;
 
     @Column(name = "summary")
+    @FullTextField
     private String summary;
 
     @Column(name = "change_hash", columnDefinition = "TEXT")
@@ -98,5 +104,4 @@ public class LegislationEntity {
                 .dateIntroduced(this.dateIntroduced)
                 .build();
     }
-
 }
