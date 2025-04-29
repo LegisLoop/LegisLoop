@@ -7,6 +7,7 @@ import com.backend.legisloop.entities.RepresentativeEntity;
 import com.backend.legisloop.enums.PolicyAreasEnum;
 import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.Representative;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;

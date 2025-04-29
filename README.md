@@ -60,7 +60,7 @@ docker-compose down -v
 The -v is important to remove the volume and ensure that there is no persistent data left over for a future run. Currently a way to check for existing data is not implemented, so spring boot will throw an error when it tries to automatically create the tables.
 
 ### Indexing the Database 
-In order for the search endpoints to work, the indexes must be manually created by making a post request to the `/api/v1/initializeDb/initializeIndex` endpoint. The legisloop api key must be included as `X-API-KEY` in the request headers. If using swagger, the api key can be entered at the top of the page by clicking the 'authorize' button. 
+If the search is not working, the database indexes can be manually created by making a post request to the `/api/v1/initializeDb/initializeIndex` endpoint. The legisloop api key must be included as `X-API-KEY` in the request headers. If using swagger, the api key can be entered at the top of the page by clicking the 'authorize' button.
 
 # Frontent Setup 
 ### Install Dependencies
