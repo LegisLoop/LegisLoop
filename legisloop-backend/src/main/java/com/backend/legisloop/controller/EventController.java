@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class EventController {
 
     private final LegislationService legislationService;
+    private final EventService eventService;
     private final VoteService voteService;
     
     // Get a person's events bills (paginated)
@@ -37,23 +38,11 @@ public class EventController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-
-        List<Legislation> legislations = legislationService.getLegislationByRepresentativeId(personId);
-        List<Vote> votes = voteService.getVotesByRepresentativeId(personId);
-
-        // Merge the two sorted lists into a single list of events.
-        List<Event> mergedEvents = EventService.mergeSortedEvents(legislations, votes);
-
-        // Wrap the merged list into a Page.
-        Pageable pageable = PageRequest.of(page, size);
-        
-        // Calculate start and end indexes for the requested page.
-        int start = (int) pageable.getOffset();
-        int end = Math.min((start + pageable.getPageSize()), mergedEvents.size());
-        List<Event> pageContent = mergedEvents.subList(start, end);
-
-        Page<Event> eventPage = new PageImpl<>(pageContent, pageable, mergedEvents.size());
-        return ResponseEntity.ok(eventPage);
+    	long startTime = System.nanoTime();
+    	Page<Event> events = eventService.getEventsForPerson(personId, page, size);
+    	long endTime = System.nanoTime();
+    	log.info("Pageable took {} ms", (endTime - startTime) / 1000000.0);
+        return ResponseEntity.ok(events);
     }
     
     /**

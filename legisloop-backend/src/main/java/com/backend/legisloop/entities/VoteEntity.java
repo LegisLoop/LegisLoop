@@ -7,7 +7,12 @@ import lombok.*;
 
 
 @Entity
-@Table(name = "votes")
+@Table(
+		name = "votes",
+		indexes = {
+				@Index(name = "idx_votes_rep", columnList = "representative_id")
+				}
+		)
 @Getter
 @Setter
 @NoArgsConstructor
