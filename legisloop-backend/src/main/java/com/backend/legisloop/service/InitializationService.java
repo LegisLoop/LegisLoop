@@ -193,6 +193,7 @@ public class InitializationService {
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
             LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
+            // TODO: This whole process is mirrored in the {@link LegislationService#getBill(Legislation)} and needs to be refactored into a "fill record" schema
             
             legislationEntity.setState(StateEnum.fromStateID(legislationJson.get("state_id").getAsInt()));
             

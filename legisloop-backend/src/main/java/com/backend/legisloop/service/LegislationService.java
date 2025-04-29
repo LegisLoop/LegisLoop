@@ -349,6 +349,7 @@ public class LegislationService {
      * @param rollCalls
      */
     private void updateRollCalls(List<RollCall> rollCalls) {
+    	// TODO: should probably fetch votes here?
     	if (rollCalls.isEmpty()) return;
     	List<RollCallEntity> rollCallEntities = new ArrayList<RollCallEntity>();
     	for (RollCall rollCall : rollCalls) {
