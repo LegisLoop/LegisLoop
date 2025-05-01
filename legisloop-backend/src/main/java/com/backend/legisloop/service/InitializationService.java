@@ -32,10 +32,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.sql.Date;
 
 @Service
 @Slf4j
@@ -195,9 +192,25 @@ public class InitializationService {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
             LegislationEntity legislationEntity = Legislation.fillRecord(legislationJson).toEntity();
             
+            // For each document, check if it exists in the repository
+            List<LegislationDocumentEntity> existingDocs = new ArrayList<>();
+            List<LegislationDocumentEntity> newDocs = new ArrayList<>();
+            
             for (LegislationDocumentEntity doc : legislationEntity.getTexts()) {
-                doc.setBill(LegislationEntity.builder().bill_id(legislationEntity.getBill_id()).build());
+                Optional<LegislationDocumentEntity> existingDoc = legislationDocumentRepository.findById(doc.getDoc_id());
+                if (existingDoc.isPresent()) {
+                    // If document exists, keep the existing one (preserves content)
+                    existingDocs.add(existingDoc.get());
+                } else {
+                    // If document is new, add it
+                    doc.setBill(LegislationEntity.builder().bill_id(legislationEntity.getBill_id()).build());
+                    newDocs.add(doc);
+                }
             }
+            
+            // Combine existing and new documents
+            legislationEntity.setTexts(existingDocs);
+            legislationEntity.getTexts().addAll(newDocs);
             
             legislationToAdd.add(legislationEntity);
         });
@@ -235,126 +248,6 @@ public class InitializationService {
         });
     }
 
-
-    public void insertDummyData() {
-        // Insert Representatives
-        RepresentativeEntity rep1 = RepresentativeEntity.builder()
-                .people_id(1)
-                .name("John Doe")
-                .party("Democrat")
-                .state_id(1)
-                .role("Senator")
-                .role_id(1)
-                .build();
-
-        RepresentativeEntity rep2 = RepresentativeEntity.builder()
-                .people_id(2)
-                .name("Jane Smith")
-                .party("Republican")
-                .state_id(2)
-                .role("Representative")
-                .role_id(1)
-                .build();
-
-        representativeRepository.saveAll(Arrays.asList(rep1, rep2));
-
-        // Insert and Save Roll Calls First
-        RollCallEntity rollCall1 = RollCallEntity.builder()
-                .roll_call_id(98)
-                .absent(1)
-                .nv(2)
-                .yea(3)
-                .nay(4)
-                .passed(false)
-                .total(10)
-                .desc("Baller vote")
-                .build();
-
-        RollCallEntity rollCall2 = RollCallEntity.builder()
-                .roll_call_id(99)
-                .absent(5)
-                .nv(6)
-                .yea(7)
-                .nay(8)
-                .passed(false)
-                .total(20)
-                .desc("Mega baller vote")
-                .build();
-
-        rollCallRepository.saveAll(Arrays.asList(rollCall1, rollCall2));
-
-        // Fetch roll calls again to ensure IDs are set
-        rollCall1 = rollCallRepository.findById(rollCall1.getRoll_call_id()).orElseThrow();
-        rollCall2 = rollCallRepository.findById(rollCall2.getRoll_call_id()).orElseThrow();
-
-        // Insert Legislation
-        LegislationEntity legislation = LegislationEntity.builder()
-                .bill_id(100)
-                .title("Clean Energy Act")
-                .description("A bill to promote renewable energy")
-                .summary("This bill provides incentives for clean energy projects.")
-                .change_hash("xyz123")
-                .url("https://example.com/legislation/101")
-                .state_link("https://state.example.com/legislation/101")
-                .sponsors(List.of(rep1, rep2))
-                // .endorsements(List.of(rep1))
-                .rollCalls(List.of(rollCall1, rollCall2))
-                .build();
-
-        legislationRepository.save(legislation);
-
-        // Insert Legislation Documents
-        LegislationDocumentEntity document = LegislationDocumentEntity.builder()
-                .doc_id(1)
-                .bill(legislation)
-                .text_hash("doc_hash_123")
-                .url(URI.create("https://example.com/document/1"))
-                .state_link(URI.create("https://external.example.com/document/1"))
-                .mime("application/pdf")
-                .mimeId(1)
-                .docContent("Sample document content")
-                .type("Bill Text")
-                .type_id(101)
-                .build();
-
-        legislationDocumentRepository.save(document);
-
-        // Insert Votes After Roll Calls Exist
-        VoteEntity vote1 = VoteEntity.builder()
-                .rollCall(rollCall1)
-                .representative(rep1)
-                .vote_position(VotePosition.YEA)
-                .build();
-
-        VoteEntity vote2 = VoteEntity.builder()
-                .rollCall(rollCall1)
-                .representative(rep2)
-                .vote_position(VotePosition.NAY)
-                .build();
-
-        VoteEntity vote3 = VoteEntity.builder()
-                .rollCall(rollCall2)
-                .representative(rep1)
-                .vote_position(VotePosition.NV)
-                .build();
-
-        VoteEntity vote4 = VoteEntity.builder()
-                .rollCall(rollCall2)
-                .representative(rep2)
-                .vote_position(VotePosition.ABSENT)
-                .build();
-
-        // Associate Votes with Roll Calls
-        rollCall1.setVotes(Arrays.asList(vote1, vote2));
-        rollCall2.setVotes(Arrays.asList(vote3, vote4));
-
-        // Save Votes
-        voteRepository.saveAll(Arrays.asList(vote1, vote2, vote3, vote4));
-
-        // Save Roll Calls Again to Update with Votes
-        rollCallRepository.saveAll(Arrays.asList(rollCall1, rollCall2));
-    }
-    
     private static void saveBase64ZipToFile(String base64String, String filePath) {
     	
     	File file = new File(filePath);
