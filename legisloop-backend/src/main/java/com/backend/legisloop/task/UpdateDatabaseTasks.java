@@ -1,11 +1,13 @@
 package com.backend.legisloop.task;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import com.backend.legisloop.service.InitializationService;
 import com.backend.legisloop.service.LegislationService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -29,15 +31,16 @@ import lombok.extern.slf4j.Slf4j;
 public class UpdateDatabaseTasks {
 
 
-    private final LegislationRepository legislationRepository;
-    private final RepresentativeRepository representativeRepository;
-    private final LegislationService billService;
-    private final RepresentativeService representativeService;
+	private final LegislationRepository legislationRepository;
+	private final RepresentativeRepository representativeRepository;
+	private final LegislationService billService;
+	private final RepresentativeService representativeService;
+	private final InitializationService initializationService;
 	
 	@Scheduled(timeUnit = TimeUnit.MINUTES,
 			fixedRate = 60,
 			initialDelay = 300)
-	public void updateLegislation() throws UnirestException, URISyntaxException {
+	public void updateLegislation() throws UnirestException, URISyntaxException, IOException {
 		
 		log.info("Updating legislation...");
 		
@@ -90,9 +93,8 @@ public class UpdateDatabaseTasks {
 				}
 			
 			} else {
-				// TODO: Call for a zip file and populate the bills from there
 				log.info("\tToo many entries to update manually, will call for a ZIP file!");
-				continue;
+				initializationService.initializeDbFromLegiscanByState(state);
 			}
 
 			legislationRepository.flush();

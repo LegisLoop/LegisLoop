@@ -152,6 +152,7 @@ public class InitializationService {
 	
 	        Map<String, List<JsonObject>> dataMap = DatasetUtils.unzipJsonFiles(encodedZip.getZip());
 	
+            log.info("Saving data for ZIP: {}", outputFilePath);
 	        saveDataFromZip(dataMap);
         }
 
@@ -178,8 +179,9 @@ public class InitializationService {
 
         // Save Representatives
         List<JsonObject> representativeData = dataMap.getOrDefault("people", Collections.emptyList());
-        List<RepresentativeEntity> representativesToAdd = new ArrayList<>();
-        List<RepresentativeEntity> representativesToUpdate = new ArrayList<>();
+        List<RepresentativeEntity> representativesToAdd = new ArrayList<RepresentativeEntity>();
+        List<RepresentativeEntity> representativesToUpdate = new ArrayList<RepresentativeEntity>();
+        log.info("\t{} Representatives in ZIP", representativeData.size());
         
         representativeData.forEach(representative -> {
             JsonObject representativeJson = representative.getAsJsonObject("person");
@@ -198,20 +200,19 @@ public class InitializationService {
             }
         });
         
-        // Save new representatives
-        if (!representativesToAdd.isEmpty()) {
+        log.info("\tAdding {} and updating {} Representative records", representativesToAdd.size(), representativesToUpdate.size());
+        if (!representativesToAdd.isEmpty()) { // Save new representatives
             representativeRepository.saveAll(representativesToAdd);
         }
-        
-        // Update changed representatives
-        if (!representativesToUpdate.isEmpty()) {
+        if (!representativesToUpdate.isEmpty()) { // Update changed representatives
             representativeRepository.saveAll(representativesToUpdate);
         }
 
         // Save Legislation
         List<JsonObject> legislationData = dataMap.getOrDefault("bill", Collections.emptyList());
-        List<LegislationEntity> legislationToAdd = new ArrayList<>();
-        List<LegislationEntity> legislationToUpdate = new ArrayList<>();
+        List<LegislationEntity> legislationToAdd = new ArrayList<LegislationEntity>();
+        List<LegislationEntity> legislationToUpdate = new ArrayList<LegislationEntity>();
+        log.info("\t{} bills/legislation in ZIP", legislationData.size());
         
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
@@ -222,8 +223,8 @@ public class InitializationService {
             if (existingLegislation.isPresent()) {
                 if (!existingLegislation.get().getChange_hash().equals(newLegislation.getChange_hash())) {
                     // Hash changed, update the legislation but preserve existing documents
-                    List<LegislationDocumentEntity> existingDocs = new ArrayList<>();
-                    List<LegislationDocumentEntity> newDocs = new ArrayList<>();
+                    List<LegislationDocumentEntity> existingDocs = new ArrayList<LegislationDocumentEntity>();
+                    List<LegislationDocumentEntity> newDocs = new ArrayList<LegislationDocumentEntity>();
                     
                     for (LegislationDocumentEntity doc : newLegislation.getTexts()) {
                         Optional<LegislationDocumentEntity> existingDoc = legislationDocumentRepository.findById(doc.getDoc_id());
@@ -248,18 +249,19 @@ public class InitializationService {
             }
         });
         
-        // Save new legislation
-        if (!legislationToAdd.isEmpty()) {
+        log.info("\tAdding {} and updating {} Legislation records", legislationToAdd.size(), legislationToUpdate.size());
+        if (!legislationToAdd.isEmpty()) { // Save new legislation
             legislationRepository.saveAll(legislationToAdd);
         }
-        
-        // Update changed legislation
-        if (!legislationToUpdate.isEmpty()) {
+        if (!legislationToUpdate.isEmpty()) { // Update changed legislation
             legislationRepository.saveAll(legislationToUpdate);
         }
 
         // Save Roll Calls and Votes
         List<JsonObject> rollCallData = dataMap.getOrDefault("vote", Collections.emptyList());
+        List<RollCallEntity> rollCallsToAdd = new ArrayList<RollCallEntity>();
+        log.info("\t{} RollCalls in ZIP", rollCallData.size());
+
         rollCallData.forEach(rollCall -> {
             JsonObject rollCallJson = rollCall.getAsJsonObject("roll_call");
             RollCallEntity rollCallToAdd = new GsonBuilder()
@@ -273,7 +275,7 @@ public class InitializationService {
             if (existingRollCall.isPresent()) return; // Roll calls and their votes do not change
 
             JsonArray votesArray = rollCallJson.getAsJsonArray("votes");
-            List<VoteEntity> votesToAdd = new ArrayList<>();
+            List<VoteEntity> votesToAdd = new ArrayList<VoteEntity>();
             if (votesArray != null) {
                 votesArray.forEach(rollCallVote -> {
                     VoteEntity vote = VoteEntity.builder()
@@ -289,8 +291,13 @@ public class InitializationService {
             }
 
             rollCallToAdd.setVotes(votesToAdd);
-            rollCallRepository.save(rollCallToAdd);
+            rollCallsToAdd.add(rollCallToAdd);
         });
+        
+        log.info("\tAdding {} RollCall records", rollCallsToAdd.size());
+        if (!rollCallsToAdd.isEmpty()) { // Save new legislation
+            rollCallRepository.saveAll(rollCallsToAdd);
+        }
     }
 
     private static void saveBase64ZipToFile(String base64String, String filePath) {
