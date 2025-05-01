@@ -203,9 +203,11 @@ public class InitializationService {
         log.info("\tAdding {} and updating {} Representative records", representativesToAdd.size(), representativesToUpdate.size());
         if (!representativesToAdd.isEmpty()) { // Save new representatives
             representativeRepository.saveAll(representativesToAdd);
+            representativeRepository.flush();
         }
         if (!representativesToUpdate.isEmpty()) { // Update changed representatives
             representativeRepository.saveAll(representativesToUpdate);
+            representativeRepository.flush();
         }
 
         // Save Legislation
@@ -252,9 +254,11 @@ public class InitializationService {
         log.info("\tAdding {} and updating {} Legislation records", legislationToAdd.size(), legislationToUpdate.size());
         if (!legislationToAdd.isEmpty()) { // Save new legislation
             legislationRepository.saveAll(legislationToAdd);
+            legislationRepository.flush();
         }
         if (!legislationToUpdate.isEmpty()) { // Update changed legislation
             legislationRepository.saveAll(legislationToUpdate);
+            legislationRepository.flush();
         }
 
         // Save Roll Calls and Votes
@@ -297,6 +301,7 @@ public class InitializationService {
         log.info("\tAdding {} RollCall records", rollCallsToAdd.size());
         if (!rollCallsToAdd.isEmpty()) { // Save new legislation
             rollCallRepository.saveAll(rollCallsToAdd);
+            rollCallRepository.flush();
         }
     }
 
