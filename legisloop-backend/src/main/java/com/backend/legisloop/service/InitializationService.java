@@ -5,6 +5,7 @@ import com.backend.legisloop.entities.*;
 import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.enums.VotePosition;
 import com.backend.legisloop.model.LegiscanDataset;
+import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.RollCall;
 import com.backend.legisloop.repository.*;
 import com.backend.legisloop.serial.BooleanSerializer;
@@ -192,31 +193,12 @@ public class InitializationService {
         List<LegislationEntity> legislationToAdd = new ArrayList<>();
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
-            LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
-            // TODO: This whole process is mirrored in the {@link LegislationService#getBill(Legislation)} and needs to be refactored into a "fill record" schema
-            
-            legislationEntity.setState(StateEnum.fromStateID(legislationJson.get("state_id").getAsInt()));
+            LegislationEntity legislationEntity = Legislation.fillRecord(legislationJson).toEntity();
             
             for (LegislationDocumentEntity doc : legislationEntity.getTexts()) {
-            	doc.setBill(LegislationEntity.builder().bill_id(legislationEntity.getBill_id()).build());
+                doc.setBill(LegislationEntity.builder().bill_id(legislationEntity.getBill_id()).build());
             }
-
-            JsonArray progress = legislationJson.getAsJsonArray("progress");
-            // Find the date where event = 1 (introduced)
-            LocalDate event1Date = null;
-            if(progress != null) {
-                for (JsonElement element : progress) {
-                    JsonObject progressObject = element.getAsJsonObject();
-                    int event = progressObject.get("event").getAsInt();
-
-                    if (event == 1) {
-                        String dateIntroduced = progressObject.get("date").getAsString();
-                        event1Date = LocalDate.parse(dateIntroduced, DateTimeFormatter.ISO_DATE);
-                        break;
-                    }
-                }
-            }
-            legislationEntity.setDateIntroduced((event1Date != null) ? Date.valueOf(event1Date) : null);
+            
             legislationToAdd.add(legislationEntity);
         });
         legislationRepository.saveAll(legislationToAdd);
