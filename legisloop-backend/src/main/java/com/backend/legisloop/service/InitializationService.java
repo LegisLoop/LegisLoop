@@ -228,13 +228,19 @@ public class InitializationService {
                     List<LegislationDocumentEntity> existingDocs = new ArrayList<LegislationDocumentEntity>();
                     List<LegislationDocumentEntity> newDocs = new ArrayList<LegislationDocumentEntity>();
                     
+                    // First, get all existing documents
+                    existingDocs.addAll(existingLegislation.get().getTexts());
+                    
+                    // Then process new documents
                     for (LegislationDocumentEntity doc : newLegislation.getTexts()) {
                         Optional<LegislationDocumentEntity> existingDoc = legislationDocumentRepository.findById(doc.getDoc_id());
-                        if (existingDoc.isPresent()) {
-                            // If document exists, keep the existing one (preserves content)
-                            existingDocs.add(existingDoc.get());
-                        } else {
+                        if (!existingDoc.isPresent()) {
                             // If document is new, add it
+                            doc.setBill(LegislationEntity.builder().bill_id(newLegislation.getBill_id()).build());
+                            newDocs.add(doc);
+                        } else if (!existingDoc.get().getText_hash().equals(doc.getText_hash())) {
+                            // If the document text has changed, replace it. We're ok with losing the content (since the hash changed)
+                            existingDocs.remove(existingDoc.get());
                             doc.setBill(LegislationEntity.builder().bill_id(newLegislation.getBill_id()).build());
                             newDocs.add(doc);
                         }
@@ -303,6 +309,8 @@ public class InitializationService {
             rollCallRepository.saveAll(rollCallsToAdd);
             rollCallRepository.flush();
         }
+
+        log.info("Done!");
     }
 
     private static void saveBase64ZipToFile(String base64String, String filePath) {
