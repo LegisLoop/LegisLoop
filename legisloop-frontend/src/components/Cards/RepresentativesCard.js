@@ -34,9 +34,6 @@ export function RepresentativeCard({ id, name, title, service, topics }) {
             className="bg-white rounded-xl shadow-md p-4 border border-gray-200 hover:shadow-lg transition-shadow cursor-pointer"
             onClick={handleClick}
         >
-            <div className="h-32 bg-gray-200 rounded-md mb-4 flex items-center justify-center">
-                <span className="text-gray-400">Image Placeholder</span>
-            </div>
             <h2 className="text-lg font-semibold">{name}</h2>
             <p className="text-gray-600 font-bold">{title} - {id}</p>
             <p className="text-sm text-gray-500">{service}</p>
