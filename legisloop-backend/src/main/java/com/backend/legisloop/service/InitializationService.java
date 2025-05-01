@@ -179,42 +179,84 @@ public class InitializationService {
         // Save Representatives
         List<JsonObject> representativeData = dataMap.getOrDefault("people", Collections.emptyList());
         List<RepresentativeEntity> representativesToAdd = new ArrayList<>();
+        List<RepresentativeEntity> representativesToUpdate = new ArrayList<>();
+        
         representativeData.forEach(representative -> {
             JsonObject representativeJson = representative.getAsJsonObject("person");
-            representativesToAdd.add(gson.fromJson(representativeJson, RepresentativeEntity.class));
+            RepresentativeEntity newRep = gson.fromJson(representativeJson, RepresentativeEntity.class);
+            
+            // Check if representative exists and if their hash has changed
+            Optional<RepresentativeEntity> existingRep = representativeRepository.findById(newRep.getPeople_id());
+            if (existingRep.isPresent()) {
+                if (!existingRep.get().getPerson_hash().equals(newRep.getPerson_hash())) {
+                    // Only update if the hash has changed
+                    representativesToUpdate.add(newRep);
+                }
+            } else {
+                // New representative
+                representativesToAdd.add(newRep);
+            }
         });
-        representativeRepository.saveAll(representativesToAdd);
+        
+        // Save new representatives
+        if (!representativesToAdd.isEmpty()) {
+            representativeRepository.saveAll(representativesToAdd);
+        }
+        
+        // Update changed representatives
+        if (!representativesToUpdate.isEmpty()) {
+            representativeRepository.saveAll(representativesToUpdate);
+        }
 
         // Save Legislation
         List<JsonObject> legislationData = dataMap.getOrDefault("bill", Collections.emptyList());
         List<LegislationEntity> legislationToAdd = new ArrayList<>();
+        List<LegislationEntity> legislationToUpdate = new ArrayList<>();
+        
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
-            LegislationEntity legislationEntity = Legislation.fillRecord(legislationJson).toEntity();
+            LegislationEntity newLegislation = Legislation.fillRecord(legislationJson).toEntity();
             
-            // For each document, check if it exists in the repository
-            List<LegislationDocumentEntity> existingDocs = new ArrayList<>();
-            List<LegislationDocumentEntity> newDocs = new ArrayList<>();
-            
-            for (LegislationDocumentEntity doc : legislationEntity.getTexts()) {
-                Optional<LegislationDocumentEntity> existingDoc = legislationDocumentRepository.findById(doc.getDoc_id());
-                if (existingDoc.isPresent()) {
-                    // If document exists, keep the existing one (preserves content)
-                    existingDocs.add(existingDoc.get());
-                } else {
-                    // If document is new, add it
-                    doc.setBill(LegislationEntity.builder().bill_id(legislationEntity.getBill_id()).build());
-                    newDocs.add(doc);
+            // Check if legislation exists and if its hash has changed
+            Optional<LegislationEntity> existingLegislation = legislationRepository.findById(newLegislation.getBill_id());
+            if (existingLegislation.isPresent()) {
+                if (!existingLegislation.get().getChange_hash().equals(newLegislation.getChange_hash())) {
+                    // Hash changed, update the legislation but preserve existing documents
+                    List<LegislationDocumentEntity> existingDocs = new ArrayList<>();
+                    List<LegislationDocumentEntity> newDocs = new ArrayList<>();
+                    
+                    for (LegislationDocumentEntity doc : newLegislation.getTexts()) {
+                        Optional<LegislationDocumentEntity> existingDoc = legislationDocumentRepository.findById(doc.getDoc_id());
+                        if (existingDoc.isPresent()) {
+                            // If document exists, keep the existing one (preserves content)
+                            existingDocs.add(existingDoc.get());
+                        } else {
+                            // If document is new, add it
+                            doc.setBill(LegislationEntity.builder().bill_id(newLegislation.getBill_id()).build());
+                            newDocs.add(doc);
+                        }
+                    }
+                    
+                    // Combine existing and new documents
+                    newLegislation.setTexts(existingDocs);
+                    newLegislation.getTexts().addAll(newDocs);
+                    legislationToUpdate.add(newLegislation);
                 }
+            } else {
+                // New legislation
+                legislationToAdd.add(newLegislation);
             }
-            
-            // Combine existing and new documents
-            legislationEntity.setTexts(existingDocs);
-            legislationEntity.getTexts().addAll(newDocs);
-            
-            legislationToAdd.add(legislationEntity);
         });
-        legislationRepository.saveAll(legislationToAdd);
+        
+        // Save new legislation
+        if (!legislationToAdd.isEmpty()) {
+            legislationRepository.saveAll(legislationToAdd);
+        }
+        
+        // Update changed legislation
+        if (!legislationToUpdate.isEmpty()) {
+            legislationRepository.saveAll(legislationToUpdate);
+        }
 
         // Save Roll Calls and Votes
         List<JsonObject> rollCallData = dataMap.getOrDefault("vote", Collections.emptyList());
@@ -226,6 +268,9 @@ public class InitializationService {
                     .create()
                     .fromJson(rollCallJson, RollCall.class)
                     .toEntity();
+
+            Optional<RollCallEntity> existingRollCall = rollCallRepository.findById(rollCallToAdd.getRoll_call_id());
+            if (existingRollCall.isPresent()) return; // Roll calls and their votes do not change
 
             JsonArray votesArray = rollCallJson.getAsJsonArray("votes");
             List<VoteEntity> votesToAdd = new ArrayList<>();
