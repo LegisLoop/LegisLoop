@@ -9,10 +9,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 public enum VotePosition {
 	
-	YEA(0),
-    NAY(1),
-    NV(2),
-    ABSENT(3);
+	YEA(1),
+    NAY(2),
+    NV(3),
+    ABSENT(4);
 
     private final int id;
 	
