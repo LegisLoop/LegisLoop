@@ -25,7 +25,7 @@ public class SummaryController {
     }
     
     @PostMapping("/readingLevel/{docId}")
-    public ResponseEntity<String> getSummaryByAge(
+    public ResponseEntity<Summary> getSummaryByAge(
             @PathVariable int docId,
             @RequestParam ReadingLevelEnum readingLevel,
             @RequestParam String mimeType,

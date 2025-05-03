@@ -75,13 +75,13 @@ public class SummaryService {
 
     // query is the base64 encoded string from the db
     @Transactional
-    public String getSummaryOfContentByReadingLevel(int docId, String encodedString, ReadingLevelEnum readingLevelEnum, String mimeType) throws UnirestException, IOException {
+    public Summary getSummaryOfContentByReadingLevel(int docId, String encodedString, ReadingLevelEnum readingLevelEnum, String mimeType) throws UnirestException, IOException {
 
         int age = readingLevelEnum.getAge();
         log.info("Fetching summary for reading level {}", readingLevelEnum);
 
         String query = extractTextFromEncodedString(encodedString, mimeType);
-        
+
     	JSONObject jsonBody = new JSONObject();
         jsonBody.put("text", query);
         jsonBody.put("age", age);
@@ -108,7 +108,7 @@ public class SummaryService {
                         .build();
                 summaryRepository.save(summaryToAdd);
 
-                return summaryText;
+                return summaryToAdd.toModel();
             } catch (Exception e){
                 log.error(e.getMessage());
                 throw e;
