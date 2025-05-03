@@ -5,6 +5,7 @@ import com.backend.legisloop.entities.*;
 import com.backend.legisloop.enums.StateEnum;
 import com.backend.legisloop.enums.VotePosition;
 import com.backend.legisloop.model.LegiscanDataset;
+import com.backend.legisloop.model.Legislation;
 import com.backend.legisloop.model.RollCall;
 import com.backend.legisloop.repository.*;
 import com.backend.legisloop.serial.BooleanSerializer;
@@ -31,10 +32,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.sql.Date;
 
 @Service
 @Slf4j
@@ -154,6 +152,7 @@ public class InitializationService {
 	
 	        Map<String, List<JsonObject>> dataMap = DatasetUtils.unzipJsonFiles(encodedZip.getZip());
 	
+            log.info("Saving data for ZIP: {}", outputFilePath);
 	        saveDataFromZip(dataMap);
         }
 
@@ -180,48 +179,99 @@ public class InitializationService {
 
         // Save Representatives
         List<JsonObject> representativeData = dataMap.getOrDefault("people", Collections.emptyList());
-        List<RepresentativeEntity> representativesToAdd = new ArrayList<>();
+        List<RepresentativeEntity> representativesToAdd = new ArrayList<RepresentativeEntity>();
+        List<RepresentativeEntity> representativesToUpdate = new ArrayList<RepresentativeEntity>();
+        log.info("\t{} Representatives in ZIP", representativeData.size());
+        
         representativeData.forEach(representative -> {
             JsonObject representativeJson = representative.getAsJsonObject("person");
-            representativesToAdd.add(gson.fromJson(representativeJson, RepresentativeEntity.class));
+            RepresentativeEntity newRep = gson.fromJson(representativeJson, RepresentativeEntity.class);
+            
+            // Check if representative exists and if their hash has changed
+            Optional<RepresentativeEntity> existingRep = representativeRepository.findById(newRep.getPeople_id());
+            if (existingRep.isPresent()) {
+                if (!existingRep.get().getPerson_hash().equals(newRep.getPerson_hash())) {
+                    // Only update if the hash has changed
+                    representativesToUpdate.add(newRep);
+                }
+            } else {
+                // New representative
+                representativesToAdd.add(newRep);
+            }
         });
-        representativeRepository.saveAll(representativesToAdd);
+        
+        log.info("\tAdding {} and updating {} Representative records", representativesToAdd.size(), representativesToUpdate.size());
+        if (!representativesToAdd.isEmpty()) { // Save new representatives
+            representativeRepository.saveAll(representativesToAdd);
+            representativeRepository.flush();
+        }
+        if (!representativesToUpdate.isEmpty()) { // Update changed representatives
+            representativeRepository.saveAll(representativesToUpdate);
+            representativeRepository.flush();
+        }
 
         // Save Legislation
         List<JsonObject> legislationData = dataMap.getOrDefault("bill", Collections.emptyList());
-        List<LegislationEntity> legislationToAdd = new ArrayList<>();
+        List<LegislationEntity> legislationToAdd = new ArrayList<LegislationEntity>();
+        List<LegislationEntity> legislationToUpdate = new ArrayList<LegislationEntity>();
+        log.info("\t{} bills/legislation in ZIP", legislationData.size());
+        
         legislationData.forEach(legislation -> {
             JsonObject legislationJson = legislation.getAsJsonObject("bill");
-            LegislationEntity legislationEntity = gson.fromJson(legislationJson, LegislationEntity.class);
+            LegislationEntity newLegislation = Legislation.fillRecord(legislationJson).toEntity();
             
-            legislationEntity.setState(StateEnum.fromStateID(legislationJson.get("state_id").getAsInt()));
-            
-            for (LegislationDocumentEntity doc : legislationEntity.getTexts()) {
-            	doc.setBill(LegislationEntity.builder().bill_id(legislationEntity.getBill_id()).build());
-            }
-
-            JsonArray progress = legislationJson.getAsJsonArray("progress");
-            // Find the date where event = 1 (introduced)
-            LocalDate event1Date = null;
-            if(progress != null) {
-                for (JsonElement element : progress) {
-                    JsonObject progressObject = element.getAsJsonObject();
-                    int event = progressObject.get("event").getAsInt();
-
-                    if (event == 1) {
-                        String dateIntroduced = progressObject.get("date").getAsString();
-                        event1Date = LocalDate.parse(dateIntroduced, DateTimeFormatter.ISO_DATE);
-                        break;
+            // Check if legislation exists and if its hash has changed
+            Optional<LegislationEntity> existingLegislation = legislationRepository.findById(newLegislation.getBill_id());
+            if (existingLegislation.isPresent()) {
+                if (!existingLegislation.get().getChange_hash().equals(newLegislation.getChange_hash())) {
+                    // Hash changed, update the legislation but preserve existing documents
+                    List<LegislationDocumentEntity> existingDocs = new ArrayList<LegislationDocumentEntity>();
+                    List<LegislationDocumentEntity> newDocs = new ArrayList<LegislationDocumentEntity>();
+                    
+                    // First, get all existing documents
+                    existingDocs.addAll(existingLegislation.get().getTexts());
+                    
+                    // Then process new documents
+                    for (LegislationDocumentEntity doc : newLegislation.getTexts()) {
+                        Optional<LegislationDocumentEntity> existingDoc = legislationDocumentRepository.findById(doc.getDoc_id());
+                        if (!existingDoc.isPresent()) {
+                            // If document is new, add it
+                            doc.setBill(LegislationEntity.builder().bill_id(newLegislation.getBill_id()).build());
+                            newDocs.add(doc);
+                        } else if (!existingDoc.get().getText_hash().equals(doc.getText_hash())) {
+                            // If the document text has changed, replace it. We're ok with losing the content (since the hash changed)
+                            existingDocs.remove(existingDoc.get());
+                            doc.setBill(LegislationEntity.builder().bill_id(newLegislation.getBill_id()).build());
+                            newDocs.add(doc);
+                        }
                     }
+                    
+                    // Combine existing and new documents
+                    newLegislation.setTexts(existingDocs);
+                    newLegislation.getTexts().addAll(newDocs);
+                    legislationToUpdate.add(newLegislation);
                 }
+            } else {
+                // New legislation
+                legislationToAdd.add(newLegislation);
             }
-            legislationEntity.setDateIntroduced((event1Date != null) ? Date.valueOf(event1Date) : null);
-            legislationToAdd.add(legislationEntity);
         });
-        legislationRepository.saveAll(legislationToAdd);
+        
+        log.info("\tAdding {} and updating {} Legislation records", legislationToAdd.size(), legislationToUpdate.size());
+        if (!legislationToAdd.isEmpty()) { // Save new legislation
+            legislationRepository.saveAll(legislationToAdd);
+            legislationRepository.flush();
+        }
+        if (!legislationToUpdate.isEmpty()) { // Update changed legislation
+            legislationRepository.saveAll(legislationToUpdate);
+            legislationRepository.flush();
+        }
 
         // Save Roll Calls and Votes
         List<JsonObject> rollCallData = dataMap.getOrDefault("vote", Collections.emptyList());
+        List<RollCallEntity> rollCallsToAdd = new ArrayList<RollCallEntity>();
+        log.info("\t{} RollCalls in ZIP", rollCallData.size());
+
         rollCallData.forEach(rollCall -> {
             JsonObject rollCallJson = rollCall.getAsJsonObject("roll_call");
             RollCallEntity rollCallToAdd = new GsonBuilder()
@@ -231,8 +281,11 @@ public class InitializationService {
                     .fromJson(rollCallJson, RollCall.class)
                     .toEntity();
 
+            Optional<RollCallEntity> existingRollCall = rollCallRepository.findById(rollCallToAdd.getRoll_call_id());
+            if (existingRollCall.isPresent()) return; // Roll calls and their votes do not change
+
             JsonArray votesArray = rollCallJson.getAsJsonArray("votes");
-            List<VoteEntity> votesToAdd = new ArrayList<>();
+            List<VoteEntity> votesToAdd = new ArrayList<VoteEntity>();
             if (votesArray != null) {
                 votesArray.forEach(rollCallVote -> {
                     VoteEntity vote = VoteEntity.builder()
@@ -248,130 +301,18 @@ public class InitializationService {
             }
 
             rollCallToAdd.setVotes(votesToAdd);
-            rollCallRepository.save(rollCallToAdd);
+            rollCallsToAdd.add(rollCallToAdd);
         });
+        
+        log.info("\tAdding {} RollCall records", rollCallsToAdd.size());
+        if (!rollCallsToAdd.isEmpty()) { // Save new legislation
+            rollCallRepository.saveAll(rollCallsToAdd);
+            rollCallRepository.flush();
+        }
+
+        log.info("Done!");
     }
 
-
-    public void insertDummyData() {
-        // Insert Representatives
-        RepresentativeEntity rep1 = RepresentativeEntity.builder()
-                .people_id(1)
-                .name("John Doe")
-                .party("Democrat")
-                .state_id(1)
-                .role("Senator")
-                .role_id(1)
-                .build();
-
-        RepresentativeEntity rep2 = RepresentativeEntity.builder()
-                .people_id(2)
-                .name("Jane Smith")
-                .party("Republican")
-                .state_id(2)
-                .role("Representative")
-                .role_id(1)
-                .build();
-
-        representativeRepository.saveAll(Arrays.asList(rep1, rep2));
-
-        // Insert and Save Roll Calls First
-        RollCallEntity rollCall1 = RollCallEntity.builder()
-                .roll_call_id(98)
-                .absent(1)
-                .nv(2)
-                .yea(3)
-                .nay(4)
-                .passed(false)
-                .total(10)
-                .desc("Baller vote")
-                .build();
-
-        RollCallEntity rollCall2 = RollCallEntity.builder()
-                .roll_call_id(99)
-                .absent(5)
-                .nv(6)
-                .yea(7)
-                .nay(8)
-                .passed(false)
-                .total(20)
-                .desc("Mega baller vote")
-                .build();
-
-        rollCallRepository.saveAll(Arrays.asList(rollCall1, rollCall2));
-
-        // Fetch roll calls again to ensure IDs are set
-        rollCall1 = rollCallRepository.findById(rollCall1.getRoll_call_id()).orElseThrow();
-        rollCall2 = rollCallRepository.findById(rollCall2.getRoll_call_id()).orElseThrow();
-
-        // Insert Legislation
-        LegislationEntity legislation = LegislationEntity.builder()
-                .bill_id(100)
-                .title("Clean Energy Act")
-                .description("A bill to promote renewable energy")
-                .summary("This bill provides incentives for clean energy projects.")
-                .change_hash("xyz123")
-                .url("https://example.com/legislation/101")
-                .state_link("https://state.example.com/legislation/101")
-                .sponsors(List.of(rep1, rep2))
-                // .endorsements(List.of(rep1))
-                .rollCalls(List.of(rollCall1, rollCall2))
-                .build();
-
-        legislationRepository.save(legislation);
-
-        // Insert Legislation Documents
-        LegislationDocumentEntity document = LegislationDocumentEntity.builder()
-                .doc_id(1)
-                .bill(legislation)
-                .text_hash("doc_hash_123")
-                .url(URI.create("https://example.com/document/1"))
-                .state_link(URI.create("https://external.example.com/document/1"))
-                .mime("application/pdf")
-                .mimeId(1)
-                .docContent("Sample document content")
-                .type("Bill Text")
-                .type_id(101)
-                .build();
-
-        legislationDocumentRepository.save(document);
-
-        // Insert Votes After Roll Calls Exist
-        VoteEntity vote1 = VoteEntity.builder()
-                .rollCall(rollCall1)
-                .representative(rep1)
-                .vote_position(VotePosition.YEA)
-                .build();
-
-        VoteEntity vote2 = VoteEntity.builder()
-                .rollCall(rollCall1)
-                .representative(rep2)
-                .vote_position(VotePosition.NAY)
-                .build();
-
-        VoteEntity vote3 = VoteEntity.builder()
-                .rollCall(rollCall2)
-                .representative(rep1)
-                .vote_position(VotePosition.NV)
-                .build();
-
-        VoteEntity vote4 = VoteEntity.builder()
-                .rollCall(rollCall2)
-                .representative(rep2)
-                .vote_position(VotePosition.ABSENT)
-                .build();
-
-        // Associate Votes with Roll Calls
-        rollCall1.setVotes(Arrays.asList(vote1, vote2));
-        rollCall2.setVotes(Arrays.asList(vote3, vote4));
-
-        // Save Votes
-        voteRepository.saveAll(Arrays.asList(vote1, vote2, vote3, vote4));
-
-        // Save Roll Calls Again to Update with Votes
-        rollCallRepository.saveAll(Arrays.asList(rollCall1, rollCall2));
-    }
-    
     private static void saveBase64ZipToFile(String base64String, String filePath) {
     	
     	File file = new File(filePath);
