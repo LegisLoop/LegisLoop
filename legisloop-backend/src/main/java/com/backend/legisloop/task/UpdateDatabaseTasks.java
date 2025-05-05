@@ -37,9 +37,9 @@ public class UpdateDatabaseTasks {
 	private final RepresentativeService representativeService;
 	private final InitializationService initializationService;
 	
-	@Scheduled(timeUnit = TimeUnit.MINUTES,
-			fixedRate = 60,
-			initialDelay = 300)
+	@Scheduled(timeUnit = TimeUnit.DAYS,
+			fixedRate = 7,
+			initialDelay = 2)
 	public void updateLegislation() throws UnirestException, URISyntaxException, IOException {
 		
 		log.info("Updating legislation...");
@@ -47,8 +47,7 @@ public class UpdateDatabaseTasks {
 		
 		for (StateEnum state : StateEnum.values()) {
 			List<Legislation> changeHashLegislation = billService.getMasterListChange(state.toString());
-			List<Legislation> legislationStubsToFetch = new ArrayList<Legislation>();
-			int failures = 0;
+			int legislationOutOfDate = 0;
 			
 			log.info("{}: {} entries to check", state.toString(), changeHashLegislation.size());
 			
@@ -68,40 +67,20 @@ public class UpdateDatabaseTasks {
 					
 					log.info("We do not have bill_id {} with changehash {}!", 
 							legislationStub.getBill_id(), legislationStub.getChange_hash());
-					legislationRepository.saveIfDoesNotExist(legislationStub.toEntity()); // TODO: Can be dangerous, leaving only a bill_id and changehash in the db if these calls fall through
+					//legislationRepository.saveIfDoesNotExist(legislationStub.toEntity()); // TODO: Can be dangerous, leaving only a bill_id and changehash in the db if these calls fall through
 					
 				}
 				
-				legislationStubsToFetch.add(legislationStub);
+				legislationOutOfDate++;
 			}
 			
-			log.info("{}: {} entries to update", state.toString(), legislationStubsToFetch.size());
+			log.info("{}: {} entries to update", state.toString(), legislationOutOfDate);
+			log.info("Calling for a ZIP file!");
+			initializationService.initializeDbFromLegiscanByState(state);
 			
-			if (legislationStubsToFetch.size() < 500) {
-			
-				for (Legislation legislationStub : legislationStubsToFetch) {
-					try {
-						LegislationEntity fetchedLegislation = billService.getBill(legislationStub).toEntity();
-						log.info("\tGot upstream legislation, bill_id {} with changehash {}", 
-								fetchedLegislation.getBill_id(), fetchedLegislation.getChange_hash());
-						
-						legislationRepository.save(fetchedLegislation);
-					} catch (Exception e) {
-						log.error("Tried to update the following legislation, got error: {}.\n\t{}", e.toString(), legislationStub.toString());
-						failures++;
-					}
-				}
-			
-			} else {
-				log.info("\tToo many entries to update manually, will call for a ZIP file!");
-				initializationService.initializeDbFromLegiscanByState(state);
-			}
-
-			legislationRepository.flush();
-			
-			log.info("Done updating legislation, {} updates, {} failures.", legislationStubsToFetch.size() - failures, failures);
+			log.info("Done updating legislation.");
 		}
-		//initializationService.initializeDbFromLegiscanByState(state)
+		
 	}
 	
 	@Scheduled(timeUnit = TimeUnit.DAYS,
