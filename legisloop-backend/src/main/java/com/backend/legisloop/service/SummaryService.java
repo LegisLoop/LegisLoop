@@ -6,7 +6,10 @@ import com.backend.legisloop.enums.ReadingLevelEnum;
 import com.backend.legisloop.model.Summary;
 import com.backend.legisloop.repository.LegislationDocumentRepository;
 import com.backend.legisloop.repository.SummaryRepository;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import jakarta.persistence.EntityNotFoundException;
@@ -86,16 +89,17 @@ public class SummaryService {
         jsonBody.put("text", query);
         jsonBody.put("age", age);
 
-        HttpResponse<String> response = Unirest.post(url + "/text/makeReadable")
+        HttpResponse<JsonNode> response = Unirest.post(url + "/text/makeReadable")
             .header("X-API-KEY", API_KEY)
             .header("Content-Language", "en")
             .header("Content-Type", "application/json")
             .body(jsonBody.toString())
-            .asString();
+            .asJson();
 
         if (response.getStatus() == 200) {
             try{
-                String summaryText = response.getBody();
+                String summaryText = response.getBody().getObject().getString("text");
+
                 LegislationDocumentEntity doc = legislationDocumentRepository.findById(docId)
                         .orElseThrow(() -> new EntityNotFoundException(
                                 "No LegislationDocument with id=" + docId
