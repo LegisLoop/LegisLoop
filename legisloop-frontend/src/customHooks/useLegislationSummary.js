@@ -27,25 +27,7 @@ export default function useLegislationSummary(docId, readingLevel, docContent, m
                 setSummary(data);
             } catch (err) {
                 if (axios.isCancel(err)) return;
-                // if it’s a 404, POST to generate a new summary
-                if (err.response?.status === 404) {
-                    try {
-                        const { data } = await axios.post(
-                            baseUrl,
-                            docContent,
-                            {
-                                params,                            // level + mimeType
-                                headers: { "Content-Type": "text/plain" },
-                                cancelToken: source.token
-                            }
-                        );
-                        setSummary(data);
-                    } catch (postErr) {
-                        if (!axios.isCancel(postErr)) setError(postErr);
-                    }
-                } else {
-                    setError(err);
-                }
+                setError(err);
             } finally {
                 setLoading(false);
             }
