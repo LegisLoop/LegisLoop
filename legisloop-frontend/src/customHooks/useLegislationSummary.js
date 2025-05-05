@@ -8,7 +8,7 @@ export default function useLegislationSummary(docId, readingLevel, docContent, m
 
     useEffect(() => {
         // don’t run until we have a docId and a level
-        if (!docId || !readingLevel) return;
+        if (!docId || !readingLevel || readingLevel === "UN_EDITED") return;
 
         const source = axios.CancelToken.source();
         const fetchOrCreate = async () => {

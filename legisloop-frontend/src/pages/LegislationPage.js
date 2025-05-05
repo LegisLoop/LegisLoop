@@ -72,7 +72,7 @@ export default function LegislationPage() {
         loading: summaryLoading,
         error: summaryError
     } = useLegislationSummary(
-        legislation?.docId ?? id,       // your docId field
+        legislation?.docId,       // your docId field
         activeLevel,
         legislation?.docContent || "",
         legislation?.mime || ""
