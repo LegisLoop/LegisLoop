@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -47,7 +48,7 @@ public class SummaryService {
     private final SummaryRepository summaryRepository;
     private final LegislationDocumentRepository legislationDocumentRepository;
 
-    public String getSummaryOfContent(String query) throws UnirestException {
+    private String getSummaryOfContent(String query) throws UnirestException {
 
         log.info("Fetching summary about {}...", query.substring(0, Math.min(query.length(), 20)));
         
@@ -78,7 +79,7 @@ public class SummaryService {
 
     // query is the base64 encoded string from the db
     @Transactional
-    public Summary getSummaryOfContentByReadingLevel(int docId, String encodedString, ReadingLevelEnum readingLevelEnum, String mimeType) throws UnirestException, IOException {
+    private Summary getSummaryOfContentByReadingLevel(int docId, String encodedString, ReadingLevelEnum readingLevelEnum, String mimeType) throws UnirestException, IOException {
 
         int age = readingLevelEnum.getAge();
         log.info("Fetching summary for reading level {}", readingLevelEnum);
@@ -125,10 +126,18 @@ public class SummaryService {
         }
     }
 
-    public Summary getSummaryByDocIdAndReadingLevel(int docId, ReadingLevelEnum readingLevel) {
-        return summaryRepository.findSummaryByDocIdAndReadingLevel(docId, readingLevel).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No summary found for docId: " + docId)
-        ).toModel();
+    public Summary getSummaryByDocIdAndReadingLevel(int docId, ReadingLevelEnum readingLevel) throws UnirestException, IOException {
+    	Optional<SummaryEntity> summary_db = summaryRepository.findSummaryByDocIdAndReadingLevel(docId, readingLevel);
+    	if (summary_db.isPresent()) {
+    		return summary_db.get().toModel();
+    	}
+    	
+    	Optional<LegislationDocumentEntity> doc_db = legislationDocumentRepository.findById(docId);
+    	if (doc_db.isEmpty()) {
+    		throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No legislation document found for docId: " + docId);
+    	}
+    	
+    	return getSummaryOfContentByReadingLevel(docId, doc_db.get().getDocContent(), readingLevel, doc_db.get().getMime());
     }
 
     private String extractTextFromEncodedString(String encodedString, String mimeType) throws IOException {

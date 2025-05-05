@@ -18,28 +18,11 @@ public class SummaryController {
 
     private final SummaryService summaryService;
 
-    @PostMapping
-    public ResponseEntity<String> getSummary(@RequestBody String query) throws UnirestException {
-
-        return new ResponseEntity<>(summaryService.getSummaryOfContent(query), HttpStatus.OK);
-    }
-    
-    @PostMapping("/readingLevel/{docId}")
-    public ResponseEntity<Summary> getSummaryByAge(
-            @PathVariable int docId,
-            @RequestParam ReadingLevelEnum readingLevel,
-            @RequestParam String mimeType,
-            @RequestBody String encodedString
-    ) throws UnirestException, IOException {
-
-        return new ResponseEntity<>(summaryService.getSummaryOfContentByReadingLevel(docId, encodedString, readingLevel, mimeType), HttpStatus.OK);
-    }
-
     @GetMapping("/readingLevel/{docId}")
     public ResponseEntity<Summary> getSummaryByDocIdAndReadingLevel(
             @PathVariable int docId,
             @RequestParam ReadingLevelEnum readingLevel
-    ) {
+    ) throws UnirestException, IOException {
         return ResponseEntity.ok(summaryService.getSummaryByDocIdAndReadingLevel(docId, readingLevel));
     }
 }
