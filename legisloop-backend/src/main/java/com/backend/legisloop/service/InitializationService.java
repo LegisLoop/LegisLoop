@@ -43,7 +43,6 @@ public class InitializationService {
     private final RepresentativeRepository representativeRepository;
     private final LegislationDocumentRepository legislationDocumentRepository;
     private final RollCallRepository rollCallRepository;
-    private final VoteRepository voteRepository;
 
     @Value("${legiscan.api.key}")
     private String API_KEY;
