@@ -22,7 +22,7 @@ function RepresentativePage() {
 
     return (
         <div>
-            <NavBar />
+            <NavBar className="z-50"/>
 
             {/* Back Button */}
             <div className="container mx-auto px-4 mt-4">
