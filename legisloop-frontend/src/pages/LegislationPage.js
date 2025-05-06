@@ -12,7 +12,7 @@ import LegislationSideBar from "../components/SideBar/LegislationSideBar";
 import LegislationVisualizer from "../components/LegislationVisualizer/LegislationVisualizer";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 function createBlobUrl(base64Data, mimeType) {
     if (!base64Data) return "";
@@ -28,78 +28,114 @@ function createBlobUrl(base64Data, mimeType) {
 
 function LegislationPage() {
     const { id } = useParams();
-    const votes = [
-        { representative: "John Doe", decision: "Yea" },
-        { representative: "Jane Smith", decision: "Nay" },
-        { representative: "Alex Johnson", decision: "Abstain" },
-    ];
-    const [legislation, setLegislation] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState("");
+    const { state } = useLocation();
+    const initialBill = state?.bill;
+    const [bill, setBill] = useState(initialBill || null);
 
     useEffect(() => {
-        const fetchLegislation = async () => {
+        if (initialBill) {
+            setBill(initialBill);
+            console.log(initialBill);
+        }
+        else {
+            axios
+                .get(`/api/v1/legislation/${id}`)
+                .then((res) => setBill(res.data))
+                .catch((e) => {
+                    console.error(e);
+                    setErrorMessage("Failed to load bill details.");
+                });
+        }
+    }, [id, initialBill]);
+    const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [doc, setDoc] = useState(null);
+
+
+    useEffect(() => {
+        const fetchDoc = async () => {
             try {
-                // Use the bill id from the URL
                 const response = await axios.get(`/api/v1/legislation-doc/latest/${id}`);
-                
-                // Check for HTTP 204 (no content)
                 if (response.status === 204) {
                     setErrorMessage("No content for this legislation, yet.");
                 } else {
-                    setLegislation(response.data);
+                    setDoc(response.data);
                 }
             } catch (error) {
-                // If the error response is available, check for 404
-                if (error.response && error.response.status === 404) {
+                if (error.response?.status === 404) {
                     setErrorMessage("Bill not found.");
                 } else {
-                    setErrorMessage("An error occurred while fetching data.");
+                    setErrorMessage("An error occurred while fetching document.");
                 }
             } finally {
                 setLoading(false);
             }
-        };
-
-        if (id) {
-            fetchLegislation();
         }
+        if (id) fetchDoc();
     }, [id]);
 
-    // Determine what to render in the content area.
-    let content;
-    if (loading) {
-        content = <p className="text-center text-blue-500">Fetching data...</p>;
-    } else if (errorMessage) {
-        content = <p className="text-center text-red-500">{errorMessage}</p>;
-    } else {
-        // Use the fetched legislation data; fall back to default values if for some reason data is absent.
-        const legislationData = legislation || {
-            name: "Unknown Representative",
-            mime: "application/pdf",
-            docContent: ""
+    const latestRoll = bill?.roll_calls?.[0];
+    const votes = latestRoll?.votes?.map((v) => ({
+        representative: `Member ${v.person_id}`,
+        decision: v.vote_position,
+    })) || [];
+
+    const rollCallSummary =
+        latestRoll && {
+            yea: latestRoll.yea,
+            nay: latestRoll.nay,
+            abstain: (latestRoll.nv || 0) + (latestRoll.absent || 0),
         };
-
-        // Convert the Base64 document content to a Blob URL.
-        const blobUrl = createBlobUrl(legislationData.docContent, legislationData.mime);
-
-        content = <LegislationVisualizer mimeType={legislationData.mime} mimeId={blobUrl} />;
-    }
 
     return (
         <div className="flex flex-col min-h-screen">
             <NavBar />
+
             <div className="flex flex-col lg:flex-row flex-1">
-                {/* Sidebar: full width on small, 1/3 on lg+ */}
                 <div className="w-full lg:w-1/3">
-                    <LegislationSideBar votes={votes} />
+                    <LegislationSideBar
+                        votes={votes}
+                        rollCallSummary={rollCallSummary}
+                        billInfo={{
+                            status: bill?.status,
+                            dateIntroduced: bill?.dateIntroduced,
+                            sponsors: bill?.sponsors,
+                        }}
+                    />
                 </div>
+
                 <div className="w-full lg:w-2/3 p-4 md:p-6 overflow-auto">
                     <div className="mx-auto w-full max-w-full lg:max-w-none">
-                        {content}
+                        {/* Bill metadata panel */}
+                        {bill && (
+                            <div className="mb-6 border-b pb-4">
+                                <h1 className="text-2xl font-bold">{bill.title}</h1>
+
+                                <div className="mt-3 prose">
+                                    {bill.title !== bill.description && <p><strong>Description:</strong> {bill.description}</p>}
+                                    <p>
+                                        <strong>Sponsors:</strong>{" "}
+                                        {bill.sponsors.map((s) => s.name).join(", ")}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Document viewer */}
+                        {loading ? (
+                            <p className="text-center text-blue-500">Fetching document…</p>
+                        ) : errorMessage ? (
+                            <p className="text-center text-red-500">{errorMessage}</p>
+                        ) : (
+                            <LegislationVisualizer
+                                mimeType={doc.mime}
+                                mimeId={createBlobUrl(doc.docContent, doc.mime)}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
+
             <Footer />
         </div>
     );
