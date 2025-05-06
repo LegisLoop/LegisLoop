@@ -12,9 +12,9 @@ function ConnectSideBar() {
                 <CompassIcon />
                 <Tooltip
                     text="Use this sidebar to explore posts made by fellow Americans."
-                    position="bottom"
+                    position="right"
                 >
-                    <h5 className="text-xl font-sans font-semibold leading-snug text-blue-gray-900 cursor-pointer">
+                    <h5 className="text-xl font-sans pr-5 font-semibold leading-snug text-blue-gray-900 cursor-pointer">
                         Connect Page
                     </h5>
                 </Tooltip>

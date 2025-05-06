@@ -16,6 +16,7 @@ import {
     MapIcon,
 } from "../Icons/Icons";
 import policyMap from "../../constants/policyMap";
+import Tooltip from "../ToolTips/ToolTip";
 
 function LandingSideBar({ activeLevel, setActiveLevel, activePolicy, setActivePolicy, setSearchTerm }) {
     const [isLevelOpen, setIsLevelOpen] = useState(true);
@@ -36,9 +37,11 @@ function LandingSideBar({ activeLevel, setActiveLevel, activePolicy, setActivePo
             <div className="w-full lg:w-[16rem] min-h-auto lg:min-h-screen bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 flex flex-col">
                 <div className="flex items-center gap-2 p-4">
                     <CompassIcon />
-                    <h5 className="text-xl font-sans font-semibold leading-snug text-blue-gray-900 cursor-pointer">
-                        Legislative Explorer
-                    </h5>
+                    <Tooltip text="Use this sidebar to filter and explore legislation by government level and policy area." position="right">
+                        <h5 className="text-xl font-sans font-semibold leading-snug text-blue-gray-900 cursor-pointer">
+                            Legislative Explorer
+                        </h5>
+                    </Tooltip>
                 </div>
                 <hr className="my-2 border-blue-gray-50" />
                 <nav className="flex flex-col gap-1 p-2 font-sans text-base font-normal text-blue-gray-700">
