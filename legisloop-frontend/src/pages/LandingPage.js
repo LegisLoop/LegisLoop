@@ -143,14 +143,14 @@ function LandingPage() {
                     <hr className="my-2 border-blue-gray-50" />
                     <div className="space-y-6 mt-6">
                         <EventCard
-                            title="Event 1"
-                            description="This is a description."
-                            signUpLink="link to sign up"
+                            title="Federal Midterm Elections - New Jersey"
+                            description="Vote for your U.S. House representative and local offices."
+                            signUpLink="https://www.nj.gov/state/elections/vote.shtml"
                         />
                         <EventCard
-                            title="Event 2"
-                            description="Another event happening soon."
-                            signUpLink="link to sign up"
+                            title="May 14- Hoboken City Council Meeting"
+                            description="Rent Leveling Board Regular Meeting"
+                            signUpLink="https://hobokennj.iqm2.com/Citizens/Detail_Meeting.aspx?ID=2987"
                         />
                     </div>
                 </div>
