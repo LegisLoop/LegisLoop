@@ -104,16 +104,16 @@ function Footer() {
                                 Connect with Us On
                             </h4>
                             <div className="mb-6 flex justify-center sm:justify-start items-center">
-                                <a href="/" className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke text-dark hover:border-primary hover:bg-primary hover:text-white sm:mr-4 dark:border-dark-3 dark:text-white dark:hover:border-primary">
+                                <a href="https://github.com/LegisLoop/LegisLoop" target="_blank" rel="noopener noreferrer" className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke text-dark hover:border-primary hover:bg-primary hover:text-white sm:mr-4 dark:border-dark-3 dark:text-white dark:hover:border-primary">
                                     <GitHubIcon/>
                                 </a>
-                                <a href="/" className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke text-dark hover:border-primary hover:bg-primary hover:text-white sm:mr-4 dark:border-dark-3 dark:text-white dark:hover:border-primary">
+                                <a href="https://discord.gg/j57CwYh4" target="_blank" rel="noopener noreferrer" className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke text-dark hover:border-primary hover:bg-primary hover:text-white sm:mr-4 dark:border-dark-3 dark:text-white dark:hover:border-primary">
                                     <DiscordIcon/>
                                 </a>
-                                <a href="/" className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke text-dark hover:border-primary hover:bg-primary hover:text-white sm:mr-4 dark:border-dark-3 dark:text-white dark:hover:border-primary">
+                                <a href="https://www.youtube.com/watch?v=5I7bzg65cyU" target="_blank" rel="noopener noreferrer" className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke text-dark hover:border-primary hover:bg-primary hover:text-white sm:mr-4 dark:border-dark-3 dark:text-white dark:hover:border-primary">
                                     <YouTubeIcon/>
                                 </a>
-                                <a href="/" className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke text-dark hover:border-primary hover:bg-primary hover:text-white sm:mr-4 dark:border-dark-3 dark:text-white dark:hover:border-primary">
+                                <a href="https://www.linkedin.com/company/legisloop" target="_blank" rel="noopener noreferrer" className="mr-3 flex h-8 w-8 items-center justify-center rounded-full border border-stroke text-dark hover:border-primary hover:bg-primary hover:text-white sm:mr-4 dark:border-dark-3 dark:text-white dark:hover:border-primary">
                                     <LinkedInIcon/>
                                 </a>
                             </div>
