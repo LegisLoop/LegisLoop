@@ -12,6 +12,7 @@ import LegislationPage from "./pages/LegislationPage";
 import RepresentativePage from "./pages/RepresentativePage";
 import ConnectPage from "./pages/ConnectPage";
 import FindYourRepresentativesPage from "./pages/FindYourRepresentativePage";
+import AboutPage from "./pages/AboutPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
               <Route path="/findrepresentatives" element={<FindYourRepresentativesPage/>} />
               <Route path="/representative/:name" element={<RepresentativePage/>}/>
               <Route path="/connect" element={<ConnectPage/>} />
+              <Route path="/aboutus" element={<AboutPage/>} />
           </Routes>
       </Router>
   );
