@@ -219,7 +219,7 @@ const Timeline = ({ personID }) => {
                 </div>
             ))}
             {!filterActive && hasMore && (
-                <div className="text-center mt-4 relative z-10 bg-white p-4">
+                <div className="text-center mt-4 relative z-0 bg-white p-4">
                     <button
                         onClick={() => setCurrentPage(prev => prev + 1)}
                         className="bg-custom-blue text-white px-4 py-2 rounded-lg shadow-lg"
