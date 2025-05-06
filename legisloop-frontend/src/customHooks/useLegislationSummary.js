@@ -16,7 +16,6 @@ export default function useLegislationSummary(docId, readingLevel, docContent, m
             setError(null);
 
             const baseUrl = `/api/v1/summary/readingLevel/${docId}`;
-            const params = { readingLevel, mimeType };
 
             try {
                 // 1) try GET
