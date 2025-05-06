@@ -90,7 +90,7 @@ export default function LegislationPage() {
         content = (
             <LegislationVisualizer mimeType={legislation.mime} mimeId={blobUrl} />
         );
-    } else if (summaryLoading) {
+    } else if (summaryLoading || !summary) {
         content = <p className="text-center">Loading summary…</p>;
     } else if (summaryError) {
         content = (
@@ -111,14 +111,14 @@ export default function LegislationPage() {
         <div className="flex flex-col min-h-screen">
             <NavBar />
             <div className="flex flex-1 flex-col lg:flex-row">
-                <div className="w-full lg:w-1/3">
+                <div className="w-full lg:w-auto">
                     <LegislationSideBar
                         votes={legislation?.votes || []}
                         activeLevel={activeLevel}
                         setActiveLevel={setActiveLevel}
                     />
                 </div>
-                <div className="w-full lg:w-2/3 overflow-auto p-4 md:p-6">
+                <div className="w-full lg:flex-1 overflow-auto p-4 md:p-6">
                     {content}
                 </div>
             </div>
