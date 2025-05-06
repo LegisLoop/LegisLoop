@@ -16,7 +16,6 @@ import { CalendarEventIcon } from "../components/Icons/Icons";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import useGeoLocation from "../customHooks/useGeoLocation";
 import useLegislation from "../customHooks/useLegislation";
-import ToolTip from "../components/ToolTips/ToolTip";
 import Tooltip from "../components/ToolTips/ToolTip";
 
 
