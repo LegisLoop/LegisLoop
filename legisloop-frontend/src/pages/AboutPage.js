@@ -1,8 +1,4 @@
 import NavBar from "../components/NavBar/NavBar";
-import LandingSideBar from "../components/SideBar/LandingSideBar";
-import LegislationPreviewCard from "../components/Cards/LegislationPreviewCard";
-import {CalendarEventIcon} from "../components/Icons/Icons";
-import EventCard from "../components/Cards/EventCard";
 import Footer from "../components/Footer/Footer";
 
 function AboutPage() {
