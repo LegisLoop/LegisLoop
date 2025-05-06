@@ -17,6 +17,8 @@ import {
 } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
 import { NewspaperIcon } from "lucide-react";
+import axios from "axios";
+import { useEffect } from "react";
 
 function LegislationSideBar({ votes = [], rollCallSummary, billInfo }) {
     // if no precomputed summary, compute from votes array
@@ -30,6 +32,24 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo }) {
         { yea: 0, nay: 0, abstain: 0 }
     );
     const summary = rollCallSummary || computed;
+
+    const [idToName, setIdToName] = useState({});
+
+    useEffect(() => {
+        const ids = Array.from(new Set(votes.map((v) => v.person_id)));
+        if (ids.length === 0) return;
+        console.log('ids', ids);
+
+        axios
+            .post("/api/v1/representative/names", ids)
+            .then((res) => {
+                setIdToName(res.data);
+                console.log(res.data);
+            })
+            .catch((err) => {
+                console.error("Failed to fetch representative names", err);
+            });
+    }, [votes]);
 
     const [isLevelOpen, setIsLevelOpen] = useState(false);
     const [isVotingRecordOpen, setIsVotingRecordOpen] = useState(false);
@@ -128,8 +148,15 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo }) {
                 <div className={`mt-2 transition-[height] duration-300 ease-in-out overflow-hidden ${isVotingRecordOpen ? "h-64" : "h-0"}`}>
                     <div className="h-full overflow-y-auto p-2 space-y-2">
                         {votes.length > 0 ? (
-                            votes.map((v, index) => (
-                                <VoteCard key={index} name={v.representative} vote={v.decision} />
+                            votes.map((v, i) => (
+                                <VoteCard
+                                    key={i}
+                                    name={
+                                        idToName[v.person_id] ||
+                                        `Member ${v.person_id}` /* fallback */
+                                    }
+                                    vote={v.decision}
+                                />
                             ))
                         ) : (
                             <p className="text-gray-500 text-sm">No votes available</p>

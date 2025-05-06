@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/representative")
@@ -59,5 +61,17 @@ public class RepresentativeController {
     @GetMapping("/stateId/{stateId}")
     public ResponseEntity<List<Representative>> getRepresentativeByStateId(@PathVariable int stateId) {
         return new ResponseEntity<>(representativeRepository.findByStateId(stateId).stream().map(RepresentativeEntity::toModel).toList(), HttpStatus.OK);
+    }
+
+    // take in a list of people_ids in the body and output a mapping of them to the respective names
+    @PostMapping("/names")
+    public Map<Integer, String> getNamesByIds(@RequestBody List<Integer> peopleIds) {
+        List<RepresentativeEntity> reps = representativeRepository.findAllById(peopleIds);
+
+        return reps.stream()
+                .collect(Collectors.toMap(
+                        RepresentativeEntity::getPeople_id,  // key = the ID
+                        RepresentativeEntity::getName        // value = the name
+                ));
     }
 }

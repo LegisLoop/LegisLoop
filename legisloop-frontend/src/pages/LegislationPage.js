@@ -30,14 +30,27 @@ function LegislationPage() {
     const { id } = useParams();
     const { state } = useLocation();
     const initialBill = state?.bill;
-    const [bill, setBill] = useState(initialBill || null);
 
+    // --- Bill & document state ---
+    const [bill, setBill] = useState(initialBill || null);
+    const [doc, setDoc] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    // --- Derived state for votes & summary ---
+    const [latestRoll, setLatestRoll] = useState(null);
+    const [votes, setVotes] = useState([]);
+    const [rollCallSummary, setRollCallSummary] = useState({
+        yea: 0,
+        nay: 0,
+        abstain: 0,
+    });
+
+    // load bill info if not provided from landing page 
     useEffect(() => {
         if (initialBill) {
             setBill(initialBill);
-            console.log(initialBill);
-        }
-        else {
+        } else {
             axios
                 .get(`/api/v1/legislation/${id}`)
                 .then((res) => setBill(res.data))
@@ -47,51 +60,62 @@ function LegislationPage() {
                 });
         }
     }, [id, initialBill]);
-    const [loading, setLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState("");
-    const [doc, setDoc] = useState(null);
 
-
+    // fetch the document 
     useEffect(() => {
-        const fetchDoc = async () => {
-            try {
-                const response = await axios.get(`/api/v1/legislation-doc/latest/${id}`);
-                if (response.status === 204) {
+        if (!id) return;
+
+        setLoading(true);
+        axios
+            .get(`/api/v1/legislation-doc/latest/${id}`)
+            .then((res) => {
+                if (res.status === 204) {
                     setErrorMessage("No content for this legislation, yet.");
                 } else {
-                    setDoc(response.data);
+                    setDoc(res.data);
                 }
-            } catch (error) {
-                if (error.response?.status === 404) {
+            })
+            .catch((e) => {
+                if (e.response?.status === 404) {
                     setErrorMessage("Bill not found.");
                 } else {
                     setErrorMessage("An error occurred while fetching document.");
                 }
-            } finally {
-                setLoading(false);
-            }
-        }
-        if (id) fetchDoc();
+            })
+            .finally(() => setLoading(false));
     }, [id]);
 
-    const latestRoll = bill?.roll_calls?.[0];
-    const votes = latestRoll?.votes?.map((v) => ({
-        representative: `Member ${v.person_id}`,
-        decision: v.vote_position,
-    })) || [];
+    // recalculate latestRoll, votes & summary
+    useEffect(() => {
+        if (!bill?.roll_calls?.length) {
+            setLatestRoll(null);
+            setVotes([]);
+            setRollCallSummary({ yea: 0, nay: 0, abstain: 0 });
+            return;
+        }
 
-    const rollCallSummary =
-        latestRoll && {
-            yea: latestRoll.yea,
-            nay: latestRoll.nay,
-            abstain: (latestRoll.nv || 0) + (latestRoll.absent || 0),
-        };
+        const roll = bill.roll_calls[0];
+        setLatestRoll(roll);
+
+        const mappedVotes = roll.votes.map((v) => ({
+            person_id: v.person_id,
+            decision: v.vote_position,
+        }));
+        setVotes(mappedVotes);
+
+        setRollCallSummary({
+            yea: roll.yea,
+            nay: roll.nay,
+            abstain: (roll.nv || 0) + (roll.absent || 0),
+        });
+    }, [bill]);
 
     return (
         <div className="flex flex-col min-h-screen">
             <NavBar />
 
             <div className="flex flex-col lg:flex-row flex-1">
+                {/* Sidebar */}
                 <div className="w-full lg:w-1/3">
                     <LegislationSideBar
                         votes={votes}
@@ -104,15 +128,18 @@ function LegislationPage() {
                     />
                 </div>
 
+                {/* Main content */}
                 <div className="w-full lg:w-2/3 p-4 md:p-6 overflow-auto">
                     <div className="mx-auto w-full max-w-full lg:max-w-none">
-                        {/* Bill metadata panel */}
                         {bill && (
                             <div className="mb-6 border-b pb-4">
                                 <h1 className="text-2xl font-bold">{bill.title}</h1>
-
                                 <div className="mt-3 prose">
-                                    {bill.title !== bill.description && <p><strong>Description:</strong> {bill.description}</p>}
+                                    {bill.title !== bill.description && (
+                                        <p>
+                                            <strong>Description:</strong> {bill.description}
+                                        </p>
+                                    )}
                                     <p>
                                         <strong>Sponsors:</strong>{" "}
                                         {bill.sponsors.map((s) => s.name).join(", ")}
@@ -121,11 +148,14 @@ function LegislationPage() {
                             </div>
                         )}
 
-                        {/* Document viewer */}
                         {loading ? (
-                            <p className="text-center text-blue-500">Fetching document…</p>
+                            <p className="text-center text-blue-500">
+                                Fetching document…
+                            </p>
                         ) : errorMessage ? (
-                            <p className="text-center text-red-500">{errorMessage}</p>
+                            <p className="text-center text-red-500">
+                                {errorMessage}
+                            </p>
                         ) : (
                             <LegislationVisualizer
                                 mimeType={doc.mime}
@@ -142,3 +172,4 @@ function LegislationPage() {
 }
 
 export default LegislationPage;
+
