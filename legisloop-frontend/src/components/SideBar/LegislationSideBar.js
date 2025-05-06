@@ -18,7 +18,7 @@ import {
 import Tooltip from "../ToolTips/ToolTip";
 import { NewspaperIcon } from "lucide-react";
 
-function LegislationSideBar({ votes = [] }) {
+function LegislationSideBar({ votes = [], activeLevel, setActiveLevel }) {
     // Summarize votes
     const voteSummary = votes.reduce(
         (acc, vote) => {
@@ -31,11 +31,10 @@ function LegislationSideBar({ votes = [] }) {
     );
 
     // Drop-downs start closed
-    const [isLevelOpen, setIsLevelOpen] = useState(false);
+    const [isLevelOpen, setIsLevelOpen] = useState(true);
     const [isVotingRecordOpen, setIsVotingRecordOpen] = useState(false);
 
-    // Track which reading level is active
-    const [activeLevel, setActiveLevel] = useState("Easy");
+
 
     const handleLevelClick = (level) => {
         setActiveLevel(level);
@@ -72,40 +71,37 @@ function LegislationSideBar({ votes = [] }) {
                             Reading Level
                         </p>
                         <span className="ml-4">
-              <DropDownArrowIcon
-                  className={`${isLevelOpen ? "rotate-180" : ""}`}
-              />
-            </span>
+                            <DropDownArrowIcon
+                                className={`${isLevelOpen ? "rotate-180" : ""}`}
+                            />
+                        </span>
                     </button>
 
                     <div
-                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                            isLevelOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                        }`}
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${isLevelOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                            }`}
                     >
                         <div className="block w-full py-1 font-sans text-sm font-light leading-normal text-gray-700">
                             <nav className="flex flex-col gap-1 p-0">
                                 {[
-                                    { icon: <DocumentTextIcon />, label: "Un-edited" },
-                                    { icon: <BookOpenIcon />, label: "Moderate-read" },
-                                    { icon: <NewspaperIcon />, label: "Easy-read" },
-                                    { icon: <DocumentDuplicateIcon />, label: "1-page" },
+                                    { icon: <DocumentTextIcon />, label: "Un-edited", param: 'UN_EDITED' },
+                                    { icon: <BookOpenIcon />, label: "Moderate-read", param: 'MODERATE' },
+                                    { icon: <NewspaperIcon />, label: "Easy-read", param: 'EASY' },
+                                    { icon: <DocumentDuplicateIcon />, label: "1-page", param: 'ONE_PAGE' },
                                 ].map((item, index) => (
                                     <div
                                         key={index}
-                                        onClick={() => handleLevelClick(item.label)}
-                                        className={`flex items-center w-full p-3 transition-all rounded-lg outline-none text-start ${
-                                            activeLevel === item.label
-                                                ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red text-custom-red-dark font-semibold"
-                                                : "hover:bg-gray-200"
-                                        }`}
+                                        onClick={() => handleLevelClick(item.param)}
+                                        className={`flex items-center w-full p-3 transition-all rounded-lg outline-none text-start ${activeLevel === item.param
+                                            ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red text-custom-red-dark font-semibold"
+                                            : "hover:bg-gray-200"
+                                            }`}
                                     >
                                         <div
-                                            className={`grid mr-4 place-items-center ${
-                                                activeLevel === item.label
-                                                    ? "text-custom-red-dark"
-                                                    : "text-custom-blue"
-                                            }`}
+                                            className={`grid mr-4 place-items-center ${activeLevel === item.param
+                                                ? "text-custom-red-dark"
+                                                : "text-custom-blue"
+                                                }`}
                                         >
                                             {item.icon}
                                         </div>
@@ -151,16 +147,15 @@ function LegislationSideBar({ votes = [] }) {
                         Voting Record
                     </p>
                     <span className="ml-4">
-            <DropDownArrowIcon
-                className={`${isVotingRecordOpen ? "rotate-180" : ""}`}
-            />
-          </span>
+                        <DropDownArrowIcon
+                            className={`${isVotingRecordOpen ? "rotate-180" : ""}`}
+                        />
+                    </span>
                 </button>
 
                 <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isVotingRecordOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                    }`}
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isVotingRecordOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                        }`}
                 >
                     <div className="flex flex-col gap-2 mt-2">
                         {votes.length > 0 ? (
