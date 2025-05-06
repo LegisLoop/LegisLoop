@@ -126,7 +126,7 @@ const Timeline = ({ personID }) => {
 
             {/* Filter Form */}
             <div className="mb-6">
-            <form onSubmit={handleFilter} className="flex gap-4 items-end">
+                <form onSubmit={handleFilter} className="flex flex-col md:flex-row gap-4 md:items-end">
                 <div>
                 <label htmlFor="startDate" className="block mb-1">
                     Start Date:
