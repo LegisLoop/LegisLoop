@@ -27,7 +27,12 @@ export default function useLegislationSummary(docId, readingLevel, docContent, m
                 setSummary(data);
             } catch (err) {
                 if (axios.isCancel(err)) return;
-                setError(err);
+                if (err.response?.status === 404) {
+                    setSummary(null);
+                    setError(new Error('No summary available for this reading level'));
+                } else {
+                    setError(err);
+                }
             } finally {
                 setLoading(false);
             }
