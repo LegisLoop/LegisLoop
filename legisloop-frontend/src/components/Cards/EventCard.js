@@ -7,7 +7,6 @@
  * Last Updated: February 19, 2025.
  ***************************************************************/
 import {EventBannerIcon} from "../Icons/Icons";
-import { Link } from "react-router-dom";
 
 function EventCard({ title, description, signUpLink }) {
     return (
