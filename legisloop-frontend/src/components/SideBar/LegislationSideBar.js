@@ -48,7 +48,7 @@ function LegislationSideBar({ votes = [] }) {
             <div className="flex items-center gap-2 p-4">
                 <Tooltip
                     text="Use this sidebar to explore the legislation, adjust the reading level, and view vote details."
-                    position="bottom"
+                    position="right"
                 >
                     <h5 className="text-xl font-sans font-semibold leading-snug text-custom-blue cursor-pointer">
                         Legislation Overview &amp; Reading Level

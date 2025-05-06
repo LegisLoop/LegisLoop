@@ -117,8 +117,8 @@ const Timeline = ({ personID }) => {
         <div className="relative max-w-4xl mx-auto p-6">
             <div className="relative flex items-center text-center pb-4 gap-4">
                 <DocumentTextIcon />
-                <Tooltip text="View legislative decisions, bill proposals, and voting records in one timeline." position="bottom">
-                    <h5 className="text-xl font-sans font-semibold leading-snug text-custom-blue cursor-pointer">
+                <Tooltip text="View legislative decisions, bill proposals, and voting records in one timeline." position="right">
+                    <h5 className="text-xl font-sans pr-5 font-semibold leading-snug text-custom-blue cursor-pointer">
                         Legislative Activity Tracker
                     </h5>
                 </Tooltip>
