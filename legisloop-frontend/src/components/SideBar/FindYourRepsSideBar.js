@@ -1,9 +1,7 @@
 import { useState } from "react";
 import {
     CompassIcon,
-    DropDownArrowIcon,
-    MapPinIcon,
-    AdjustmentsIcon,
+    MapPinIcon
 } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
 
@@ -23,16 +21,15 @@ const stateMap = {
 
 function RepresentativeSideBar({ setStateId }) {
     const [selectedState, setSelectedState] = useState("");
-    const [isLocationOpen, setIsLocationOpen] = useState(true);
 
     const handleStateSelection = (state) => {
         setSelectedState(state);
-        setStateId(stateMap[state]); // Update state ID in parent
+        setStateId(stateMap[state]);
     };
 
     return (
         <div className="relative flex flex-col w-full h-screen md:h-full bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 z-9">
-        {/* Header */}
+            {/* Header */}
             <div className="flex items-center gap-2 p-2 md:p-4">
                 <CompassIcon />
                 <Tooltip text="Find your representatives by location and government level." position="right">
@@ -43,60 +40,32 @@ function RepresentativeSideBar({ setStateId }) {
             </div>
 
             <hr className="my-2 border-blue-gray-50" />
-
-            {/* LOCATION SELECTOR */}
-            <div className="relative w-full">
-                <button
-                    type="button"
-                    onClick={() => setIsLocationOpen(!isLocationOpen)}
-                    className="flex items-center justify-between w-full p-2 md:p-3 text-lg md:text-xl font-semibold leading-snug text-left transition-all duration-300 border-b border-gray-300 hover:bg-gray-200"
-                >
-                    <div className="grid mr-2 md:mr-4 place-items-center">
-                        <MapPinIcon className="text-custom-red" />
-                    </div>
-                    <p className="mr-auto text-base md:text-lg font-bold">Select Location</p>
-                    <span className="ml-2 md:ml-4"><DropDownArrowIcon /></span>
-                </button>
-
-                {/* Dropdown with Search */}
-                <div className="py-1 text-sm text-gray-700">
-                    <input
-                        type="text"
-                        placeholder="Search state..."
-                        value={selectedState}
-                        onChange={(e) => setSelectedState(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-                    <ul className="max-h-48 overflow-auto mt-2">
-                        {Object.keys(stateMap)
-                            .filter(state => state.toLowerCase().includes(selectedState.toLowerCase()))
-                            .map((state, index) => (
-                                <li
-                                    key={index}
-                                    onClick={() => handleStateSelection(state)}
-                                    className="p-2 cursor-pointer hover:bg-gray-200"
-                                >
-                                    {state}
-                                </li>
-                            ))}
-                    </ul>
+            <div className="w-full">
+                <div className="flex items-center gap-2 mt-5 mb-2">
+                    <MapPinIcon className="text-custom-red" />
+                    <p className="text-base md:text-lg font-bold">Select Location</p>
                 </div>
+                <input
+                    type="text"
+                    placeholder="Search state..."
+                    value={selectedState}
+                    onChange={(e) => setSelectedState(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                <ul className="max-h-48 overflow-auto mt-2">
+                    {Object.keys(stateMap)
+                        .filter(state => state.toLowerCase().includes(selectedState.toLowerCase()))
+                        .map((state, index) => (
+                            <li
+                                key={index}
+                                onClick={() => handleStateSelection(state)}
+                                className="p-2 cursor-pointer hover:bg-gray-200"
+                            >
+                                {state}
+                            </li>
+                        ))}
+                </ul>
             </div>
-
-            {/* GOVERNMENT LEVEL SELECTOR */}
-            {selectedState && (
-                <div className="relative block w-full mt-4">
-                    <button
-                        type="button"
-                        className="flex items-center justify-between w-full p-3 text-xl font-semibold leading-snug text-left transition-all duration-300 border-b border-gray-300 hover:bg-gray-200">
-                        <div className="grid mr-4 place-items-center">
-                            <AdjustmentsIcon className="text-custom-red" />
-                        </div>
-                        <p className="mr-auto text-base font-bold">Select Government Level</p>
-                        <span className="ml-4"><DropDownArrowIcon /></span>
-                    </button>
-                </div>
-            )}
         </div>
     );
 }
