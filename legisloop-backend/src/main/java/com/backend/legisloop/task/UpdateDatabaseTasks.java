@@ -84,8 +84,8 @@ public class UpdateDatabaseTasks {
 	}
 	
 	@Scheduled(timeUnit = TimeUnit.DAYS,
-			fixedRate = 7,
-			initialDelay = 1)
+			fixedRate = 14,
+			initialDelay = 7)
 	public void updatePeople() throws UnirestException {
 		
 		log.info("Updating legislators...");
