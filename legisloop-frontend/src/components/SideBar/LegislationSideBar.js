@@ -20,6 +20,7 @@ import { NewspaperIcon } from "lucide-react";
 import axios from "axios";
 
 function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel, setActiveLevel, }) {
+
     // vote summary: use passed‐in or fallback
     const fallback = votes.reduce(
         (acc, v) => {
