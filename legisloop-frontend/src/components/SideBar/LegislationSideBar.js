@@ -7,7 +7,6 @@
  * Last Updated: April 3, 2025.
  ***************************************************************/
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import VoteCard from "../Cards/VoteCard";
 import {
     BookOpenIcon,
