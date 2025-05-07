@@ -14,19 +14,12 @@ import {
     DocumentDuplicateIcon,
     DocumentTextIcon,
     DropDownArrowIcon,
-    MapPinIcon,
 } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
 import { NewspaperIcon } from "lucide-react";
 import axios from "axios";
 
-function LegislationSideBar({
-                                votes = [],
-                                rollCallSummary,
-                                billInfo,
-                                activeLevel,
-                                setActiveLevel,
-                            }) {
+function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel, setActiveLevel, }) {
     // vote summary: use passed‐in or fallback
     const fallback = votes.reduce(
         (acc, v) => {
@@ -98,11 +91,7 @@ function LegislationSideBar({
                     />
                 </button>
 
-                <div
-                    className={`mt-1 overflow-hidden transition-all ${
-                        isLevelOpen ? "max-h-60" : "max-h-0"
-                    }`}
-                >
+                <div className={`mt-1 overflow-hidden transition-all ${isLevelOpen ? "max-h-60" : "max-h-0"}`}>
                     {levels.map((lvl) => (
                         <div
                             key={lvl.param}
@@ -110,11 +99,10 @@ function LegislationSideBar({
                                 setActiveLevel(lvl.param);
                                 setIsLevelOpen(false);
                             }}
-                            className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
-                                activeLevel === lvl.param
-                                    ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red font-semibold"
-                                    : "hover:bg-gray-100"
-                            }`}
+                            className={`flex items-center gap-2 p-2 rounded cursor-pointer ${activeLevel === lvl.param
+                                ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red font-semibold"
+                                : "hover:bg-gray-100"
+                                }`}
                         >
                             {lvl.icon}
                             <span>{lvl.label}</span>
@@ -155,9 +143,8 @@ function LegislationSideBar({
                 </button>
 
                 <div
-                    className={`mt-2 transition-[height] duration-300 ease-in-out overflow-hidden ${
-                        isVotingOpen ? "h-64" : "h-0"
-                    }`}
+                    className={`mt-2 transition-[height] duration-300 ease-in-out overflow-hidden ${isVotingOpen ? "h-64" : "h-0"
+                        }`}
                 >
                     <div className="h-full overflow-y-auto p-2 space-y-2">
                         {votes.length > 0 ? (

@@ -4,13 +4,12 @@
  ****************************************************************
  * LegislationPage Declaration.
  ****************************************************************
- * Last Updated: April 3, 2025.
+ * Last Updated: May 6, 2025.
  ***************************************************************/
 import React, { useState, useEffect } from "react";
 import {
     useParams,
     useLocation,
-    Link
 } from "react-router-dom";
 import axios from "axios";
 
@@ -127,26 +126,33 @@ export default function LegislationPage() {
     );
 
     let content;
+
     if (loadingDoc) {
         content = <p className="text-center text-blue-500">Fetching document…</p>;
     } else if (errorDoc) {
         content = <p className="text-center text-red-500">{errorDoc}</p>;
     } else if (activeLevel === "UN_EDITED") {
         const blobUrl = createBlobUrl(doc.docContent, doc.mime);
-        content = (
-            <LegislationVisualizer mimeType={doc.mime} mimeId={blobUrl} />
-        );
+        content = <LegislationVisualizer mimeType={doc.mime} mimeId={blobUrl} />;
     } else if (loadingSummary) {
         content = <p className="text-center">Loading summary…</p>;
     } else if (errorSummary) {
         content = (
-            <p className="text-center text-red-500">{errorSummary}</p>
+            <p className="text-center text-red-500">
+                {errorSummary.message || "Error loading summary."}
+            </p>
         );
-    } else {
+    } else if (summary && summary.summaryContent) {
         content = (
             <div className="prose max-w-none p-4">
                 {summary.summaryContent}
             </div>
+        );
+    } else {
+        content = (
+            <p className="text-center text-gray-500">
+                No summary available for this reading level.
+            </p>
         );
     }
 
@@ -170,7 +176,6 @@ export default function LegislationPage() {
                     />
                 </div>
 
-                {/* Main content */}
                 <div className="w-full lg:flex-1 overflow-auto p-4 md:p-6">
                     {bill && (
                         <div className="mb-6 border-b pb-4">
@@ -193,24 +198,15 @@ export default function LegislationPage() {
                                         <strong>Sponsors:</strong>{" "}
                                         {bill.sponsors.map((s, i) => (
                                             <span key={s.people_id}>
-                        {i > 0 && ", "}
-                                                <Link
-                                                    to={`/representative/${encodeURIComponent(
-                                                        s.name
-                                                    )}`}
-                                                    state={{ id: s.people_id, name: s.name }}
-                                                    className="text-blue-600 hover:underline"
-                                                >
-                          {s.name}
-                        </Link>
-                      </span>
+                                                {i > 0 && ", "}
+                                                {s.name}
+                                            </span>
                                         ))}
                                     </p>
                                 )}
                             </div>
                         </div>
                     )}
-
                     {content}
                 </div>
             </div>
