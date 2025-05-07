@@ -160,7 +160,7 @@ export default function LegislationPage() {
 
             <div className="flex flex-1 flex-col lg:flex-row">
                 {/* Sidebar */}
-                <div className="w-full lg:w-1/3">
+                <div className="w-full lg:w-1/3 flex">
                     <LegislationSideBar
                         votes={votes}
                         rollCallSummary={rollCallSummary}

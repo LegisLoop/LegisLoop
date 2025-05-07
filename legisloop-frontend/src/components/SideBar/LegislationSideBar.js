@@ -62,7 +62,7 @@ function LegislationSideBar({
     ];
 
     return (
-        <div className="w-full lg:w-[20rem] lg:min-h-screen flex flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5">
+        <div className="w-full lg:w-[20rem] flex flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 h-full">
             <div className="flex flex-col items-start gap-4 p-4">
                 <Tooltip
                     text="Use this sidebar to explore the legislation, adjust the reading level, and view vote details."
@@ -113,8 +113,8 @@ function LegislationSideBar({
                                 setIsLevelOpen(false);
                             }}
                             className={`flex items-center gap-2 p-2 rounded cursor-pointer ${activeLevel === lvl.param
-                                    ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red font-semibold"
-                                    : "hover:bg-gray-100"
+                                ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red font-semibold"
+                                : "hover:bg-gray-100"
                                 }`}
                         >
                             {lvl.icon}
