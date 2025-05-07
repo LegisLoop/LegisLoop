@@ -95,7 +95,7 @@ function LegislationSideBar({
                 >
                     <MapPinIcon className="text-custom-red mr-2" />
                     <span className="flex-1">
-                        {levels.find((l) => l.param === activeLevel)?.label}
+                        Reading Level: {levels.find((l) => l.param === activeLevel)?.label}
                     </span>
                     <DropDownArrowIcon
                         className={`${isLevelOpen ? "rotate-180" : ""}`}
@@ -156,11 +156,11 @@ function LegislationSideBar({
                         className={`${isVotingOpen ? "rotate-180" : ""}`}
                     />
                 </button>
-                <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isVotingOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
-                        }`}
-                >
-                    <div className="h-full overflow-y-auto p-2 space-y-2">
+                <div className={`
+                        overflow-hidden transition-all duration-300 ease-in-out
+                        ${isVotingOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}
+                      `}>
+                    <div className="overflow-y-auto max-h-60 p-2 space-y-2">
                         {votes.length > 0 ? (
                             votes.map((v, i) => {
                                 const name = idToName[v.person_id] || `Member ${v.person_id}`;
