@@ -77,8 +77,8 @@ function LegislationSideBar({
                 {billInfo && (
                     <div className="w-full bg-gray-50 rounded py-2 px-0">
                         <p className="m-0 text-sm text-gray-600">
-                            Status: {billInfo.status} • Introduced:{" "}
-                            {new Date(billInfo.dateIntroduced).toLocaleDateString()}
+                            {/*Status: {billInfo.status}*/}
+                            Introduced: {new Date(billInfo.dateIntroduced).toLocaleDateString()}
                         </p>
                     </div>
                 )}

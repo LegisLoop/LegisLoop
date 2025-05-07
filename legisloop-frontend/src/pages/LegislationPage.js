@@ -180,10 +180,6 @@ export default function LegislationPage() {
                             <h1 className="text-2xl font-bold">{bill.title}</h1>
 
                             <div className="mt-3 prose">
-                                <p>
-                                    <strong>Introduced:</strong>{" "}
-                                    {new Date(bill.dateIntroduced).toLocaleDateString()}
-                                </p>
 
                                 {bill.description && (
                                     <p><strong>Description:</strong> {bill.description}</p>
