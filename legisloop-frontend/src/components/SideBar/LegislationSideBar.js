@@ -13,14 +13,20 @@ import {
     DocumentDuplicateIcon,
     DocumentTextIcon,
     DropDownArrowIcon,
+    MapPinIcon,
 } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
 import { NewspaperIcon } from "lucide-react";
 import axios from "axios";
 
-function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel, setActiveLevel, }) {
-
-    // vote summary: use passed‐in or fallback
+function LegislationSideBar({
+    votes = [],
+    rollCallSummary,
+    billInfo,
+    activeLevel,
+    setActiveLevel,
+}) {
+    // vote summary: use passed-in or fallback
     const fallback = votes.reduce(
         (acc, v) => {
             if (v.decision === "Yea") acc.yea++;
@@ -37,7 +43,6 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel
     useEffect(() => {
         const ids = Array.from(new Set(votes.map((v) => v.person_id)));
         if (!ids.length) return;
-
         axios
             .post("/api/v1/representative/names", ids)
             .then((res) => setIdToName(res.data))
@@ -58,40 +63,48 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel
 
     return (
         <div className="w-full lg:w-[20rem] lg:min-h-screen flex flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5">
-            {/* Bill status */}
-            {billInfo && (
-                <div className="mb-4 p-2 bg-gray-50 rounded">
-                    <p className="text-sm text-gray-600">
-                        Status: {billInfo.status} • Introduced:{" "}
-                        {new Date(billInfo.dateIntroduced).toLocaleDateString()}
-                    </p>
-                </div>
-            )}
+            <div className="flex flex-col items-start gap-4 p-4">
+                <Tooltip
+                    text="Use this sidebar to explore the legislation, adjust the reading level, and view vote details."
+                    position="right"
+                >
+                    <h5 className="text-xl font-sans font-semibold leading-snug text-custom-blue cursor-pointer">
+                        Legislation Overview &amp; Reading Level
+                    </h5>
+                </Tooltip>
+
+                {/* Bill status */}
+                {billInfo && (
+                    <div className="w-full bg-gray-50 rounded py-2 px-0">
+                        <p className="m-0 text-sm text-gray-600">
+                            Status: {billInfo.status} • Introduced:{" "}
+                            {new Date(billInfo.dateIntroduced).toLocaleDateString()}
+                        </p>
+                    </div>
+                )}
+            </div>
 
             <hr className="my-2 border-blue-gray-50" />
 
             {/* Reading Level */}
             <div className="mb-4">
-                <Tooltip
-                    text="Adjust the reading level for this document."
-                    position="right"
-                >
-                    <h6 className="text-xl font-semibold cursor-pointer">
-                        Reading Level
-                    </h6>
-                </Tooltip>
-
                 <button
-                    onClick={() => setIsLevelOpen((state) => !state)}
-                    className="flex items-center justify-between w-full mt-2 p-2 hover:bg-gray-100 rounded"
+                    type="button"
+                    onClick={() => setIsLevelOpen((o) => !o)}
+                    className="flex items-center justify-between w-full p-3 font-sans text-base font-bold leading-snug text-left transition-all duration-300 ease-in-out border-b-0 select-none border-b-blue-gray-100 text-blue-gray-700 hover:bg-gray-100 rounded"
                 >
-                    <span>{levels.find((l) => l.param === activeLevel)?.label}</span>
+                    <MapPinIcon className="text-custom-red mr-2" />
+                    <span className="flex-1">
+                        {levels.find((l) => l.param === activeLevel)?.label}
+                    </span>
                     <DropDownArrowIcon
                         className={`${isLevelOpen ? "rotate-180" : ""}`}
                     />
                 </button>
-
-                <div className={`mt-1 overflow-hidden transition-all ${isLevelOpen ? "max-h-60" : "max-h-0"}`}>
+                <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isLevelOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
+                        }`}
+                >
                     {levels.map((lvl) => (
                         <div
                             key={lvl.param}
@@ -100,8 +113,8 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel
                                 setIsLevelOpen(false);
                             }}
                             className={`flex items-center gap-2 p-2 rounded cursor-pointer ${activeLevel === lvl.param
-                                ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red font-semibold"
-                                : "hover:bg-gray-100"
+                                    ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red font-semibold"
+                                    : "hover:bg-gray-100"
                                 }`}
                         >
                             {lvl.icon}
@@ -131,28 +144,27 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel
             </div>
 
             {/* Voting Record */}
-            <div>
+            <div className="relative mt-4">
                 <button
+                    type="button"
                     onClick={() => setIsVotingOpen((o) => !o)}
-                    className="flex items-center justify-between w-full p-2 font-semibold hover:bg-gray-100 rounded"
+                    className="flex items-center justify-between w-full p-3 font-sans text-base font-bold leading-snug text-left transition-all duration-300 ease-in-out border-b-0 select-none border-b-blue-gray-100 text-blue-gray-700 hover:bg-gray-100 rounded"
                 >
-                    <span>Voting Record</span>
+                    <MapPinIcon className="text-custom-red mr-2" />
+                    <span className="flex-1">Voting Record</span>
                     <DropDownArrowIcon
                         className={`${isVotingOpen ? "rotate-180" : ""}`}
                     />
                 </button>
-
                 <div
-                    className={`mt-2 transition-[height] duration-300 ease-in-out overflow-hidden ${isVotingOpen ? "h-64" : "h-0"
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isVotingOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
                         }`}
                 >
                     <div className="h-full overflow-y-auto p-2 space-y-2">
                         {votes.length > 0 ? (
                             votes.map((v, i) => {
                                 const name = idToName[v.person_id] || `Member ${v.person_id}`;
-                                return (
-                                    <VoteCard name={name} vote={v.decision} />
-                                );
+                                return <VoteCard key={i} name={name} vote={v.decision} />;
                             })
                         ) : (
                             <p className="text-gray-500 text-sm">No votes available</p>
@@ -165,4 +177,3 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel
 }
 
 export default LegislationSideBar;
-
