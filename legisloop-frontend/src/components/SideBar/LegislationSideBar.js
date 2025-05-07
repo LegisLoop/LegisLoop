@@ -6,7 +6,7 @@
  ****************************************************************
  * Last Updated: April 3, 2025.
  ***************************************************************/
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import VoteCard from "../Cards/VoteCard";
 import {
     BookOpenIcon,
@@ -17,34 +17,53 @@ import {
 } from "../Icons/Icons";
 import Tooltip from "../ToolTips/ToolTip";
 import { NewspaperIcon } from "lucide-react";
+import axios from "axios";
 
-function LegislationSideBar({ votes = [], activeLevel, setActiveLevel }) {
-    // Summarize votes
-    const voteSummary = votes.reduce(
-        (acc, vote) => {
-            if (vote.decision === "Yea") acc.yea++;
-            else if (vote.decision === "Nay") acc.nay++;
+function LegislationSideBar({
+    votes = [],
+    rollCallSummary,
+    billInfo,
+    activeLevel,
+    setActiveLevel,
+}) {
+    // vote summary: use passed-in or fallback
+    const fallback = votes.reduce(
+        (acc, v) => {
+            if (v.decision === "Yea") acc.yea++;
+            else if (v.decision === "Nay") acc.nay++;
             else acc.abstain++;
             return acc;
         },
         { yea: 0, nay: 0, abstain: 0 }
     );
+    const summary = rollCallSummary || fallback;
 
-    // Drop-downs start closed
-    const [isLevelOpen, setIsLevelOpen] = useState(true);
-    const [isVotingRecordOpen, setIsVotingRecordOpen] = useState(false);
+    // get rep names
+    const [idToName, setIdToName] = useState({});
+    useEffect(() => {
+        const ids = Array.from(new Set(votes.map((v) => v.person_id)));
+        if (!ids.length) return;
+        axios
+            .post("/api/v1/representative/names", ids)
+            .then((res) => setIdToName(res.data))
+            .catch((err) =>
+                console.error("Failed to fetch representative names", err)
+            );
+    }, [votes]);
 
+    const [isLevelOpen, setIsLevelOpen] = useState(false);
+    const [isVotingOpen, setIsVotingOpen] = useState(false);
 
-
-    const handleLevelClick = (level) => {
-        setActiveLevel(level);
-    };
+    const levels = [
+        { icon: <DocumentTextIcon />, label: "Un-edited", param: "UN_EDITED" },
+        { icon: <BookOpenIcon />, label: "Moderate-read", param: "MODERATE" },
+        { icon: <NewspaperIcon />, label: "Easy-read", param: "EASY" },
+        { icon: <DocumentDuplicateIcon />, label: "1-page", param: "ONE_PAGE" },
+    ];
 
     return (
-        // On mobile/tablet: w-full, no forced min-height
-        // On lg+: fix width & fill vertical space
-        <div className="w-full lg:w-[20rem] min-h-auto lg:min-h-screen flex flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5">
-            <div className="flex items-center gap-2 p-4">
+        <div className="w-full lg:w-[20rem] flex flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5 h-full">
+            <div className="flex flex-col items-start gap-4 p-4">
                 <Tooltip
                     text="Use this sidebar to explore the legislation, adjust the reading level, and view vote details."
                     position="right"
@@ -53,115 +72,100 @@ function LegislationSideBar({ votes = [], activeLevel, setActiveLevel }) {
                         Legislation Overview &amp; Reading Level
                     </h5>
                 </Tooltip>
+
+                {/* Bill status */}
+                {billInfo && (
+                    <div className="w-full bg-gray-50 rounded py-2 px-0">
+                        <p className="m-0 text-sm text-gray-600">
+                            {/*Status: {billInfo.status}*/}
+                            Introduced: {new Date(billInfo.dateIntroduced).toLocaleDateString()}
+                        </p>
+                    </div>
+                )}
             </div>
+
             <hr className="my-2 border-blue-gray-50" />
 
-            {/* Reading Level Section */}
-            <nav className="flex flex-col gap-1 p-2 font-sans text-base font-normal text-blue-gray-700">
-                <div className="relative block w-full">
-                    <button
-                        type="button"
-                        onClick={() => setIsLevelOpen(!isLevelOpen)}
-                        className="flex items-center justify-between w-full p-3 font-sans text-xl font-semibold leading-snug text-left transition-all duration-300 ease-in-out border-b-0 select-none border-b-blue-gray-100 text-blue-gray-700 hover:bg-gray-200"
-                    >
-                        <div className="grid mr-4 place-items-center">
-                            <MapPinIcon className="text-custom-red" />
+            {/* Reading Level */}
+            <div className="mb-4">
+                <button
+                    type="button"
+                    onClick={() => setIsLevelOpen((o) => !o)}
+                    className="flex items-center justify-between w-full p-3 font-sans text-base font-bold leading-snug text-left transition-all duration-300 ease-in-out border-b-0 select-none border-b-blue-gray-100 text-blue-gray-700 hover:bg-gray-100 rounded"
+                >
+                    <MapPinIcon className="text-custom-red mr-2" />
+                    <span className="flex-1">
+                        Reading Level: {levels.find((l) => l.param === activeLevel)?.label}
+                    </span>
+                    <DropDownArrowIcon
+                        className={`${isLevelOpen ? "rotate-180" : ""}`}
+                    />
+                </button>
+                <div
+                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isLevelOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"
+                        }`}
+                >
+                    {levels.map((lvl) => (
+                        <div
+                            key={lvl.param}
+                            onClick={() => {
+                                setActiveLevel(lvl.param);
+                                setIsLevelOpen(false);
+                            }}
+                            className={`flex items-center gap-2 p-2 rounded cursor-pointer ${activeLevel === lvl.param
+                                ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red font-semibold"
+                                : "hover:bg-gray-100"
+                                }`}
+                        >
+                            {lvl.icon}
+                            <span>{lvl.label}</span>
                         </div>
-                        <p className="block mr-auto font-sans text-base font-bold leading-relaxed text-blue-gray-900">
-                            Reading Level
-                        </p>
-                        <span className="ml-4">
-                            <DropDownArrowIcon
-                                className={`${isLevelOpen ? "rotate-180" : ""}`}
-                            />
-                        </span>
-                    </button>
-
-                    <div
-                        className={`overflow-hidden transition-all duration-300 ease-in-out ${isLevelOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                            }`}
-                    >
-                        <div className="block w-full py-1 font-sans text-sm font-light leading-normal text-gray-700">
-                            <nav className="flex flex-col gap-1 p-0">
-                                {[
-                                    { icon: <DocumentTextIcon />, label: "Un-edited", param: 'UN_EDITED' },
-                                    { icon: <BookOpenIcon />, label: "Moderate-read", param: 'MODERATE' },
-                                    { icon: <NewspaperIcon />, label: "Easy-read", param: 'EASY' },
-                                    { icon: <DocumentDuplicateIcon />, label: "1-page", param: 'ONE_PAGE' },
-                                ].map((item, index) => (
-                                    <div
-                                        key={index}
-                                        onClick={() => handleLevelClick(item.param)}
-                                        className={`flex items-center w-full p-3 transition-all rounded-lg outline-none text-start ${activeLevel === item.param
-                                            ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red text-custom-red-dark font-semibold"
-                                            : "hover:bg-gray-200"
-                                            }`}
-                                    >
-                                        <div
-                                            className={`grid mr-4 place-items-center ${activeLevel === item.param
-                                                ? "text-custom-red-dark"
-                                                : "text-custom-blue"
-                                                }`}
-                                        >
-                                            {item.icon}
-                                        </div>
-                                        {item.label}
-                                    </div>
-                                ))}
-                            </nav>
-                        </div>
-                    </div>
+                    ))}
                 </div>
-            </nav>
+            </div>
 
             {/* Vote Summary */}
-            <div className="p-4 bg-gray-100 rounded-lg">
+            <div className="p-4 bg-gray-100 rounded-lg mb-4">
                 <h6 className="text-lg font-bold text-custom-blue">Vote Summary</h6>
-                <ul className="mt-2 text-sm text-gray-700">
+                <ul className="mt-2 space-y-1 text-sm text-gray-700">
                     <li>
                         <span className="font-semibold text-custom-cyan">Yea:</span>{" "}
-                        {voteSummary.yea}
+                        {summary.yea}
                     </li>
                     <li>
                         <span className="font-semibold text-custom-red">Nay:</span>{" "}
-                        {voteSummary.nay}
+                        {summary.nay}
                     </li>
                     <li>
                         <span className="font-semibold text-custom-blue">Abstain:</span>{" "}
-                        {voteSummary.abstain}
+                        {summary.abstain}
                     </li>
                 </ul>
             </div>
 
             {/* Voting Record */}
-            <div className="relative block w-full mt-4">
+            <div className="relative mt-4">
                 <button
                     type="button"
-                    onClick={() => setIsVotingRecordOpen(!isVotingRecordOpen)}
-                    className="flex items-center justify-between w-full p-3 font-sans text-xl font-semibold leading-snug text-left transition-all duration-300 ease-in-out border-b-0 select-none border-b-blue-gray-100 text-blue-gray-700 hover:bg-gray-200"
+                    onClick={() => setIsVotingOpen((o) => !o)}
+                    className="flex items-center justify-between w-full p-3 font-sans text-base font-bold leading-snug text-left transition-all duration-300 ease-in-out border-b-0 select-none border-b-blue-gray-100 text-blue-gray-700 hover:bg-gray-100 rounded"
                 >
-                    <div className="grid mr-4 place-items-center">
-                        <MapPinIcon className="text-custom-red" />
-                    </div>
-                    <p className="block mr-auto font-sans text-base font-bold leading-relaxed text-blue-gray-900">
-                        Voting Record
-                    </p>
-                    <span className="ml-4">
-                        <DropDownArrowIcon
-                            className={`${isVotingRecordOpen ? "rotate-180" : ""}`}
-                        />
-                    </span>
+                    <MapPinIcon className="text-custom-red mr-2" />
+                    <span className="flex-1">Voting Record</span>
+                    <DropDownArrowIcon
+                        className={`${isVotingOpen ? "rotate-180" : ""}`}
+                    />
                 </button>
-
-                <div
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${isVotingRecordOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                        }`}
-                >
-                    <div className="flex flex-col gap-2 mt-2">
+                <div className={`
+                        overflow-hidden transition-all duration-300 ease-in-out
+                        ${isVotingOpen ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}
+                      `}>
+                    <div className="overflow-y-auto max-h-60 p-2 space-y-2">
                         {votes.length > 0 ? (
-                            votes.map((vote, index) => (
-                                <VoteCard key={index} name={vote.representative} vote={vote.decision} />
-                            ))
+                            votes.map((v, i) => {
+                                const name = idToName[v.person_id] || `Member ${v.person_id}`;
+                                return <VoteCard key={i} name={name} vote={v.decision} />;
+                            })
                         ) : (
                             <p className="text-gray-500 text-sm">No votes available</p>
                         )}
