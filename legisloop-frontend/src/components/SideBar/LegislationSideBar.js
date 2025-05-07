@@ -39,7 +39,7 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel
         if (!ids.length) return;
 
         axios
-            .post("/api/v1/representatives/names", ids)
+            .post("/api/v1/representative/names", ids)
             .then((res) => setIdToName(res.data))
             .catch((err) =>
                 console.error("Failed to fetch representative names", err)
@@ -82,7 +82,7 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel
                 </Tooltip>
 
                 <button
-                    onClick={() => setIsLevelOpen((o) => !o)}
+                    onClick={() => setIsLevelOpen((state) => !state)}
                     className="flex items-center justify-between w-full mt-2 p-2 hover:bg-gray-100 rounded"
                 >
                     <span>{levels.find((l) => l.param === activeLevel)?.label}</span>
@@ -151,14 +151,7 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo, activeLevel
                             votes.map((v, i) => {
                                 const name = idToName[v.person_id] || `Member ${v.person_id}`;
                                 return (
-                                    <Link
-                                        key={i}
-                                        to={`/representative/${encodeURIComponent(name)}`}
-                                        state={{ id: v.person_id, name }}
-                                        className="block"
-                                    >
-                                        <VoteCard name={name} vote={v.decision} />
-                                    </Link>
+                                    <VoteCard name={name} vote={v.decision} />
                                 );
                             })
                         ) : (

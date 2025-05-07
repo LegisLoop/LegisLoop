@@ -83,7 +83,7 @@ export default function LegislationPage() {
                     setDoc(resp.data);
                 }
             } catch (err) {
-                if (e.response?.status === 404) {
+                if (err.response?.status === 404) {
                     setErrorDoc("Document not found.");
                 } else {
                     setErrorDoc("An error occurred while fetching document.");
