@@ -35,18 +35,18 @@ export default function LegislationPage() {
     const { state } = useLocation();
     const initialBill = state?.bill;
 
-    // — Bill metadata
+    // bill metadata
     const [bill, setBill] = useState(initialBill || null);
 
-    // — Document fetch state
+    // document fetch state
     const [doc, setDoc] = useState(null);
     const [loadingDoc, setLoadingDoc] = useState(true);
     const [errorDoc, setErrorDoc] = useState("");
 
-    // — Reading-level state
+    // reading-level state
     const [activeLevel, setActiveLevel] = useState("UN_EDITED");
 
-    // — Votes & roll-call summary
+    // votes & roll-call summary
     const [votes, setVotes] = useState([]);
     const [rollCallSummary, setRollCallSummary] = useState({
         yea: 0,
@@ -54,7 +54,7 @@ export default function LegislationPage() {
         abstain: 0,
     });
 
-    // fetch bill metadata if not passed via location.state
+    // fetch bill data if not passed via location.state
     useEffect(() => {
         if (initialBill) {
             setBill(initialBill);
@@ -71,26 +71,28 @@ export default function LegislationPage() {
     // fetch the latest document
     useEffect(() => {
         if (!id) return;
+        const fetchDoc = async () => {
+            setLoadingDoc(true);
+            setErrorDoc("");
+            try {
+                const resp = await axios.get(`/api/v1/legislation-doc/latest/${id}`);
 
-        setLoadingDoc(true);
-        setErrorDoc("");
-        axios
-            .get(`/api/v1/legislation-doc/latest/${id}`)
-            .then((res) => {
-                if (res.status === 204) {
+                if (resp.status === 204) {
                     setErrorDoc("No content for this legislation, yet.");
                 } else {
-                    setDoc(res.data);
+                    setDoc(resp.data);
                 }
-            })
-            .catch((e) => {
+            } catch (err) {
                 if (e.response?.status === 404) {
                     setErrorDoc("Document not found.");
                 } else {
                     setErrorDoc("An error occurred while fetching document.");
                 }
-            })
-            .finally(() => setLoadingDoc(false));
+            } finally {
+                setLoadingDoc(false);
+            }
+        }
+        fetchDoc();
     }, [id]);
 
     // votes & roll-call summary whenever the bill loads
@@ -114,19 +116,15 @@ export default function LegislationPage() {
         }
     }, [bill]);
 
-    const {
-        summary,
-        loading: loadingSummary,
-        error: errorSummary,
-    } = useLegislationSummary(
+    const { summary, loading: loadingSummary, error: summaryError, } = useLegislationSummary(
         doc?.docId,
         activeLevel,
         doc?.docContent || "",
         doc?.mime || ""
     );
 
-    let content;
 
+    let content;
     if (loadingDoc) {
         content = <p className="text-center text-blue-500">Fetching document…</p>;
     } else if (errorDoc) {
@@ -136,10 +134,10 @@ export default function LegislationPage() {
         content = <LegislationVisualizer mimeType={doc.mime} mimeId={blobUrl} />;
     } else if (loadingSummary) {
         content = <p className="text-center">Loading summary…</p>;
-    } else if (errorSummary) {
+    } else if (summaryError) {
         content = (
             <p className="text-center text-red-500">
-                {errorSummary.message || "Error loading summary."}
+                {summaryError.message || "Error loading summary."}
             </p>
         );
     } else if (summary && summary.summaryContent) {
@@ -188,9 +186,7 @@ export default function LegislationPage() {
                                 </p>
 
                                 {bill.description && (
-                                    <p>
-                                        <strong>Description:</strong> {bill.description}
-                                    </p>
+                                    <p><strong>Description:</strong> {bill.description}</p>
                                 )}
 
                                 {bill.sponsors?.length > 0 && (
