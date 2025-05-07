@@ -6,7 +6,8 @@
  ****************************************************************
  * Last Updated: April 3, 2025.
  ***************************************************************/
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import VoteCard from "../Cards/VoteCard";
 import {
     BookOpenIcon,
@@ -18,11 +19,16 @@ import {
 import Tooltip from "../ToolTips/ToolTip";
 import { NewspaperIcon } from "lucide-react";
 import axios from "axios";
-import { useEffect } from "react";
 
-function LegislationSideBar({ votes = [], rollCallSummary, billInfo }) {
-    // if no precomputed summary, compute from votes array
-    const computed = votes.reduce(
+function LegislationSideBar({
+                                votes = [],
+                                rollCallSummary,
+                                billInfo,
+                                activeLevel,
+                                setActiveLevel,
+                            }) {
+    // vote summary: use passed‐in or fallback
+    const fallback = votes.reduce(
         (acc, v) => {
             if (v.decision === "Yea") acc.yea++;
             else if (v.decision === "Nay") acc.nay++;
@@ -31,29 +37,31 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo }) {
         },
         { yea: 0, nay: 0, abstain: 0 }
     );
-    const summary = rollCallSummary || computed;
+    const summary = rollCallSummary || fallback;
 
+    // get rep names
     const [idToName, setIdToName] = useState({});
-
     useEffect(() => {
         const ids = Array.from(new Set(votes.map((v) => v.person_id)));
-        if (ids.length === 0) return;
-        console.log('ids', ids);
+        if (!ids.length) return;
 
         axios
-            .post("/api/v1/representative/names", ids)
-            .then((res) => {
-                setIdToName(res.data);
-                console.log(res.data);
-            })
-            .catch((err) => {
-                console.error("Failed to fetch representative names", err);
-            });
+            .post("/api/v1/representatives/names", ids)
+            .then((res) => setIdToName(res.data))
+            .catch((err) =>
+                console.error("Failed to fetch representative names", err)
+            );
     }, [votes]);
 
     const [isLevelOpen, setIsLevelOpen] = useState(false);
-    const [isVotingRecordOpen, setIsVotingRecordOpen] = useState(false);
-    const [activeLevel, setActiveLevel] = useState("Easy");
+    const [isVotingOpen, setIsVotingOpen] = useState(false);
+
+    const levels = [
+        { icon: <DocumentTextIcon />, label: "Un-edited", param: "UN_EDITED" },
+        { icon: <BookOpenIcon />, label: "Moderate-read", param: "MODERATE" },
+        { icon: <NewspaperIcon />, label: "Easy-read", param: "EASY" },
+        { icon: <DocumentDuplicateIcon />, label: "1-page", param: "ONE_PAGE" },
+    ];
 
     return (
         <div className="w-full lg:w-[20rem] lg:min-h-screen flex flex-col bg-white p-4 text-custom-blue shadow-xl shadow-blue-gray-900/5">
@@ -69,11 +77,11 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo }) {
 
             <hr className="my-2 border-blue-gray-50" />
 
-            {/* Reading Level Section */}
+            {/* Reading Level */}
             <div className="mb-4">
                 <Tooltip
-                    text="Use this sidebar to explore the legislation, adjust the reading level, and view vote details."
-                    position="bottom"
+                    text="Adjust the reading level for this document."
+                    position="right"
                 >
                     <h6 className="text-xl font-semibold cursor-pointer">
                         Reading Level
@@ -81,34 +89,35 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo }) {
                 </Tooltip>
 
                 <button
-                    onClick={() => setIsLevelOpen(!isLevelOpen)}
+                    onClick={() => setIsLevelOpen((o) => !o)}
                     className="flex items-center justify-between w-full mt-2 p-2 hover:bg-gray-100 rounded"
                 >
-                    <span>{activeLevel}</span>
+                    <span>{levels.find((l) => l.param === activeLevel)?.label}</span>
                     <DropDownArrowIcon
                         className={`${isLevelOpen ? "rotate-180" : ""}`}
                     />
                 </button>
+
                 <div
-                    className={`mt-1 overflow-hidden transition-all ${isLevelOpen ? "max-h-60" : "max-h-0"
-                        }`}
+                    className={`mt-1 overflow-hidden transition-all ${
+                        isLevelOpen ? "max-h-60" : "max-h-0"
+                    }`}
                 >
-                    {[
-                        { icon: <DocumentTextIcon />, label: "Un-edited" },
-                        { icon: <BookOpenIcon />, label: "Moderate-read" },
-                        { icon: <NewspaperIcon />, label: "Easy-read" },
-                        { icon: <DocumentDuplicateIcon />, label: "1-page" },
-                    ].map((item) => (
+                    {levels.map((lvl) => (
                         <div
-                            key={item.label}
-                            onClick={() => setActiveLevel(item.label)}
-                            className={`flex items-center gap-2 p-2 rounded ${activeLevel === item.label
-                                ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red"
-                                : "hover:bg-gray-100"
-                                }`}
+                            key={lvl.param}
+                            onClick={() => {
+                                setActiveLevel(lvl.param);
+                                setIsLevelOpen(false);
+                            }}
+                            className={`flex items-center gap-2 p-2 rounded cursor-pointer ${
+                                activeLevel === lvl.param
+                                    ? "bg-custom-red-light bg-opacity-50 border-l-4 border-custom-red font-semibold"
+                                    : "hover:bg-gray-100"
+                            }`}
                         >
-                            {item.icon}
-                            <span>{item.label}</span>
+                            {lvl.icon}
+                            <span>{lvl.label}</span>
                         </div>
                     ))}
                 </div>
@@ -136,28 +145,35 @@ function LegislationSideBar({ votes = [], rollCallSummary, billInfo }) {
             {/* Voting Record */}
             <div>
                 <button
-                    onClick={() => setIsVotingRecordOpen(!isVotingRecordOpen)}
+                    onClick={() => setIsVotingOpen((o) => !o)}
                     className="flex items-center justify-between w-full p-2 font-semibold hover:bg-gray-100 rounded"
                 >
                     <span>Voting Record</span>
                     <DropDownArrowIcon
-                        className={`${isVotingRecordOpen ? "rotate-180" : ""}`}
+                        className={`${isVotingOpen ? "rotate-180" : ""}`}
                     />
                 </button>
 
-                <div className={`mt-2 transition-[height] duration-300 ease-in-out overflow-hidden ${isVotingRecordOpen ? "h-64" : "h-0"}`}>
+                <div
+                    className={`mt-2 transition-[height] duration-300 ease-in-out overflow-hidden ${
+                        isVotingOpen ? "h-64" : "h-0"
+                    }`}
+                >
                     <div className="h-full overflow-y-auto p-2 space-y-2">
                         {votes.length > 0 ? (
-                            votes.map((v, i) => (
-                                <VoteCard
-                                    key={i}
-                                    name={
-                                        idToName[v.person_id] ||
-                                        `Member ${v.person_id}` /* fallback */
-                                    }
-                                    vote={v.decision}
-                                />
-                            ))
+                            votes.map((v, i) => {
+                                const name = idToName[v.person_id] || `Member ${v.person_id}`;
+                                return (
+                                    <Link
+                                        key={i}
+                                        to={`/representative/${encodeURIComponent(name)}`}
+                                        state={{ id: v.person_id, name }}
+                                        className="block"
+                                    >
+                                        <VoteCard name={name} vote={v.decision} />
+                                    </Link>
+                                );
+                            })
                         ) : (
                             <p className="text-gray-500 text-sm">No votes available</p>
                         )}

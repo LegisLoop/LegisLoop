@@ -16,6 +16,7 @@ import { CalendarEventIcon } from "../components/Icons/Icons";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import useGeoLocation from "../customHooks/useGeoLocation";
 import useLegislation from "../customHooks/useLegislation";
+import Tooltip from "../components/ToolTips/ToolTip";
 
 
 function LandingPage() {
@@ -134,9 +135,11 @@ function LandingPage() {
                 <div className="w-full lg:w-[16rem] bg-white p-4 shadow-xl shadow-blue-gray-900/5">
                     <div className="flex items-center gap-4 p-4 mb-2">
                         <CalendarEventIcon />
-                        <h5 className="block font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-custom-blue cursor-pointer">
-                            Upcoming Events
-                        </h5>
+                        <Tooltip text="View upcoming government meetings, legislative votes, and public policy discussions in your area" position="left">
+                            <h5 className="block font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-custom-blue cursor-pointer">
+                                Upcoming Events
+                            </h5>
+                        </Tooltip>
                     </div>
                     <hr className="my-2 border-blue-gray-50" />
                     <div className="space-y-6 mt-6">

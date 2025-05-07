@@ -21,14 +21,29 @@ function ConnectPage() {
                 </div>
                 <div className="flex-1 p-2 space-y-4">
                     <PostCard
-                        username="username"
-                        date="mm-dd-yyyy"
-                        title="Title of Post"
-                        body="This is the body of the post. People can express their opinions and things."
+                        username="healthforall"
+                        date="04-07-2025"
+                        title="Affordable Healthcare: Finding Common Ground"
+                        body="Most Americans agree that healthcare should be accessible and efficient. What are practical ways to improve the system without extreme overhauls?"
                     />
-                    <PostCard />
-                    <PostCard />
-                    <PostCard />
+                    <PostCard
+                        username="civicvoice"
+                        date="04-08-2025"
+                        title="Balancing Public Health and Personal Freedom"
+                        body="Policies on public health should protect the community while respecting individual freedoms. Collaboration, not conflit, will move us forward. What safeguards should exist to keep both in check?"
+                    />
+                    <PostCard
+                        username="greenmind23"
+                        date="04-10-2025"
+                        title="Investing in Renewable Energy: A Step Toward Sustainability"
+                        body="Renewable energy creates jobs and reduces long-term costs. Strategic government investment today can lead to energy independence tomorrow. Thoughts on balancing innovation with fiscal responsibility?"
+                    />
+                    <PostCard
+                        username="libertyfocus"
+                        date="04-07-2025"
+                        title="Maintaining National Security and Civil Liberties"
+                        body="Security is important, but so are our constitutional rights. How do we create policies that respect both without leaning too far in either direction?"
+                    />
                 </div>
             </div>
             <Footer />

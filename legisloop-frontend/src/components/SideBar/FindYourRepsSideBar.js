@@ -35,8 +35,8 @@ function RepresentativeSideBar({ setStateId }) {
         {/* Header */}
             <div className="flex items-center gap-2 p-2 md:p-4">
                 <CompassIcon />
-                <Tooltip text="Find your representatives by location and government level." position="bottom">
-                    <h5 className="text-lg md:text-xl font-sans font-semibold leading-snug text-blue-gray-900 cursor-pointer">
+                <Tooltip text="Find your representatives by location and government level." position="right">
+                    <h5 className="text-lg md:text-xl pr-5 font-sans font-semibold leading-snug text-blue-gray-900 cursor-pointer">
                         Legislator Finder
                     </h5>
                 </Tooltip>

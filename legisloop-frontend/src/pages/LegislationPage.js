@@ -6,39 +6,48 @@
  ****************************************************************
  * Last Updated: April 3, 2025.
  ***************************************************************/
+import React, { useState, useEffect } from "react";
+import {
+    useParams,
+    useLocation,
+    Link
+} from "react-router-dom";
+import axios from "axios";
+
 import NavBar from "../components/NavBar/NavBar";
 import Footer from "../components/Footer/Footer";
 import LegislationSideBar from "../components/SideBar/LegislationSideBar";
 import LegislationVisualizer from "../components/LegislationVisualizer/LegislationVisualizer";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { useParams, useLocation } from "react-router-dom";
+import useLegislationSummary from "../customHooks/useLegislationSummary";
 
+// Helper to turn Base64 → Blob URL
 function createBlobUrl(base64Data, mimeType) {
-    if (!base64Data) return "";
+    if (!base64Data || !mimeType) return "";
     const byteCharacters = atob(base64Data);
-    const byteNumbers = new Array(byteCharacters.length);
+    const byteNumbers = new Uint8Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
         byteNumbers[i] = byteCharacters.charCodeAt(i);
     }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: mimeType });
-    return URL.createObjectURL(blob);
+    return URL.createObjectURL(new Blob([byteNumbers], { type: mimeType }));
 }
 
-function LegislationPage() {
+export default function LegislationPage() {
     const { id } = useParams();
     const { state } = useLocation();
     const initialBill = state?.bill;
 
-    // --- Bill & document state ---
+    // — Bill metadata
     const [bill, setBill] = useState(initialBill || null);
-    const [doc, setDoc] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState("");
 
-    // --- Derived state for votes & summary ---
-    const [latestRoll, setLatestRoll] = useState(null);
+    // — Document fetch state
+    const [doc, setDoc] = useState(null);
+    const [loadingDoc, setLoadingDoc] = useState(true);
+    const [errorDoc, setErrorDoc] = useState("");
+
+    // — Reading-level state
+    const [activeLevel, setActiveLevel] = useState("UN_EDITED");
+
+    // — Votes & roll-call summary
     const [votes, setVotes] = useState([]);
     const [rollCallSummary, setRollCallSummary] = useState({
         yea: 0,
@@ -46,7 +55,7 @@ function LegislationPage() {
         abstain: 0,
     });
 
-    // load bill info if not provided from landing page 
+    // fetch bill metadata if not passed via location.state
     useEffect(() => {
         if (initialBill) {
             setBill(initialBill);
@@ -55,66 +64,97 @@ function LegislationPage() {
                 .get(`/api/v1/legislation/${id}`)
                 .then((res) => setBill(res.data))
                 .catch((e) => {
-                    console.error(e);
-                    setErrorMessage("Failed to load bill details.");
+                    console.error("Failed to load bill details", e);
                 });
         }
     }, [id, initialBill]);
 
-    // fetch the document 
+    // fetch the latest document
     useEffect(() => {
         if (!id) return;
 
-        setLoading(true);
+        setLoadingDoc(true);
+        setErrorDoc("");
         axios
             .get(`/api/v1/legislation-doc/latest/${id}`)
             .then((res) => {
                 if (res.status === 204) {
-                    setErrorMessage("No content for this legislation, yet.");
+                    setErrorDoc("No content for this legislation, yet.");
                 } else {
                     setDoc(res.data);
                 }
             })
             .catch((e) => {
                 if (e.response?.status === 404) {
-                    setErrorMessage("Bill not found.");
+                    setErrorDoc("Document not found.");
                 } else {
-                    setErrorMessage("An error occurred while fetching document.");
+                    setErrorDoc("An error occurred while fetching document.");
                 }
             })
-            .finally(() => setLoading(false));
+            .finally(() => setLoadingDoc(false));
     }, [id]);
 
-    // recalculate latestRoll, votes & summary
+    // votes & roll-call summary whenever the bill loads
     useEffect(() => {
-        if (!bill?.roll_calls?.length) {
-            setLatestRoll(null);
+        if (bill?.roll_calls?.length) {
+            const roll = bill.roll_calls[0];
+            setVotes(
+                roll.votes.map((v) => ({
+                    person_id: v.person_id,
+                    decision: v.vote_position,
+                }))
+            );
+            setRollCallSummary({
+                yea: roll.yea,
+                nay: roll.nay,
+                abstain: (roll.nv || 0) + (roll.absent || 0),
+            });
+        } else {
             setVotes([]);
             setRollCallSummary({ yea: 0, nay: 0, abstain: 0 });
-            return;
         }
-
-        const roll = bill.roll_calls[0];
-        setLatestRoll(roll);
-
-        const mappedVotes = roll.votes.map((v) => ({
-            person_id: v.person_id,
-            decision: v.vote_position,
-        }));
-        setVotes(mappedVotes);
-
-        setRollCallSummary({
-            yea: roll.yea,
-            nay: roll.nay,
-            abstain: (roll.nv || 0) + (roll.absent || 0),
-        });
     }, [bill]);
+
+    const {
+        summary,
+        loading: loadingSummary,
+        error: errorSummary,
+    } = useLegislationSummary(
+        doc?.docId,
+        activeLevel,
+        doc?.docContent || "",
+        doc?.mime || ""
+    );
+
+    let content;
+    if (loadingDoc) {
+        content = <p className="text-center text-blue-500">Fetching document…</p>;
+    } else if (errorDoc) {
+        content = <p className="text-center text-red-500">{errorDoc}</p>;
+    } else if (activeLevel === "UN_EDITED") {
+        const blobUrl = createBlobUrl(doc.docContent, doc.mime);
+        content = (
+            <LegislationVisualizer mimeType={doc.mime} mimeId={blobUrl} />
+        );
+    } else if (loadingSummary) {
+        content = <p className="text-center">Loading summary…</p>;
+    } else if (errorSummary) {
+        content = (
+            <p className="text-center text-red-500">{errorSummary}</p>
+        );
+    } else {
+        content = (
+            <div className="prose max-w-none p-4">
+                {summary.summaryContent}
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col min-h-screen">
             <NavBar />
 
-            <div className="flex flex-col lg:flex-row flex-1">
+            <div className="flex flex-1 flex-col lg:flex-row">
                 {/* Sidebar */}
                 <div className="w-full lg:w-1/3">
                     <LegislationSideBar
@@ -125,44 +165,53 @@ function LegislationPage() {
                             dateIntroduced: bill?.dateIntroduced,
                             sponsors: bill?.sponsors,
                         }}
+                        activeLevel={activeLevel}
+                        setActiveLevel={setActiveLevel}
                     />
                 </div>
 
                 {/* Main content */}
-                <div className="w-full lg:w-2/3 p-4 md:p-6 overflow-auto">
-                    <div className="mx-auto w-full max-w-full lg:max-w-none">
-                        {bill && (
-                            <div className="mb-6 border-b pb-4">
-                                <h1 className="text-2xl font-bold">{bill.title}</h1>
-                                <div className="mt-3 prose">
-                                    {bill.title !== bill.description && (
-                                        <p>
-                                            <strong>Description:</strong> {bill.description}
-                                        </p>
-                                    )}
+                <div className="w-full lg:flex-1 overflow-auto p-4 md:p-6">
+                    {bill && (
+                        <div className="mb-6 border-b pb-4">
+                            <h1 className="text-2xl font-bold">{bill.title}</h1>
+
+                            <div className="mt-3 prose">
+                                <p>
+                                    <strong>Introduced:</strong>{" "}
+                                    {new Date(bill.dateIntroduced).toLocaleDateString()}
+                                </p>
+
+                                {bill.description && (
+                                    <p>
+                                        <strong>Description:</strong> {bill.description}
+                                    </p>
+                                )}
+
+                                {bill.sponsors?.length > 0 && (
                                     <p>
                                         <strong>Sponsors:</strong>{" "}
-                                        {bill.sponsors.map((s) => s.name).join(", ")}
+                                        {bill.sponsors.map((s, i) => (
+                                            <span key={s.people_id}>
+                        {i > 0 && ", "}
+                                                <Link
+                                                    to={`/representative/${encodeURIComponent(
+                                                        s.name
+                                                    )}`}
+                                                    state={{ id: s.people_id, name: s.name }}
+                                                    className="text-blue-600 hover:underline"
+                                                >
+                          {s.name}
+                        </Link>
+                      </span>
+                                        ))}
                                     </p>
-                                </div>
+                                )}
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {loading ? (
-                            <p className="text-center text-blue-500">
-                                Fetching document…
-                            </p>
-                        ) : errorMessage ? (
-                            <p className="text-center text-red-500">
-                                {errorMessage}
-                            </p>
-                        ) : (
-                            <LegislationVisualizer
-                                mimeType={doc.mime}
-                                mimeId={createBlobUrl(doc.docContent, doc.mime)}
-                            />
-                        )}
-                    </div>
+                    {content}
                 </div>
             </div>
 
@@ -170,6 +219,3 @@ function LegislationPage() {
         </div>
     );
 }
-
-export default LegislationPage;
-
