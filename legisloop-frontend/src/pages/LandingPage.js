@@ -43,13 +43,13 @@ function LandingPage() {
 
     useEffect(() => {
         setPageNumber(0);
-    }, [activeLevel, activeStateId]);
+    }, [activeLevel, activeStateId, setPageNumber]);
 
     useEffect(() => {
         if (stateId !== null) {
             setActiveStateId(stateId);
         }
-    }, [stateId]);
+    }, [stateId, setActiveStateId]);
 
     const { data: bills, loading } = useLegislation(
         activeLevel,
