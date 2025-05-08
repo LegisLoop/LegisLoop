@@ -13,7 +13,7 @@ import LegislationPreviewCard from "../components/Cards/LegislationPreviewCard";
 import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
 // import Tooltip from "../components/ToolTips/ToolTip";
-import { useEffect, useRef } from "react";
+import { act, useEffect, useRef } from "react";
 import useGeoLocation from "../customHooks/useGeoLocation";
 import useLegislation from "../customHooks/useLegislation";
 import Tooltip from "../components/ToolTips/ToolTip";
@@ -50,6 +50,13 @@ function LandingPage() {
             setActiveStateId(stateId);
         }
     }, [stateId, setActiveStateId]);
+
+    useEffect(() => {
+        if (activeLevel === 'Federal') {
+            setActiveStateId(52);
+            setLocationRequested(false);
+        }
+    }, [activeLevel, setActiveStateId, setLocationRequested]);
 
     const { data: bills, loading } = useLegislation(
         activeLevel,
