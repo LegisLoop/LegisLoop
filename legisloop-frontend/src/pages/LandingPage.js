@@ -134,6 +134,9 @@ function LandingPage() {
                                 title={bill.title}
                                 date={bill.dateIntroduced}
                                 summary={bill.summary !== null ? bill.summary : (bill.description !== bill.title ? bill.description : "")}
+                                bill={bill}
+                                sponsors={bill.sponsors}
+                                documents={bill.documents}
                             />
                         ))}
                         <div ref={bottomRef} className="w-fulll h1" />
