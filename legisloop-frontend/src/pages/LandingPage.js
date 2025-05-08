@@ -137,6 +137,7 @@ function LandingPage() {
                                 bill={bill}
                                 sponsors={bill.sponsors}
                                 documents={bill.documents}
+                                status={bill.status}
                             />
                         ))}
                         <div ref={bottomRef} className="w-fulll h1" />
