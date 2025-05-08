@@ -13,7 +13,7 @@ import LegislationPreviewCard from "../components/Cards/LegislationPreviewCard";
 import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
 // import Tooltip from "../components/ToolTips/ToolTip";
-import { useEffect, useRef, useLayoutEffect } from "react";
+import { useEffect, useRef } from "react";
 import useGeoLocation from "../customHooks/useGeoLocation";
 import useLegislation from "../customHooks/useLegislation";
 import Tooltip from "../components/ToolTips/ToolTip";
@@ -84,7 +84,7 @@ function LandingPage() {
         );
         observer.observe(sentinel);
         return () => observer.disconnect()
-    }, [loading, setPageNumber]);
+    }, [loading, setPageNumber, bills?.length]);
 
     const handleRequestLocation = () => {
         setLocationRequested(true);
