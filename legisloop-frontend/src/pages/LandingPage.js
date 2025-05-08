@@ -43,7 +43,7 @@ function LandingPage() {
 
     useEffect(() => {
         setPageNumber(0);
-    }, [activeLevel, activeStateId, setPageNumber]);
+    }, [activeLevel, activeStateId, setPageNumber, activePolicy]);
 
     useEffect(() => {
         if (stateId !== null) {
