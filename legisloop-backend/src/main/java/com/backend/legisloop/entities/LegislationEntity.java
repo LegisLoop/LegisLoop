@@ -1,6 +1,7 @@
 package com.backend.legisloop.entities;
 
 import com.backend.legisloop.enums.StateEnum;
+import com.backend.legisloop.enums.StatusEnum;
 import com.backend.legisloop.model.Legislation;
 
 import jakarta.persistence.*;
@@ -81,7 +82,7 @@ public class LegislationEntity {
     private StateEnum state;
 
     @Column(name = "status")
-    private int status;
+    private StatusEnum status;
 
     @Column(name = "status_date")
     private Date status_date;

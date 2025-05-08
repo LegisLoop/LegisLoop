@@ -9,19 +9,22 @@
 
 import { Link } from "react-router-dom";
 
-function LegislationPreviewCard({ id, category, title, date, summary, bill, documents, sponsors }) {
+function LegislationPreviewCard({ id, category, title, date, summary, status, bill, documents, sponsors }) {
     return (
-        <div className="w-full md:max-w-screen-lg bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200 relative">
-            <div className="flex items-center gap-2 text-gray-600 text-sm font-semibold uppercase">
-                <div className="w-2 h-5 bg-teal-500 rounded"></div>
-                <span>{category ? category : ""}{category && date ? " : " : ""}{date ? date : ""}</span>
-            </div>
-            <div className="absolute top-2 right-4">
-                {documents && documents.length > 0 ? (
-                    <span className="text-green-600 font-bold text-base">Available</span>
-                ) : (
-                    <span className="text-red-500 font-bold text-base">No Bill Text Available</span>
-                )}
+        <div className="w-full md:max-w-screen-lg bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between text-gray-600 text-sm font-semibold mb-1">
+                <div className="flex items-center uppercase gap-2">
+                    <div className="w-2 h-5 bg-teal-500 rounded"></div>
+                    <span>{category ? category : ""}{category && date ? " : " : ""}{date ? date : ""}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                    <span className="text-custom-cyan-dark font-bold text-base">{status}</span>
+                    {documents && documents.length > 0 ? (
+                        <span className="text-green-600 font-bold text-base">Available</span>
+                    ) : (
+                        <span className="text-red-500 font-bold text-base">No Bill Text Available</span>
+                    )}
+                </div>
             </div>
             <h2 className="text-lg font-bold text-gray-900 mt-1">
                 <Link
