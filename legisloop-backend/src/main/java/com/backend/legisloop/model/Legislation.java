@@ -2,6 +2,7 @@ package com.backend.legisloop.model;
 
 import com.backend.legisloop.entities.LegislationEntity;
 import com.backend.legisloop.enums.StateEnum;
+import com.backend.legisloop.enums.StatusEnum;
 import com.backend.legisloop.serial.DateSerializer;
 import com.kwabenaberko.newsapilib.models.response.ArticleResponse;
 import lombok.AllArgsConstructor;
@@ -46,7 +47,7 @@ public class Legislation {
     private List<Representative> endorsements;
     public List<LegislationDocument> documents = new ArrayList<>();
     private StateEnum state;
-    private int status;
+    private StatusEnum status;
     private Date status_date;
     private Date dateIntroduced;
 
