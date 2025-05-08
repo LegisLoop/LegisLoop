@@ -8,7 +8,8 @@ import lombok.extern.slf4j.Slf4j;
  * An enum to relate vote_id's from LegiScan to their string representation.
  */
 public enum VotePosition {
-	
+
+    VOICE(0),
 	YEA(1),
     NAY(2),
     NV(3),
