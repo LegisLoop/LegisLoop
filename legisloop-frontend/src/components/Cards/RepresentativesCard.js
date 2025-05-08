@@ -24,7 +24,7 @@ export function RepresentativeCard({ id, name, title, service, topics }) {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        navigate(`/representative/${name.replace(/\s+/g, "-").toLowerCase()}`, {
+        navigate(`/representative/${id}`, {
             state: { id, name, title, service, topics }
         });
     };
