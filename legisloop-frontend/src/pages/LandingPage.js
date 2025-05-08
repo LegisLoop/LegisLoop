@@ -13,19 +13,29 @@ import LegislationPreviewCard from "../components/Cards/LegislationPreviewCard";
 import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
 // import Tooltip from "../components/ToolTips/ToolTip";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useEffect, useRef, useLayoutEffect } from "react";
 import useGeoLocation from "../customHooks/useGeoLocation";
 import useLegislation from "../customHooks/useLegislation";
 import Tooltip from "../components/ToolTips/ToolTip";
+import { useLandingPage } from "../context/landingPageContext";
 
 
 function LandingPage() {
-    const [activeLevel, setActiveLevel] = useState("Federal");
-    const [activePolicy, setActivePolicy] = useState(null);
-    const [activeStateId, setActiveStateId] = useState(52);
-    const [pageNumber, setPageNumber] = useState(0);
-    const [locationRequested, setLocationRequested] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
+    const {
+        activeLevel,
+        setActiveLevel,
+        activePolicy,
+        setActivePolicy,
+        activeStateId,
+        setActiveStateId,
+        pageNumber,
+        setPageNumber,
+        locationRequested,
+        setLocationRequested,
+        searchTerm,
+        setSearchTerm,
+    } = useLandingPage();
+
 
     const pageSize = 10;
 
@@ -33,13 +43,13 @@ function LandingPage() {
 
     useEffect(() => {
         setPageNumber(0);
-    }, [activeLevel, activeStateId]);
+    }, [activeLevel, activeStateId, setPageNumber]);
 
     useEffect(() => {
         if (stateId !== null) {
             setActiveStateId(stateId);
         }
-    }, [stateId]);
+    }, [stateId, setActiveStateId]);
 
     const { data: bills, loading } = useLegislation(
         activeLevel,
@@ -126,6 +136,7 @@ function LandingPage() {
                                 title={bill.title}
                                 date={bill.dateIntroduced}
                                 summary={bill.summary !== null ? bill.summary : (bill.description !== bill.title ? bill.description : "")}
+                                bill={bill}
                             />
                         ))}
                         {loading && <p>Loading...</p>}
@@ -143,14 +154,14 @@ function LandingPage() {
                     <hr className="my-2 border-blue-gray-50" />
                     <div className="space-y-6 mt-6">
                         <EventCard
-                            title="Event 1"
-                            description="This is a description."
-                            signUpLink="link to sign up"
+                            title="Federal Midterm Elections - New Jersey"
+                            description="Vote for your U.S. House representative and local offices."
+                            signUpLink="https://www.nj.gov/state/elections/vote.shtml"
                         />
                         <EventCard
-                            title="Event 2"
-                            description="Another event happening soon."
-                            signUpLink="link to sign up"
+                            title="May 14- Hoboken City Council Meeting"
+                            description="Rent Leveling Board Regular Meeting"
+                            signUpLink="https://hobokennj.iqm2.com/Citizens/Detail_Meeting.aspx?ID=2987"
                         />
                     </div>
                 </div>

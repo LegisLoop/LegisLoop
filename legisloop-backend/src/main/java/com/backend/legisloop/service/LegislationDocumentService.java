@@ -8,6 +8,9 @@ import com.backend.legisloop.entities.LegislationEntity;
 import com.backend.legisloop.model.LegislationDocument;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 
@@ -30,9 +33,10 @@ public class LegislationDocumentService {
 
 
     public LegislationDocument getLegislationDocById(int legislationDocumentId) throws UnirestException {
-    	LegislationDocumentEntity doc = legislationDocumentRepository.getReferenceById(legislationDocumentId);
+    	Optional<LegislationDocumentEntity> doc = legislationDocumentRepository.findById(legislationDocumentId);
+    	if (doc.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Legislation document does not exist!");
     	
-    	return getDocContent(doc);
+    	return getDocContent(doc.get());
     }
     
     public LegislationDocument getLatestLegislationDocForLegislation(int billId) throws UnirestException {

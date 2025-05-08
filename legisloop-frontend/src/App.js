@@ -13,20 +13,24 @@ import RepresentativePage from "./pages/RepresentativePage";
 import ConnectPage from "./pages/ConnectPage";
 import FindYourRepresentativesPage from "./pages/FindYourRepresentativePage";
 import AboutPage from "./pages/AboutPage";
+import { LandingPageProvider } from "./context/landingPageContext";
 
 function App() {
-  return (
-      <Router>
-          <Routes>
-              <Route path="/" element={<LandingPage/>} />
-              <Route path="/legislation/:id" element={<LegislationPage/>} />
-              <Route path="/findrepresentatives" element={<FindYourRepresentativesPage/>} />
-              <Route path="/representative/:name" element={<RepresentativePage/>}/>
-              <Route path="/connect" element={<ConnectPage/>} />
-              <Route path="/aboutus" element={<AboutPage/>} />
-          </Routes>
-      </Router>
-  );
+    return (
+        <Router>
+            <LandingPageProvider>
+                <Routes>
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/legislation/:id" element={<LegislationPage />} />
+                    <Route path="/findrepresentatives" element={<FindYourRepresentativesPage />} />
+                    <Route path="/representative/:name" element={<RepresentativePage />} />
+                    <Route path="/connect" element={<ConnectPage />} />
+                    <Route path="/aboutus" element={<AboutPage />} />
+                </Routes>
+            </LandingPageProvider>
+
+        </Router>
+    );
 }
 
 export default App;
