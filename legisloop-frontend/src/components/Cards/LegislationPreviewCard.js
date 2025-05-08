@@ -40,6 +40,13 @@ function LegislationPreviewCard({ id, category, title, date, summary, bill, docu
                         <Link
                             key={sponsor.people_id || idx}
                             to={`/representative/${sponsor.people_id}`}
+                            state={{
+                                id: sponsor.people_id,
+                                name: sponsor.name,
+                                title: sponsor.role,
+                                service: `District ${sponsor.district}`,
+                                topics: sponsor.party
+                            }}
                             className="text-yellow-900 font-bold text-sm underline hover:text-yellow-700"
                         >
                             {sponsor.name} ({sponsor.party})

@@ -23,7 +23,7 @@ function App() {
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/legislation/:id" element={<LegislationPage />} />
                     <Route path="/findrepresentatives" element={<FindYourRepresentativesPage />} />
-                    <Route path="/representative/:name" element={<RepresentativePage />} />
+                    <Route path="/representative/:id" element={<RepresentativePage />} />
                     <Route path="/connect" element={<ConnectPage />} />
                     <Route path="/aboutus" element={<AboutPage />} />
                 </Routes>
