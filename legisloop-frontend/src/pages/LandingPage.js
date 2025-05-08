@@ -69,11 +69,11 @@ function LandingPage() {
         const container = scrollContainerRef.current;
         const sentinel = bottomRef.current;
 
-        if (!container || !sentinel || loading || bills?.length) return;
+        if (!container || !sentinel || loading) return;
 
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) {
+                if (bills?.length > 0 && entry.isIntersecting) {
                     setPageNumber((prev) => prev + 1);
                 }
             },
