@@ -62,6 +62,17 @@ public class EventService {
         
         return merged;
     }
+    
+    /**
+     * Fetch all events for a person within [start..end], sorted desc.
+     */
+     public List<Event> getEventsForPersonWithinRange(int personId, Date start, Date end) {
+    	 return eventRepository
+    			 .findAllEventsByPersonAndDateRange(personId, start, end)
+    			 .stream()
+    			 .map(this::toEventModel)
+    			 .toList();
+     }
 
     /**
      * Fetch a single page of merged events (sponsor‐bills + votes) for a person,
