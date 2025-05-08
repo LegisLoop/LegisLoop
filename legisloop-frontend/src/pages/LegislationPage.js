@@ -18,6 +18,8 @@ import Footer from "../components/Footer/Footer";
 import LegislationSideBar from "../components/SideBar/LegislationSideBar";
 import LegislationVisualizer from "../components/LegislationVisualizer/LegislationVisualizer";
 import useLegislationSummary from "../customHooks/useLegislationSummary";
+import SummaryCard from "../components/Cards/SummaryCard";
+import SummaryDisplayCard from "../components/Cards/SummaryDisplayCard";
 
 // Helper to turn Base64 → Blob URL
 function createBlobUrl(base64Data, mimeType) {
@@ -142,9 +144,7 @@ export default function LegislationPage() {
         );
     } else if (summary && summary.summaryContent) {
         content = (
-            <div className="prose max-w-none p-4">
-                {summary.summaryContent}
-            </div>
+            <SummaryDisplayCard content={summary.summaryContent} />
         );
     } else {
         content = (
@@ -176,33 +176,25 @@ export default function LegislationPage() {
 
                 <div className="w-full lg:flex-1 overflow-auto p-4 md:p-6">
                     {bill && (
-                        <div className="mb-6 border-b pb-4">
-                            <h1 className="text-2xl font-bold">{bill.title}</h1>
-
-                            <div className="mt-3 prose">
-
-                                {bill.description && (
-                                    <p><strong>Description:</strong> {bill.description}</p>
-                                )}
-
-                                {bill.sponsors?.length > 0 && (
-                                    <p>
-                                        <strong>Sponsors:</strong>{" "}
-                                        {bill.sponsors.map((s, i) => (
-                                            <span key={s.people_id}>
-                                                {i > 0 && ", "}
-                                                {s.name}
-                                            </span>
-                                        ))}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                        <SummaryCard title={bill.title}>
+                            {bill.description && (
+                                <p><strong>Description:</strong> {bill.description}</p>
+                            )}
+                            {bill.sponsors?.length > 0 && (
+                                <p>
+                                    <strong>Sponsors:</strong>{" "}
+                                    {bill.sponsors.map((s, i) => (
+                                        <span key={s.people_id}>
+                        {i > 0 && ", "}
+                                            {s.name}
+                    </span>
+                                    ))}
+                                </p>
+                            )}
+                        </SummaryCard>)}
                     {content}
                 </div>
             </div>
-
             <Footer />
         </div>
     );
