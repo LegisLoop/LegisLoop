@@ -60,6 +60,49 @@ public interface EventRepository extends JpaRepository<LegislationEntity, Intege
 			nativeQuery = true
 			)
 	Page<EventProjection> findAllEventsByPerson(@Param("personId") int personId, Pageable pageable);
+	
+    @Query(
+    	      value = """
+    	         SELECT
+    	           l.bill_id          AS billId,
+    	           l.status_date      AS eventDate,
+    	           l.title            AS title,
+    	           l.description      AS description,
+    	           'SPONSORED'        AS type,
+    	           NULL               AS votePosition,
+    	           l.bill_id          AS tieBreaker
+    	         FROM legislation_sponsors s
+    	         JOIN legislation l   ON l.bill_id = s.bill_id
+    	         WHERE s.people_id = :personId
+    	           AND (CAST(:startDate AS DATE) IS NULL OR l.status_date >= :startDate)
+    	           AND (CAST(:endDate   AS DATE) IS NULL OR l.status_date <= :endDate)
+
+    	         UNION ALL
+
+    	         SELECT
+    	           rc.bill_id  AS billId,
+    	           rc.date            AS eventDate,
+    	           lg.title           AS title,
+    	           rc.description     AS description,
+    	           'VOTE'             AS type,
+    	           v.vote_position    AS votePosition,
+    	           rc.roll_call_id    AS tieBreaker
+    	         FROM votes v
+    	         JOIN roll_calls rc  ON v.roll_call_id = rc.roll_call_id
+    	         JOIN legislation lg ON lg.bill_id = rc.bill_id
+    	         WHERE v.representative_id = :personId
+    	           AND (CAST(:startDate AS DATE) IS NULL OR rc.date >= :startDate)
+    	           AND (CAST(:endDate   AS DATE) IS NULL OR rc.date <= :endDate)
+
+    	         ORDER BY eventDate DESC, tieBreaker DESC
+    	      """,
+    	      nativeQuery = true
+    	    )
+    List<EventProjection> findAllEventsByPersonAndDateRange(
+    	      @Param("personId")  int    personId,
+    	      @Param("startDate") Date   startDate,
+    	      @Param("endDate")   Date   endDate
+    	    );
 
 	public interface EventProjection {
 		Integer getBillId();
