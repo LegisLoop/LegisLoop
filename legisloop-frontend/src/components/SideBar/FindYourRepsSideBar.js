@@ -41,9 +41,9 @@ function RepresentativeSideBar({ setStateId }) {
 
             <hr className="my-2 border-blue-gray-50" />
             <div className="w-full">
-                <div className="flex items-center gap-2 mt-5 mb-2">
+                <div className="flex items-center gap-2 p-2 md:p-4">
                     <MapPinIcon className="text-custom-red" />
-                    <p className="text-base md:text-lg font-bold">Select Location</p>
+                    <p className="text-base md:text-lg font-semibold">Select Location</p>
                 </div>
                 <input
                     type="text"
