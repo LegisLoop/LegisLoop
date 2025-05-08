@@ -13,7 +13,7 @@ import LegislationPreviewCard from "../components/Cards/LegislationPreviewCard";
 import EventCard from "../components/Cards/EventCard";
 import { CalendarEventIcon } from "../components/Icons/Icons";
 // import Tooltip from "../components/ToolTips/ToolTip";
-import { useEffect, useRef, useLayoutEffect } from "react";
+import { useEffect, useRef } from "react";
 import useGeoLocation from "../customHooks/useGeoLocation";
 import useLegislation from "../customHooks/useLegislation";
 import Tooltip from "../components/ToolTips/ToolTip";
@@ -63,29 +63,28 @@ function LandingPage() {
 
 
     const scrollContainerRef = useRef(null);
-    const prevScrollHeightRef = useRef(0);
+    const bottomRef = useRef(null);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         const container = scrollContainerRef.current;
-        if (!container) return;
+        const sentinel = bottomRef.current;
 
-        if (pageNumber > 0) {
-            // Calculate the change in height after new content is appended.
-            const newScrollHeight = container.scrollHeight;
-            const heightDiff = newScrollHeight - prevScrollHeightRef.current;
-            // Adjust scrollTop so the user remains at the same position relative to the content.
-            container.scrollTop = container.scrollTop + heightDiff;
-        }
-        // Update the stored scrollHeight.
-        prevScrollHeightRef.current = container.scrollHeight;
-    }, [bills, pageNumber]);
+        if (!container || !sentinel || loading) return;
 
-    const handleScroll = (e) => {
-        const { scrollTop, scrollHeight, clientHeight } = e.target;
-        if (scrollTop + clientHeight >= scrollHeight - 50 && !loading) {
-            setPageNumber((prev) => prev + 1);
-        }
-    };
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (bills?.length > 0 && entry.isIntersecting) {
+                    setPageNumber((prev) => prev + 1);
+                }
+            },
+            {
+                root: container,
+                rootMargin: "50px"
+            }
+        );
+        observer.observe(sentinel);
+        return () => observer.disconnect()
+    }, [loading, setPageNumber, bills?.length]);
 
     const handleRequestLocation = () => {
         setLocationRequested(true);
@@ -126,7 +125,6 @@ function LandingPage() {
                     <div
                         ref={scrollContainerRef}
                         className="overflow-y-scroll max-h-screen space-y-6"
-                        onScroll={handleScroll}
                     >
                         {bills.map((bill) => (
                             <LegislationPreviewCard
@@ -141,6 +139,7 @@ function LandingPage() {
                                 documents={bill.documents}
                             />
                         ))}
+                        <div ref={bottomRef} className="w-fulll h1" />
                         {loading && <p>Loading...</p>}
                     </div>
                 </div>
